@@ -1,0 +1,41 @@
+{
+  "expo": {
+    "name": "밥먹자!",
+    "slug": "bap-meokja",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/brand/app-icon.png",
+    "scheme": "bapmeokja",
+    "userInterfaceStyle": "light",
+    "ios": {},
+    "android": {
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "output": "static",
+      "favicon": "./assets/brand/app-icon.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#FFF8EE",
+          "image": "./assets/brand/app-icon.png",
+          "imageWidth": 118
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "식단 사진을 선택해 AI 영양 분석에 사용합니다.",
+          "cameraPermission": "식단을 촬영해 AI 영양 분석에 사용합니다."
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    }
+  }
+}
