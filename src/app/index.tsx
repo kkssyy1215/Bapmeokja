@@ -41,9 +41,9 @@ export default function LoginScreen() {
       </View>
       <View style={styles.formCard}>
         <View style={styles.formTitleRow}><Text style={styles.formTitle}>로그인</Text><Text style={styles.mode}>{apiMode === 'mock' ? '로컬 데모' : '서버 연결'}</Text></View>
-        <Field label="아이디" value={username} onChangeText={setUsername} placeholder="아이디를 입력하세요" autoCapitalize="none" />
-        <Field label="비밀번호" value={password} onChangeText={setPassword} placeholder="비밀번호를 입력하세요" secureTextEntry error={error} />
-        <Pressable><Text style={styles.forgot}>비밀번호를 잊으셨나요?</Text></Pressable>
+        <Field label="아이디" value={username} onChangeText={setUsername} placeholder="아이디를 입력하세요" autoCapitalize="none" autoComplete="username" textContentType="username" />
+        <Field label="비밀번호" value={password} onChangeText={setPassword} placeholder="비밀번호를 입력하세요" secureTextEntry autoComplete="current-password" textContentType="password" returnKeyType="done" onSubmitEditing={submit} error={error} />
+        <Text style={styles.loginHelp}>로그인이 되지 않으면 아이디와 비밀번호를 다시 확인해 주세요.</Text>
         <PrimaryButton title="로그인" onPress={submit} loading={loading} />
         {apiMode === 'mock' ? <Pressable style={styles.demoNote} onPress={submit}><Text style={styles.demoNoteTitle}>빠른 시연</Text><Text style={styles.demoNoteText}>입력된 데모 계정으로 바로 시작</Text></Pressable> : null}
         <View style={styles.signupRow}><Text style={styles.signupText}>처음 오셨나요?</Text><Pressable onPress={() => router.push('/signup')}><Text style={styles.signupLink}> 회원가입</Text></Pressable></View>
@@ -64,7 +64,7 @@ const styles = StyleSheet.create({
   formTitleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   formTitle: { ...font.heading, color: palette.ink },
   mode: { color: palette.leaf, backgroundColor: palette.leafSoft, overflow: 'hidden', borderRadius: radii.pill, paddingHorizontal: 9, paddingVertical: 5, fontSize: 10, fontWeight: '800' },
-  forgot: { color: palette.muted, fontSize: 12, textAlign: 'right', marginTop: -8 },
+  loginHelp: { color: palette.muted, fontSize: 11, textAlign: 'right', marginTop: -8 },
   demoNote: { backgroundColor: palette.surfaceWarm, borderRadius: radii.md, padding: spacing.sm, alignItems: 'center' },
   demoNoteTitle: { color: palette.ink, fontSize: 12, fontWeight: '800' },
   demoNoteText: { color: palette.muted, fontSize: 10, marginTop: 2 },

@@ -7,6 +7,7 @@ import { font, palette, radii, spacing } from '@/constants/design';
 import { useApp } from '@/context/app-context';
 import { getErrorMessage, isMockMode } from '@/services/api';
 import { userApi } from '@/services/bapmeokja-api';
+import { syncLocalNotifications } from '@/services/device-notifications';
 import { NotificationSettings } from '@/types';
 
 export default function SettingsScreen() {
@@ -29,8 +30,25 @@ export default function SettingsScreen() {
         dinnerTime: next.dinnerTime,
         expiryAlertEnabled: next.expiryAlert,
       });
+      const result = await syncLocalNotifications(next);
+      if (result.status === 'denied') {
+        const denied = { ...next, pushEnabled: false };
+        updateNotifications({ pushEnabled: false });
+        await userApi.updateNotifications({
+          pushEnabled: false,
+          waterReminderEnabled: denied.waterReminder,
+          breakfastTime: denied.breakfastTime,
+          lunchTime: denied.lunchTime,
+          dinnerTime: denied.dinnerTime,
+          expiryAlertEnabled: denied.expiryAlert,
+        });
+        Alert.alert('알림 권한이 필요해요', '기기 설정에서 밥 먹자! 알림을 허용한 뒤 다시 켜 주세요.');
+      } else if (result.status === 'unsupported' && key === 'pushEnabled' && value) {
+        Alert.alert('모바일 앱에서 적용돼요', '설정은 저장했습니다. 실제 알림 예약은 iOS 또는 Android 앱에서 적용됩니다.');
+      }
     } catch (error) {
       updateNotifications({ [key]: previous });
+      await syncLocalNotifications({ ...notifications, [key]: previous }).catch(() => undefined);
       Alert.alert('알림 설정을 바꾸지 못했어요', getErrorMessage(error));
     } finally {
       setSavingNotification(null);

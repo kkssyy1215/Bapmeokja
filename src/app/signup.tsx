@@ -23,8 +23,10 @@ export default function SignupScreen() {
 
   const passwordValid = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/.test(password);
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const nicknameValid = nickname.trim().length >= 2 && nickname.trim().length <= 20;
+  const usernameValid = /^[A-Za-z0-9]{4,20}$/.test(username);
   const checksDone = Object.values(checks).every((value) => value === 'available');
-  const canSubmit = useMemo(() => Boolean(name.trim() && nickname.trim() && emailValid && username.length >= 4 && passwordValid && password === confirm && agreeTerms && agreePrivacy && checksDone), [name, nickname, emailValid, username, passwordValid, password, confirm, agreeTerms, agreePrivacy, checksDone]);
+  const canSubmit = useMemo(() => Boolean(name.trim() && nicknameValid && emailValid && usernameValid && passwordValid && password.length <= 72 && password === confirm && agreeTerms && agreePrivacy && checksDone), [name, nicknameValid, emailValid, usernameValid, passwordValid, password, confirm, agreeTerms, agreePrivacy, checksDone]);
 
   const runCheck = async (field: 'username' | 'email' | 'nickname', value: string) => {
     if (!value.trim()) return;
@@ -66,30 +68,30 @@ export default function SignupScreen() {
       <Header title="회원가입" left={<IconButton label="←" onPress={() => router.back()} accessibilityLabel="뒤로 가기" />} />
       <View style={styles.intro}><Text style={styles.title}>계정을 만들고{`\n`}식단 기록을 시작해요</Text><Text style={styles.description}>중복 확인이 필요한 항목은 입력 후 확인해 주세요.</Text></View>
       <View style={styles.form}>
-        <Field label="이름" value={name} onChangeText={setName} placeholder="이름" />
-        <CheckedField label="닉네임" value={nickname} onChange={(value) => { setNickname(value); setChecks((prev) => ({ ...prev, nickname: 'idle' })); }} state={checks.nickname} onCheck={() => runCheck('nickname', nickname)} />
-        <CheckedField label="이메일" value={email} keyboard="email-address" onChange={(value) => { setEmail(value); setChecks((prev) => ({ ...prev, email: 'idle' })); }} state={checks.email} onCheck={() => runCheck('email', email)} error={email && !emailValid ? '이메일 형식을 확인해 주세요.' : undefined} />
-        <CheckedField label="아이디" value={username} onChange={(value) => { setUsername(value); setChecks((prev) => ({ ...prev, username: 'idle' })); }} state={checks.username} onCheck={() => runCheck('username', username)} error={username && username.length < 4 ? '영문 또는 숫자 4자 이상 입력해 주세요.' : undefined} />
-        <Field label="비밀번호" value={password} onChangeText={setPassword} placeholder="영문·숫자·특수문자 포함 8자 이상" secureTextEntry error={password && !passwordValid ? '영문, 숫자, 특수문자를 모두 포함해 주세요.' : undefined} />
-        <Field label="비밀번호 확인" value={confirm} onChangeText={setConfirm} placeholder="비밀번호를 다시 입력하세요" secureTextEntry error={confirm && password !== confirm ? '비밀번호가 일치하지 않아요.' : undefined} />
+        <Field label="이름" value={name} onChangeText={setName} placeholder="이름" maxLength={30} autoComplete="name" textContentType="name" />
+        <CheckedField label="닉네임" value={nickname} maxLength={20} canCheck={nicknameValid} onChange={(value) => { setNickname(value); setChecks((prev) => ({ ...prev, nickname: 'idle' })); }} state={checks.nickname} onCheck={() => runCheck('nickname', nickname)} error={nickname && !nicknameValid ? '닉네임은 2~20자로 입력해 주세요.' : undefined} />
+        <CheckedField label="이메일" value={email} maxLength={254} canCheck={emailValid} keyboard="email-address" onChange={(value) => { setEmail(value); setChecks((prev) => ({ ...prev, email: 'idle' })); }} state={checks.email} onCheck={() => runCheck('email', email)} error={email && !emailValid ? '이메일 형식을 확인해 주세요.' : undefined} />
+        <CheckedField label="아이디" value={username} maxLength={20} canCheck={usernameValid} onChange={(value) => { setUsername(value); setChecks((prev) => ({ ...prev, username: 'idle' })); }} state={checks.username} onCheck={() => runCheck('username', username)} error={username && !usernameValid ? '영문과 숫자만 사용해 4~20자로 입력해 주세요.' : undefined} />
+        <Field label="비밀번호" value={password} onChangeText={setPassword} placeholder="영문·숫자·특수문자 포함 8자 이상" secureTextEntry maxLength={72} autoComplete="new-password" textContentType="newPassword" error={password && !passwordValid ? '영문, 숫자, 특수문자를 모두 포함해 주세요.' : undefined} />
+        <Field label="비밀번호 확인" value={confirm} onChangeText={setConfirm} placeholder="비밀번호를 다시 입력하세요" secureTextEntry maxLength={72} autoComplete="new-password" textContentType="newPassword" error={confirm && password !== confirm ? '비밀번호가 일치하지 않아요.' : undefined} />
       </View>
       <View style={styles.agreementCard}>
-        <Agreement checked={agreeTerms} label="이용약관 동의 (필수)" onPress={() => setAgreeTerms((value) => !value)} />
+        <Agreement checked={agreeTerms} label="이용약관 동의 (필수)" onPress={() => setAgreeTerms((value) => !value)} onView={() => router.push('/settings/legal')} />
         <View style={styles.line} />
-        <Agreement checked={agreePrivacy} label="개인정보 처리방침 동의 (필수)" onPress={() => setAgreePrivacy((value) => !value)} />
+        <Agreement checked={agreePrivacy} label="개인정보 처리방침 동의 (필수)" onPress={() => setAgreePrivacy((value) => !value)} onView={() => router.push('/settings/legal')} />
       </View>
       <PrimaryButton title="회원가입" disabled={!canSubmit} loading={loading} onPress={submit} />
     </Screen>
   );
 }
 
-function CheckedField({ label, value, onChange, onCheck, state, keyboard, error }: { label: string; value: string; onChange: (value: string) => void; onCheck: () => void; state: CheckState; keyboard?: 'email-address'; error?: string }) {
+function CheckedField({ label, value, onChange, onCheck, state, keyboard, error, canCheck, maxLength }: { label: string; value: string; onChange: (value: string) => void; onCheck: () => void; state: CheckState; keyboard?: 'email-address'; error?: string; canCheck: boolean; maxLength: number }) {
   const status = state === 'duplicate' ? '이미 사용 중이에요.' : error;
-  return <View style={styles.checkedWrap}><Field label={label} value={value} onChangeText={onChange} keyboardType={keyboard} autoCapitalize="none" error={status} />{state === 'available' ? <Text style={styles.success}>사용 가능해요.</Text> : null}<Pressable style={[styles.checkButton, state === 'available' && styles.checkButtonDone]} onPress={onCheck} disabled={!value || state === 'checking'}><Text style={[styles.checkText, state === 'available' && styles.checkTextDone]}>{state === 'checking' ? '확인 중' : state === 'available' ? '확인됨' : '중복 확인'}</Text></Pressable></View>;
+  return <View style={styles.checkedWrap}><Field label={label} value={value} onChangeText={onChange} keyboardType={keyboard} autoCapitalize="none" maxLength={maxLength} autoComplete={keyboard === 'email-address' ? 'email' : 'off'} textContentType={keyboard === 'email-address' ? 'emailAddress' : 'none'} error={status} />{state === 'available' ? <Text style={styles.success}>사용 가능해요.</Text> : null}<Pressable style={[styles.checkButton, state === 'available' && styles.checkButtonDone, !canCheck && styles.checkButtonDisabled]} onPress={onCheck} disabled={!canCheck || state === 'checking'}><Text style={[styles.checkText, state === 'available' && styles.checkTextDone]}>{state === 'checking' ? '확인 중' : state === 'available' ? '확인됨' : '중복 확인'}</Text></Pressable></View>;
 }
 
-function Agreement({ checked, label, onPress }: { checked: boolean; label: string; onPress: () => void }) {
-  return <Pressable onPress={onPress} style={styles.agreement}><Text style={[styles.checkCircle, checked && styles.checkCircleActive]}>{checked ? '✓' : ''}</Text><Text style={styles.agreementText}>{label}</Text></Pressable>;
+function Agreement({ checked, label, onPress, onView }: { checked: boolean; label: string; onPress: () => void; onView: () => void }) {
+  return <View style={styles.agreement}><Pressable accessibilityRole="checkbox" accessibilityState={{ checked }} onPress={onPress} style={styles.agreementCheck}><Text style={[styles.checkCircle, checked && styles.checkCircleActive]}>{checked ? '✓' : ''}</Text><Text style={styles.agreementText}>{label}</Text></Pressable><Pressable accessibilityRole="link" onPress={onView} hitSlop={8}><Text style={styles.viewLegal}>보기</Text></Pressable></View>;
 }
 
 const styles = StyleSheet.create({
@@ -100,12 +102,15 @@ const styles = StyleSheet.create({
   checkedWrap: { position: 'relative' },
   checkButton: { position: 'absolute', right: 8, top: 29, minWidth: 72, height: 36, borderRadius: radii.sm, backgroundColor: palette.ink, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 9 },
   checkButtonDone: { backgroundColor: palette.leafSoft },
+  checkButtonDisabled: { opacity: 0.45 },
   checkText: { color: '#fff', fontSize: 11, fontWeight: '800' },
   checkTextDone: { color: palette.leaf },
   success: { color: palette.leaf, fontSize: 12 },
   agreementCard: { backgroundColor: palette.surface, borderRadius: radii.md, borderWidth: 1, borderColor: palette.line, paddingHorizontal: spacing.md },
   agreement: { minHeight: 52, flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  agreementCheck: { flex: 1, minHeight: 52, flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   agreementText: { color: palette.ink, fontSize: 13, fontWeight: '600' },
+  viewLegal: { color: palette.tomato, fontSize: 12, fontWeight: '800', textDecorationLine: 'underline' },
   checkCircle: { width: 22, height: 22, borderRadius: 11, borderWidth: 1.5, borderColor: palette.line, overflow: 'hidden', textAlign: 'center', lineHeight: 19, color: '#fff', fontSize: 12, fontWeight: '900' },
   checkCircleActive: { backgroundColor: palette.leaf, borderColor: palette.leaf },
   line: { height: 1, backgroundColor: palette.line },

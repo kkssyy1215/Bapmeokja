@@ -4,6 +4,7 @@ import { createContext, PropsWithChildren, useCallback, useContext, useEffect, u
 import { defaultProfile, initialFridge, initialMeals, initialNotifications, initialPosts } from '@/data/mock';
 import { getErrorMessage, isMockMode, setSessionExpiredHandler, simulateRequest } from '@/services/api';
 import { authApi, dietApi, fridgeApi, homeApi, userApi } from '@/services/bapmeokja-api';
+import { cancelLocalNotifications } from '@/services/device-notifications';
 import {
   createLocalDashboard,
   fridgeItemFromApi,
@@ -296,6 +297,7 @@ export function AppProvider({ children }: PropsWithChildren) {
 
   const signOut = useCallback(async () => {
     if (!isMockMode) await authApi.logout().catch(() => tokenStore.clear());
+    await cancelLocalNotifications().catch(() => undefined);
     await resetUserScope();
   }, [resetUserScope]);
 

@@ -32,7 +32,21 @@
           "cameraPermission": "식단을 촬영해 AI 영양 분석에 사용합니다."
         }
       ],
-      "expo-secure-store"
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "주변의 추천 식당을 찾을 때만 현재 위치를 사용합니다."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "color": "#E6532F",
+          "defaultChannel": "bapmeokja-reminders"
+        }
+      ],
+      "expo-secure-store",
+      "expo-image"
     ],
     "experiments": {
       "typedRoutes": true,
