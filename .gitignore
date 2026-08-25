@@ -31,6 +31,10 @@ yarn-error.*
 *.pem
 
 # local env files
+.env
+.env.*
+!.env.example
+!backend/.env.example
 .env*.local
 
 # typescript
@@ -41,3 +45,11 @@ example
 # generated native folders
 /ios
 /android
+
+# Spring Boot backend
+backend/.gradle/
+backend/build/
+backend/out/
+backend/uploads/
+backend/logs/
+*.log

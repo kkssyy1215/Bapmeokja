@@ -1,41 +1,112 @@
 import { router } from 'expo-router';
-import { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { useMemo, useState } from 'react';
+import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Field, Header, IconButton, PrimaryButton, Screen } from '@/components/ui';
 import { font, palette, radii, spacing } from '@/constants/design';
+import { useApp } from '@/context/app-context';
+
+type CheckState = 'idle' | 'checking' | 'available' | 'duplicate';
 
 export default function SignupScreen() {
+  const { registerAccount, checkDuplicate, login } = useApp();
+  const [name, setName] = useState('');
+  const [nickname, setNickname] = useState('');
+  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
-  const [agreed, setAgreed] = useState(true);
+  const [agreeTerms, setAgreeTerms] = useState(false);
+  const [agreePrivacy, setAgreePrivacy] = useState(false);
+  const [checks, setChecks] = useState<Record<'username' | 'email' | 'nickname', CheckState>>({ username: 'idle', email: 'idle', nickname: 'idle' });
+  const [loading, setLoading] = useState(false);
+
+  const passwordValid = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/.test(password);
+  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const checksDone = Object.values(checks).every((value) => value === 'available');
+  const canSubmit = useMemo(() => Boolean(name.trim() && nickname.trim() && emailValid && username.length >= 4 && passwordValid && password === confirm && agreeTerms && agreePrivacy && checksDone), [name, nickname, emailValid, username, passwordValid, password, confirm, agreeTerms, agreePrivacy, checksDone]);
+
+  const runCheck = async (field: 'username' | 'email' | 'nickname', value: string) => {
+    if (!value.trim()) return;
+    setChecks((prev) => ({ ...prev, [field]: 'checking' }));
+    try {
+      const result = await checkDuplicate(field, value.trim());
+      setChecks((prev) => ({ ...prev, [field]: result.isDuplicated ? 'duplicate' : 'available' }));
+    } catch (error) {
+      setChecks((prev) => ({ ...prev, [field]: 'idle' }));
+      Alert.alert('중복 확인 실패', error instanceof Error ? error.message : '잠시 후 다시 시도해 주세요.');
+    }
+  };
+
+  const submit = async () => {
+    if (!canSubmit) return;
+    setLoading(true);
+    let registered = false;
+    try {
+      await registerAccount({ name: name.trim(), nickname: nickname.trim(), email: email.trim(), username: username.trim(), password, passwordConfirm: confirm, agreeTerms, agreePrivacy });
+      registered = true;
+      await login({ username: username.trim(), password });
+      setLoading(false);
+      Alert.alert('가입 완료', '이제 기본 정보를 설정할게요.');
+      router.replace('/onboarding');
+    } catch (error) {
+      if (registered) {
+        setLoading(false);
+        Alert.alert('가입 완료', '자동 로그인에 실패했어요. 방금 만든 계정으로 로그인해 주세요.');
+        router.replace('/');
+        return;
+      }
+      Alert.alert('회원가입을 완료하지 못했어요', error instanceof Error ? error.message : '입력한 정보를 확인해 주세요.');
+      setLoading(false);
+    }
+  };
 
   return (
     <Screen>
       <Header title="회원가입" left={<IconButton label="←" onPress={() => router.back()} accessibilityLabel="뒤로 가기" />} />
-      <View style={styles.intro}><Text style={styles.eyebrow}>반가워요!</Text><Text style={styles.title}>나만의 영양 코치를{`\n`}만들어 볼까요?</Text><Text style={styles.description}>기본 계정 정보만 입력하면 바로 시작할 수 있어요.</Text></View>
+      <View style={styles.intro}><Text style={styles.title}>계정을 만들고{`\n`}식단 기록을 시작해요</Text><Text style={styles.description}>중복 확인이 필요한 항목은 입력 후 확인해 주세요.</Text></View>
       <View style={styles.form}>
-        <Field label="이름" placeholder="이름을 입력하세요" />
-        <Field label="닉네임" placeholder="앱에서 사용할 이름" />
-        <Field label="이메일" placeholder="example@email.com" keyboardType="email-address" autoCapitalize="none" />
-        <Field label="아이디" placeholder="영문·숫자 4자 이상" autoCapitalize="none" />
-        <Field label="비밀번호" value={password} onChangeText={setPassword} placeholder="문자·숫자 포함 8자 이상" secureTextEntry />
+        <Field label="이름" value={name} onChangeText={setName} placeholder="이름" />
+        <CheckedField label="닉네임" value={nickname} onChange={(value) => { setNickname(value); setChecks((prev) => ({ ...prev, nickname: 'idle' })); }} state={checks.nickname} onCheck={() => runCheck('nickname', nickname)} />
+        <CheckedField label="이메일" value={email} keyboard="email-address" onChange={(value) => { setEmail(value); setChecks((prev) => ({ ...prev, email: 'idle' })); }} state={checks.email} onCheck={() => runCheck('email', email)} error={email && !emailValid ? '이메일 형식을 확인해 주세요.' : undefined} />
+        <CheckedField label="아이디" value={username} onChange={(value) => { setUsername(value); setChecks((prev) => ({ ...prev, username: 'idle' })); }} state={checks.username} onCheck={() => runCheck('username', username)} error={username && username.length < 4 ? '영문 또는 숫자 4자 이상 입력해 주세요.' : undefined} />
+        <Field label="비밀번호" value={password} onChangeText={setPassword} placeholder="영문·숫자·특수문자 포함 8자 이상" secureTextEntry error={password && !passwordValid ? '영문, 숫자, 특수문자를 모두 포함해 주세요.' : undefined} />
         <Field label="비밀번호 확인" value={confirm} onChangeText={setConfirm} placeholder="비밀번호를 다시 입력하세요" secureTextEntry error={confirm && password !== confirm ? '비밀번호가 일치하지 않아요.' : undefined} />
       </View>
-      <Text onPress={() => setAgreed((value) => !value)} style={[styles.agree, agreed && styles.agreeActive]}>{agreed ? '✓' : '○'} 이용약관 및 개인정보 처리방침에 동의합니다.</Text>
-      <PrimaryButton title="다음" disabled={!agreed || !password || password !== confirm} onPress={() => router.push('/onboarding')} />
-      <Text style={styles.hint}>발표용 데모에서는 중복 확인과 이메일 인증이 목업 처리됩니다.</Text>
+      <View style={styles.agreementCard}>
+        <Agreement checked={agreeTerms} label="이용약관 동의 (필수)" onPress={() => setAgreeTerms((value) => !value)} />
+        <View style={styles.line} />
+        <Agreement checked={agreePrivacy} label="개인정보 처리방침 동의 (필수)" onPress={() => setAgreePrivacy((value) => !value)} />
+      </View>
+      <PrimaryButton title="회원가입" disabled={!canSubmit} loading={loading} onPress={submit} />
     </Screen>
   );
 }
 
+function CheckedField({ label, value, onChange, onCheck, state, keyboard, error }: { label: string; value: string; onChange: (value: string) => void; onCheck: () => void; state: CheckState; keyboard?: 'email-address'; error?: string }) {
+  const status = state === 'duplicate' ? '이미 사용 중이에요.' : error;
+  return <View style={styles.checkedWrap}><Field label={label} value={value} onChangeText={onChange} keyboardType={keyboard} autoCapitalize="none" error={status} />{state === 'available' ? <Text style={styles.success}>사용 가능해요.</Text> : null}<Pressable style={[styles.checkButton, state === 'available' && styles.checkButtonDone]} onPress={onCheck} disabled={!value || state === 'checking'}><Text style={[styles.checkText, state === 'available' && styles.checkTextDone]}>{state === 'checking' ? '확인 중' : state === 'available' ? '확인됨' : '중복 확인'}</Text></Pressable></View>;
+}
+
+function Agreement({ checked, label, onPress }: { checked: boolean; label: string; onPress: () => void }) {
+  return <Pressable onPress={onPress} style={styles.agreement}><Text style={[styles.checkCircle, checked && styles.checkCircleActive]}>{checked ? '✓' : ''}</Text><Text style={styles.agreementText}>{label}</Text></Pressable>;
+}
+
 const styles = StyleSheet.create({
   intro: { paddingVertical: spacing.md, gap: spacing.sm },
-  eyebrow: { color: palette.tomato, fontWeight: '800', fontSize: 14 },
   title: { ...font.title, color: palette.ink, lineHeight: 37 },
   description: { ...font.body, color: palette.muted },
   form: { gap: spacing.md },
-  agree: { padding: spacing.md, borderRadius: radii.md, color: palette.muted, backgroundColor: palette.surface, borderWidth: 1, borderColor: palette.line, fontSize: 13 },
-  agreeActive: { color: palette.leaf, borderColor: '#A9CDB2', backgroundColor: palette.leafSoft },
-  hint: { ...font.caption, color: palette.muted, textAlign: 'center' },
+  checkedWrap: { position: 'relative' },
+  checkButton: { position: 'absolute', right: 8, top: 29, minWidth: 72, height: 36, borderRadius: radii.sm, backgroundColor: palette.ink, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 9 },
+  checkButtonDone: { backgroundColor: palette.leafSoft },
+  checkText: { color: '#fff', fontSize: 11, fontWeight: '800' },
+  checkTextDone: { color: palette.leaf },
+  success: { color: palette.leaf, fontSize: 12 },
+  agreementCard: { backgroundColor: palette.surface, borderRadius: radii.md, borderWidth: 1, borderColor: palette.line, paddingHorizontal: spacing.md },
+  agreement: { minHeight: 52, flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  agreementText: { color: palette.ink, fontSize: 13, fontWeight: '600' },
+  checkCircle: { width: 22, height: 22, borderRadius: 11, borderWidth: 1.5, borderColor: palette.line, overflow: 'hidden', textAlign: 'center', lineHeight: 19, color: '#fff', fontSize: 12, fontWeight: '900' },
+  checkCircleActive: { backgroundColor: palette.leaf, borderColor: palette.leaf },
+  line: { height: 1, backgroundColor: palette.line },
 });

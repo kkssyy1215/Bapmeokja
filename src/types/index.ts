@@ -30,6 +30,12 @@ export type UserProfile = {
   carbGoal: number;
   proteinGoal: number;
   fatGoal: number;
+  skeletalMuscleMass?: number;
+  bodyFatMass?: number;
+  bodyFatPercentage?: number;
+  isPreciseMode?: boolean;
+  defaultDiningBudget?: number;
+  defaultHomeBudget?: number;
 };
 
 export type NotificationSettings = {
@@ -47,6 +53,10 @@ export type FridgeItem = {
   name: string;
   quantity: string;
   expiry: string;
+  quantityValue?: number;
+  unit?: string;
+  expiryDate?: string;
+  isExpiringSoon?: boolean;
 };
 
 export type Comment = { id: string; author: string; content: string; createdAt: string };

@@ -31,7 +31,8 @@
           "photosPermission": "식단 사진을 선택해 AI 영양 분석에 사용합니다.",
           "cameraPermission": "식단을 촬영해 AI 영양 분석에 사용합니다."
         }
-      ]
+      ],
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true,

@@ -18,12 +18,18 @@ export default function RootLayout() {
         <Stack.Screen name="ai-feedback" />
         <Stack.Screen name="recommendation-detail" />
         <Stack.Screen name="nearby" />
+        <Stack.Screen name="shopping-list" />
         <Stack.Screen name="fridge" />
         <Stack.Screen name="community/new-post" />
         <Stack.Screen name="community/[id]" />
         <Stack.Screen name="settings/index" />
         <Stack.Screen name="settings/profile" />
         <Stack.Screen name="settings/notifications" />
+        <Stack.Screen name="settings/budget" />
+        <Stack.Screen name="settings/password" />
+        <Stack.Screen name="settings/account" />
+        <Stack.Screen name="settings/help" />
+        <Stack.Screen name="settings/legal" />
       </Stack>
     </AppProvider>
   );

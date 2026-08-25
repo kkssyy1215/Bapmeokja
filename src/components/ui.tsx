@@ -84,11 +84,12 @@ export function Pill({ label, active = false, onPress }: { label: string; active
   return <Pressable onPress={onPress} style={[styles.pill, active && styles.pillActive]}><Text style={[styles.pillText, active && styles.pillTextActive]}>{label}</Text></Pressable>;
 }
 
-export function MacroBar({ label, value, goal, color, unit = 'g' }: { label: string; value: number; goal: number; color: string; unit?: string }) {
-  const percent = Math.min(100, Math.round((value / goal) * 100));
+export function MacroBar({ label, value, goal, color, unit = 'g', dark = false }: { label: string; value: number; goal: number; color: string; unit?: string; dark?: boolean }) {
+  const rawPercent = Math.round((value / goal) * 100);
+  const percent = Math.min(100, rawPercent);
   return (
     <View style={styles.macroWrap}>
-      <View style={styles.macroTextRow}><Text style={styles.macroLabel}>{label}</Text><Text style={styles.macroValue}>{value}{unit} <Text style={styles.macroGoal}>/ {goal}{unit}</Text></Text></View>
+      <View style={styles.macroTextRow}><Text style={[styles.macroLabel, dark && styles.macroLabelDark]}>{label}</Text><Text style={[styles.macroValue, dark && styles.macroValueDark]}>{value}{unit} <Text style={[styles.macroGoal, dark && styles.macroGoalDark]}>/ {goal}{unit} · {rawPercent}%</Text></Text></View>
       <View style={styles.track}><View style={[styles.fill, { width: `${percent}%`, backgroundColor: color }]} /></View>
     </View>
   );
@@ -137,8 +138,11 @@ const styles = StyleSheet.create({
   macroWrap: { gap: spacing.xs },
   macroTextRow: { flexDirection: 'row', justifyContent: 'space-between' },
   macroLabel: { color: palette.ink, fontSize: 13, fontWeight: '700' },
+  macroLabelDark: { color: '#F8F5EF' },
   macroValue: { color: palette.ink, fontSize: 13, fontWeight: '800' },
+  macroValueDark: { color: '#F8F5EF' },
   macroGoal: { color: palette.muted, fontWeight: '500' },
+  macroGoalDark: { color: '#AAA59D' },
   track: { height: 10, borderRadius: 5, backgroundColor: '#EEEAE2', overflow: 'hidden' },
   fill: { height: '100%', borderRadius: 5 },
   chips: { flexDirection: 'row', gap: spacing.xs, flexWrap: 'wrap' },

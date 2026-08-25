@@ -22,7 +22,7 @@ export default function RecordsScreen() {
   return (
     <Screen>
       <Header title="식단 기록" subtitle="사진 한 장이면 충분해요" right={<IconButton label="◫" onPress={() => router.push('/history')} accessibilityLabel="식단 달력" />} />
-      <View style={styles.hero}><Text style={styles.sparkle}>AI FOOD SCAN</Text><Text style={styles.title}>지금 먹은 음식을{`\n`}기록해 볼까요?</Text><Text style={styles.description}>AI가 음식과 양을 인식해 영양 정보를 계산해요.</Text><View style={styles.dish}><Text style={styles.dishEmoji}>🍱</Text><View style={styles.scanLine} /></View></View>
+      <View style={styles.hero}><Text style={styles.sparkle}>PHOTO FOOD SCAN</Text><Text style={styles.title}>지금 먹은 음식을{`\n`}기록해 볼까요?</Text><Text style={styles.description}>사진에 보이는 음식과 양으로 영양 정보를 추정해요. 저장 전에 직접 확인하고 수정할 수 있어요.</Text><View style={styles.dish}><Text style={styles.dishEmoji}>🍱</Text><View style={styles.scanLine} /></View></View>
       <Pressable style={styles.camera} onPress={() => pick(true)}><View style={styles.actionIcon}><Text style={styles.actionEmoji}>📷</Text></View><View style={styles.actionCopy}><Text style={styles.actionTitle}>카메라로 촬영</Text><Text style={styles.actionSub}>지금 바로 찍고 분석하기</Text></View><Text style={styles.chevron}>›</Text></Pressable>
       <View style={styles.actionGrid}>
         <Pressable style={styles.smallAction} onPress={() => pick(false)}><Text style={styles.smallEmoji}>🖼️</Text><Text style={styles.smallTitle}>앨범에서 선택</Text><Text style={styles.smallSub}>저장된 음식 사진</Text></Pressable>
@@ -32,7 +32,7 @@ export default function RecordsScreen() {
       <Card style={styles.recentCard}>
         {meals.slice(0, 3).map((meal, index) => <Pressable key={meal.id} onPress={() => router.push({ pathname: '/meal-analysis', params: { saved: '1', id: meal.id } })} style={[styles.recent, index > 0 && styles.recentBorder]}><Text style={styles.recentEmoji}>{meal.emoji}</Text><View style={styles.recentInfo}><Text style={styles.recentName}>{meal.name}</Text><Text style={styles.recentMeta}>{meal.type} · {meal.calories} kcal</Text></View><Text style={styles.chevronSmall}>›</Text></Pressable>)}
       </Card>
-      <View style={styles.guide}><Text style={styles.guideTitle}>더 정확하게 인식하려면</Text><Text style={styles.guideText}>• 음식 전체가 보이도록 위에서 촬영해 주세요.{`\n`}• 여러 음식이 겹치지 않으면 정확도가 높아져요.</Text></View>
+      <View style={styles.guide}><Text style={styles.guideTitle}>사진 분석은 참고용이에요</Text><Text style={styles.guideText}>• 음식 전체가 보이도록 위에서 촬영해 주세요.{`\n`}• 사진 기반 추정값은 실제와 다를 수 있으니 저장 전에 음식명, 양, 영양값을 확인해 주세요.</Text></View>
     </Screen>
   );
 }
