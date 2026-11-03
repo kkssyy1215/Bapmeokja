@@ -52,7 +52,7 @@ app:
   ai:
     # 비어 있으면 파일명 기반 시연용 분석기를 쓴다. 키는 코드나 저장소에 넣지 말고 환경변수로 주입한다.
     api-key: ${GEMINI_API_KEY:}
-    model: ${GEMINI_MODEL:gemini-2.5-flash-lite}
+    model: ${GEMINI_MODEL:gemini-3.5-flash-lite}
     timeout-seconds: ${GEMINI_TIMEOUT_SECONDS:30}
   rate-limit:
     enabled: ${RATE_LIMIT_ENABLED:true}

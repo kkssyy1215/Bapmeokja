@@ -2,7 +2,7 @@
 
 ## 한 줄 요약
 
-애플리케이션 API 57개(명세 54개 + 추가 3개)가 모두 구현되어 있고 통합 테스트 136건을 통과했습니다. 사진 분석 API 2개는 Gemini 연동 코드가 완성되어 `GEMINI_API_KEY`를 넣으면 실제 판독으로 동작하며, 키가 없으면 파일명 기반 시연용 분석기로 동작합니다. 실제 Gemini 호출은 키 발급 후 확인이 필요합니다.
+애플리케이션 API 57개(명세 54개 + 추가 3개)가 모두 구현되어 있고 통합 테스트 136건을 통과했습니다. 사진 분석 API 2개는 Gemini 연동 코드가 완성되어 `GEMINI_API_KEY`를 넣으면 실제 판독으로 동작하며, 키가 없으면 파일명 기반 시연용 분석기로 동작합니다. 실제 Gemini API로 음식 사진 인식부터 저장까지 확인했습니다.
 
 > 집계 기준: `backend/src/main/java`의 REST Controller 매핑을 기준으로 했으며 Swagger/Actuator가 제공하는 관리 경로는 제외했습니다. `밥먹자_API명세서2.md`의 54개 엔드포인트를 대조한 결과 모두 구현되어 있어 미구현은 0개입니다. 명세에 없는 추가 3개는 식단 단건 조회, 푸시 기기 등록, 커뮤니티 이미지 제공입니다.
 
@@ -102,7 +102,7 @@
 - 구현률: **57 / 57 = 100%**
 - 테스트: 통합 136/136, 시스템 시나리오 9/9, 탐색 40/40, 단위 72/72 (2026-11-03)
 
-사진 분석은 [FoodImageAnalyzerConfig.java](backend/src/main/java/com/bapmeokja/api/diet/config/FoodImageAnalyzerConfig.java)가 키 유무에 따라 분석기를 고릅니다. 키가 있으면 [GeminiFoodImageAnalyzer.java](backend/src/main/java/com/bapmeokja/api/diet/service/GeminiFoodImageAnalyzer.java)가 사진을 판독하고, 없으면 [HeuristicFoodImageAnalyzer.java](backend/src/main/java/com/bapmeokja/api/diet/service/HeuristicFoodImageAnalyzer.java)가 파일명으로 예시 값을 고릅니다. 커뮤니티 사진 분석도 같은 분석기를 씁니다. Gemini 호출은 가짜 서버로 요청·응답 처리와 DB 저장까지 검증했으며, 실제 Gemini 응답 품질은 키 발급 후 확인해야 합니다.
+사진 분석은 [FoodImageAnalyzerConfig.java](backend/src/main/java/com/bapmeokja/api/diet/config/FoodImageAnalyzerConfig.java)가 키 유무에 따라 분석기를 고릅니다. 키가 있으면 [GeminiFoodImageAnalyzer.java](backend/src/main/java/com/bapmeokja/api/diet/service/GeminiFoodImageAnalyzer.java)가 사진을 판독하고, 없으면 [HeuristicFoodImageAnalyzer.java](backend/src/main/java/com/bapmeokja/api/diet/service/HeuristicFoodImageAnalyzer.java)가 파일명으로 예시 값을 고릅니다. 커뮤니티 사진 분석도 같은 분석기를 씁니다. 실제 Gemini API(`gemini-3.5-flash-lite`)로 쌀국수 사진이 "소고기 쌀국수"로 인식되어 저장·홈 반영까지 되는 것을 확인했습니다. 인식 정확도는 여러 사진으로 따로 측정해야 합니다.
 
 또한 저장 기기 토큰을 실제 발송하는 FCM/APNs worker, 외부 지도/장소 API, 실시간 판매 상품·가격 조회는 현재 코드에서 확인되지 않습니다. 이는 각각 API 없는 미구현 연동 기능이며, 구현률의 57개 라우트 분모에 넣지 않았습니다. 현재 nearby API는 DB 매장 데이터와 거리 계산으로 응답하고, 쇼핑 목록은 예상 가격 및 외부 검색 URL을 만듭니다.
 
