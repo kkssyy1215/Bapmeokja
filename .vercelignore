@@ -5,3 +5,8 @@ dist
 .expo
 .env*
 *.md
+e2e
+e2e-dist
+playwright-report
+test-results
+playwright.config.ts

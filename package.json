@@ -37,6 +37,7 @@
     "react-native-worklets": "0.10.1"
   },
   "devDependencies": {
+    "@playwright/test": "^1.64.1",
     "@types/react": "~19.2.2",
     "eslint": "^9.0.0",
     "eslint-config-expo": "~57.0.1",
@@ -54,7 +55,9 @@
     "test:integration": "python3 scripts/qa/integration_test.py",
     "test:system": "python3 scripts/qa/system_test.py",
     "test:report": "python3 scripts/qa/build_report.py",
-    "test:exploratory": "python3 scripts/qa/exploratory_test.py"
+    "test:exploratory": "python3 scripts/qa/exploratory_test.py",
+    "test:e2e": "playwright test",
+    "test:e2e:report": "playwright show-report"
   },
   "private": true
 }

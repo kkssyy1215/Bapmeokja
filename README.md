@@ -83,7 +83,7 @@ Docker 백엔드가 실행 중이면 핵심 사용자 흐름을 실제 HTTP 요�
 ./scripts/api-smoke-test.sh
 ```
 
-통합·시스템·탐색 테스트와 결과서는 `npm run test:integration`, `test:system`, `test:exploratory`와 [`docs/test/`](docs/test/README.md)를 참고하세요.
+통합·시스템·탐색·화면 테스트와 결과서는 `npm run test:integration`, `test:system`, `test:exploratory`, `test:e2e`와 [`docs/test/`](docs/test/README.md)를 참고하세요.
 
 `.github/workflows/ci.yml`은 pull request와 `main` push마다 프론트 검사, 백엔드 단위 테스트, 실제 MySQL·서버 대상 통합·시스템 테스트를 실행하고, `main`에서 백엔드 테스트가 통과하면 서버 이미지를 GHCR에 올립니다.
 

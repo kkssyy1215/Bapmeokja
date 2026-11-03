@@ -11,7 +11,8 @@
 | **단위 테스트 리포트** | 백엔드 JUnit **72/72 통과** (23개 클래스) · 라인 커버리지 **41.3%** · 프론트 타입 검사 0 오류 | [02-단위-테스트-리포트](02-단위-테스트-리포트.md) |
 | **통합 테스트 결과서** | API↔DB **57/57개 API 통과** (케이스 **136/136**, DB 직접 검증 13건) · 탐색 테스트 **40/40** · Front↔Back 화면 **25개 경로 표시 확인** | [03-통합-테스트-결과서](03-통합-테스트-결과서.md) |
 | **시스템 테스트 결과서** | 사용자 시나리오 **9/9 통과** (검증 단계 **103/103**) · 기능(F01~F10) 시나리오 커버율 **100%** | [04-시스템-테스트-결과서](04-시스템-테스트-결과서.md) |
-| **버그/이슈 리포트** | 발견 **16건** → 수정 **11건**, 회피 절차 문서화 1건, 남은 4건 (모두 프론트) | [05-버그-이슈-리포트](05-버그-이슈-리포트.md) |
+| **화면 E2E 테스트** | Playwright **17/17 통과** · 수정 전 9/17 (BUG-011 발견) | [06-화면-E2E-테스트-결과서](06-화면-E2E-테스트-결과서.md) |
+| **버그/이슈 리포트** | 발견 **17건** → 수정 **12건**, 회피 절차 문서화 1건, 남은 4건 (모두 프론트) | [05-버그-이슈-리포트](05-버그-이슈-리포트.md) |
 | CI 연동 | GitHub Actions에 API 통합·시스템 테스트 job 추가, 리포트 artifact 업로드 | [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml) |
 
 ## 테스트 진행 흐름
@@ -29,6 +30,8 @@
 탐색 테스트 ─ 실제 서버 경계 상황에서 버그 4건 추가 발견·수정 (BUG-006 ~ 009)
    ▼
 최종 실행 ─ 단위 72/72 · 통합 136/136 · 시스템 9/9 · 탐색 40/40
+   ▼
+화면 E2E ── Playwright 도입, 9/17 통과 → BUG-011 수정 → 17/17
 ```
 
 ## 다시 실행하는 방법
@@ -39,6 +42,7 @@ npm run test:integration                     # 57개 API 통합 테스트 → re
 npm run test:system                          # 9개 사용자 시나리오 → results/system-*
 npm run test:exploratory                     # 경계 상황 40건 → results/exploratory-*
 npm run test:report                          # 결과 JSON → 부록 표(md) 생성
+npm run test:e2e                             # 브라우저 화면 테스트 17건 → results/e2e-result.json
 cd backend && ./gradlew test                 # 단위 테스트 + JaCoCo 커버리지 리포트
 ```
 
@@ -54,6 +58,8 @@ JDK 17이 없는 PC에서도 Gradle이 자동으로 내려받아 단위 테스�
 | `results/system-result.json`, `system-api-log.md` | 시스템 테스트 시나리오·단계 결과와 로그 |
 | `results/unit-backend-result.json` | 백엔드 단위 테스트 72건 목록 |
 | `results/exploratory-result.json` | 탐색 테스트 40건 결과 |
+| `results/e2e-result.json` | 화면 E2E 테스트 17건 결과 |
 | `results/integration-table.md`, `system-table.md` | 결과서 부록 표 (자동 생성) |
 | `screenshots/` | Front↔Back 연동 및 버그 수정 전후 화면 11장 |
-| `../../scripts/qa/` | 테스트 코드 (Python 표준 라이브러리만 사용) |
+| `../../scripts/qa/` | API 테스트 코드 (Python 표준 라이브러리만 사용) |
+| `../../e2e/` | 화면 E2E 테스트 코드 (Playwright) |
