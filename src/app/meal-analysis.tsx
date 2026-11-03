@@ -154,7 +154,7 @@ export default function MealAnalysisScreen() {
   const { saveAnalyzedMeal, meals } = useApp();
 
   const [imageError, setImageError] = useState(false);
-  const [imageLoaded, setImageLoaded] = useState(false);
+  const [, setImageLoaded] = useState(false);
   const previewData = getMealImagePreview(params.uri);
 
   console.log(
@@ -233,28 +233,28 @@ export default function MealAnalysisScreen() {
   const [editItems, setEditItems] =
     useState<EditableDietItem[]>([]);
 
-  useEffect(() => {
-    console.log(
-      '[MealAnalysis] 선택한 사진 URI:',
-      params.uri
-    );
-
-    console.log(
-      '[MealAnalysis] Mock Mode:',
-      isMockMode
-    );
-
-    setImageError(false);
-    setImageLoaded(false);
-  }, [params.uri]);
+ useEffect(() => {
+  console.log(
+    '[MealAnalysis] 선택한 사진 URI:',
+    params.uri
+  );
+  console.log(
+    '[MealAnalysis] Mock Mode:',
+    isMockMode
+  );
+}, [params.uri]);
 
   useEffect(() => {
-    if (savedMeal) {
-      setMealType(savedMeal.type);
-      setAnalysis(savedMealToAnalysis(savedMeal));
-      setAnalyzing(false);
-    }
-  }, [savedMeal]);
+  if (!savedMeal) return;
+
+  const timer = setTimeout(() => {
+    setMealType(savedMeal.type);
+    setAnalysis(savedMealToAnalysis(savedMeal));
+    setAnalyzing(false);
+  }, 0);
+
+  return () => clearTimeout(timer);
+}, [savedMeal]);
 
   const analyze = useCallback(async () => {
     if (savedMeal) return;
