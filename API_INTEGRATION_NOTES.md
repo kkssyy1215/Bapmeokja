@@ -40,12 +40,19 @@
 
 ## 운영 공급자가 필요한 기능
 
-- 비전 AI provider와 key
+- 비전 AI key: `GEMINI_API_KEY` (코드는 구현됨, `docs/guides/배포-가이드.md` 참고)
 - Kakao/Google/Naver 지도·장소 API
 - FCM/APNs 발송 worker
 - 실제 상품·가격 제휴 API
 
-현재 backend fallback은 각각 heuristic 분석, seed 매장+거리 계산, token 저장만, 검색 링크+추정가다. 화면에서 실제 확정값으로 과장하지 않는다.
+키가 없을 때 backend fallback은 각각 heuristic 분석, seed 매장+거리 계산, token 저장만, 검색 링크+추정가다. 화면에서 실제 확정값으로 과장하지 않는다.
+
+## 추가된 오류 응답
+
+- `429 RATE_001`: 요청 횟수 초과 (인증 분당 30회, 사진 분석 분당 10회, IP 기준). `Retry-After: 60` 포함. 로컬 Docker는 기본으로 꺼져 있음
+- `405 VALID_012`, `415 VALID_013`: 지원하지 않는 메서드·요청 형식
+- `404 NOTFOUND_001`: 없는 주소 (이전에는 500)
+- `503 NET_001`: AI 호출량 초과·외부 서비스 장애, `504 AI_002`: AI 시간 초과, `502 AI_001`: 음식 인식 실패. 프론트는 직접 입력으로 안내
 
 ## 회귀 검사
 

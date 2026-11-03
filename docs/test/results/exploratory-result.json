@@ -1,0 +1,255 @@
+{
+  "summary": {
+    "executedAt": "2026-11-03 13:38:33",
+    "total": 40,
+    "passed": 40,
+    "requestCount": 146,
+    "serverErrors": []
+  },
+  "cases": [
+    {
+      "title": "서로 다른 10명이 동시에 좋아요",
+      "expected": "모두 200, likeCount=10",
+      "actual": "[200], 10",
+      "passed": true
+    },
+    {
+      "title": "같은 사용자가 동시에 좋아요 연타",
+      "expected": "500 없음, 카운트 = 실제 행 수",
+      "actual": "[200], count=10, rows=10",
+      "passed": true
+    },
+    {
+      "title": "10명이 동시에 댓글",
+      "expected": "모두 201, commentCount=10",
+      "actual": "[201], 10",
+      "passed": true
+    },
+    {
+      "title": "댓글·좋아요를 남긴 사용자가 탈퇴한 뒤 게시글",
+      "expected": "조회 가능, 카운트 = 실제 데이터",
+      "actual": "likeCount=0, commentCount=0, 댓글 0개",
+      "passed": true
+    },
+    {
+      "title": "탈퇴 전 사진 접근",
+      "expected": "200, 200",
+      "actual": "[200, 200]",
+      "passed": true
+    },
+    {
+      "title": "탈퇴자의 좋아요·댓글이 남의 글 카운터에서 빠짐",
+      "expected": "likeCount=0, commentCount=0, 댓글 0개",
+      "actual": "likeCount=0, commentCount=0, 댓글 0개",
+      "passed": true
+    },
+    {
+      "title": "탈퇴자의 사진 파일 삭제",
+      "expected": "404, 404",
+      "actual": "[404, 404]",
+      "passed": true
+    },
+    {
+      "title": "같은 아이디로 동시 가입",
+      "expected": "1건만 201, 나머지 409(500 없음)",
+      "actual": "[201, 409, 409, 409, 409, 409], rows=1",
+      "passed": true
+    },
+    {
+      "title": "이모지 게시글 저장·조회",
+      "expected": "원문 그대로",
+      "actual": "🍅🍚 김치찌개 👍",
+      "passed": true
+    },
+    {
+      "title": "이모지 음식명 식단",
+      "expected": "201",
+      "actual": "201",
+      "passed": true
+    },
+    {
+      "title": "5001자 게시글",
+      "expected": "400",
+      "actual": "400",
+      "passed": true
+    },
+    {
+      "title": "5000자 게시글(경계값)",
+      "expected": "201",
+      "actual": "201",
+      "passed": true
+    },
+    {
+      "title": "1001자 댓글",
+      "expected": "400",
+      "actual": "400",
+      "passed": true
+    },
+    {
+      "title": "101자 음식명",
+      "expected": "400",
+      "actual": "400",
+      "passed": true
+    },
+    {
+      "title": "101자 재료명",
+      "expected": "400",
+      "actual": "400",
+      "passed": true
+    },
+    {
+      "title": "없는 끼니 값",
+      "expected": "400",
+      "actual": "400",
+      "passed": true
+    },
+    {
+      "title": "잘못된 식사 시각",
+      "expected": "400",
+      "actual": "400",
+      "passed": true
+    },
+    {
+      "title": "범위를 넘는 칼로리",
+      "expected": "400",
+      "actual": "400",
+      "passed": true
+    },
+    {
+      "title": "검색어에 SQL 문구",
+      "expected": "200, 결과 0건",
+      "actual": "0",
+      "passed": true
+    },
+    {
+      "title": "검색어 % 하나",
+      "expected": "500 없음",
+      "actual": "200",
+      "passed": true
+    },
+    {
+      "title": "음수 page",
+      "expected": "4xx",
+      "actual": "400",
+      "passed": true
+    },
+    {
+      "title": "size 0",
+      "expected": "4xx",
+      "actual": "400",
+      "passed": true
+    },
+    {
+      "title": "size 100000",
+      "expected": "4xx 또는 제한 적용",
+      "actual": "400",
+      "passed": true
+    },
+    {
+      "title": "아주 오래된 날짜 통계",
+      "expected": "400",
+      "actual": "400",
+      "passed": true
+    },
+    {
+      "title": "먼 미래 날짜 통계",
+      "expected": "400",
+      "actual": "400",
+      "passed": true
+    },
+    {
+      "title": "먼 미래 날짜 /statistics/daily",
+      "expected": "400",
+      "actual": "400",
+      "passed": true
+    },
+    {
+      "title": "먼 미래 날짜 /diet/records",
+      "expected": "400",
+      "actual": "400",
+      "passed": true
+    },
+    {
+      "title": "먼 미래 날짜 /ai/feedback/daily",
+      "expected": "400",
+      "actual": "400",
+      "passed": true
+    },
+    {
+      "title": "먼 미래 날짜 /ai/feedback/weekly",
+      "expected": "400",
+      "actual": "400",
+      "passed": true
+    },
+    {
+      "title": "2월 캘린더",
+      "expected": "200",
+      "actual": "200",
+      "passed": true
+    },
+    {
+      "title": "몸무게 0",
+      "expected": "400",
+      "actual": "400",
+      "passed": true
+    },
+    {
+      "title": "10MB 바로 아래 사진",
+      "expected": "200",
+      "actual": "200",
+      "passed": true
+    },
+    {
+      "title": "10MB 초과 사진",
+      "expected": "400",
+      "actual": "400 VALID_011",
+      "passed": true
+    },
+    {
+      "title": "빈 파일",
+      "expected": "400",
+      "actual": "400 VALID_020",
+      "passed": true
+    },
+    {
+      "title": "이미지가 아닌 형식으로 올린 파일",
+      "expected": "400",
+      "actual": "400",
+      "passed": true
+    },
+    {
+      "title": "경로 조작 파일명 업로드",
+      "expected": "500 없음, 저장 경로 고정",
+      "actual": "200",
+      "passed": true
+    },
+    {
+      "title": "한국 시간 3/10 식단 목록",
+      "expected": "2건, 300kcal",
+      "actual": "2건, 300kcal",
+      "passed": true
+    },
+    {
+      "title": "한국 시간 3/10 일간 통계",
+      "expected": "300kcal",
+      "actual": "300",
+      "passed": true
+    },
+    {
+      "title": "캘린더 날짜(KST 기준)",
+      "expected": [
+        "2026-03-09",
+        "2026-03-10",
+        "2026-03-11"
+      ],
+      "actual": "['2026-03-09', '2026-03-10', '2026-03-11']",
+      "passed": true
+    },
+    {
+      "title": "주간 통계 날짜별 합계",
+      "expected": "3/9=400, 3/10=300, 3/11=800",
+      "actual": "[400, 300, 800]",
+      "passed": true
+    }
+  ]
+}

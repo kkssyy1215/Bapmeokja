@@ -53,3 +53,6 @@ backend/out/
 backend/uploads/
 backend/logs/
 *.log
+
+# python
+__pycache__/
