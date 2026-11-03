@@ -1,3 +1,5 @@
+import '@/services/web-alert';
+
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
