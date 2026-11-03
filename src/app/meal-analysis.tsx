@@ -1144,7 +1144,7 @@ const styles = StyleSheet.create({
   },
 
   imageMessage: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#EDE2D0',
