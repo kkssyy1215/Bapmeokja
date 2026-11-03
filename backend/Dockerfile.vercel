@@ -1,0 +1,18 @@
+# Vercel Container Runtime용 이미지. 일반 서버 배포는 Dockerfile을 쓴다.
+FROM eclipse-temurin:17-jdk-jammy AS builder
+WORKDIR /workspace
+COPY gradlew settings.gradle build.gradle ./
+COPY gradle ./gradle
+RUN chmod +x gradlew && ./gradlew dependencies --no-daemon
+COPY src ./src
+RUN ./gradlew bootJar --no-daemon
+
+FROM eclipse-temurin:17-jre-jammy
+WORKDIR /app
+COPY --from=builder /workspace/build/libs/*.jar app.jar
+# Vercel 인스턴스는 요청이 없으면 꺼지므로 시작 시간을 줄이고, 디스크가 유지되지 않으므로 사진은 임시 폴더에 둔다.
+ENV SPRING_PROFILES_ACTIVE=prod \
+    SPRING_MAIN_LAZY_INITIALIZATION=true \
+    UPLOAD_DIRECTORY=/tmp/uploads \
+    DB_POOL_SIZE=3
+ENTRYPOINT ["sh", "-c", "exec java -XX:+UseSerialGC -XX:TieredStopAtLevel=1 -XX:MaxRAMPercentage=75.0 -Dserver.port=${PORT:-80} -jar /app/app.jar"]

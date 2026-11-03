@@ -1,0 +1,16 @@
+{
+  "framework": null,
+  "buildCommand": "npx expo export --platform web",
+  "outputDirectory": "dist",
+  "cleanUrls": true,
+  "rewrites": [
+    {
+      "source": "/community/:id",
+      "destination": "/community/[id]"
+    },
+    {
+      "source": "/:path*",
+      "destination": "/"
+    }
+  ]
+}

@@ -21,9 +21,14 @@ export default function PostDetailScreen() {
   const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
-    const local = posts.find((item) => item.id === id) ?? posts[0];
-    const demo: CommunityPostDetail = { postId: local.id, content: local.content, authorNickname: local.author, createdAt: local.createdAt, likeCount: local.likes, isLiked: local.liked, commentCount: local.comments.length, nutritionInfo: { foodName: local.mealName, calorie: local.nutrients.calories, carb: local.nutrients.carbs, protein: local.nutrients.protein, fat: local.nutrients.fat }, comments: local.comments.map((item) => ({ commentId: item.id, authorNickname: item.author, content: item.content, createdAt: item.createdAt })) };
-    (isMockMode ? simulateRequest(demo, 300) : communityApi.detail(id)).then(setPost).catch((error) => Alert.alert('게시물을 불러오지 못했어요', getErrorMessage(error))).finally(() => setLoading(false));
+    const load = (): Promise<CommunityPostDetail> => {
+      if (!isMockMode) return communityApi.detail(id);
+      // 시연 데이터는 시연 모드에서만 있다. 서버 모드의 posts는 비어 있으므로 여기서만 읽는다.
+      const local = posts.find((item) => item.id === id) ?? posts[0];
+      const demo: CommunityPostDetail = { postId: local.id, content: local.content, authorNickname: local.author, createdAt: local.createdAt, likeCount: local.likes, isLiked: local.liked, commentCount: local.comments.length, nutritionInfo: { foodName: local.mealName, calorie: local.nutrients.calories, carb: local.nutrients.carbs, protein: local.nutrients.protein, fat: local.nutrients.fat }, comments: local.comments.map((item) => ({ commentId: item.id, authorNickname: item.author, content: item.content, createdAt: item.createdAt })) };
+      return simulateRequest(demo, 300);
+    };
+    load().then(setPost).catch((error) => Alert.alert('게시물을 불러오지 못했어요', getErrorMessage(error))).finally(() => setLoading(false));
   }, [id, posts]);
 
   const like = async () => {

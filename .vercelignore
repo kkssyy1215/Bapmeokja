@@ -1,0 +1,7 @@
+backend
+docs
+scripts
+dist
+.expo
+.env*
+*.md

@@ -56,3 +56,7 @@ backend/logs/
 
 # python
 __pycache__/
+
+# vercel
+.vercel/
+.vercel-urls
