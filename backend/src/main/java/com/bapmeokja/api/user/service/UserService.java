@@ -2,6 +2,10 @@ package com.bapmeokja.api.user.service;
 
 import com.bapmeokja.api.common.exception.BusinessException;
 import com.bapmeokja.api.common.exception.ErrorCode;
+import com.bapmeokja.api.community.CommunityImageStorage;
+import com.bapmeokja.api.community.CommunityPostRepository;
+import com.bapmeokja.api.diet.repository.AiAnalysisRepository;
+import com.bapmeokja.api.diet.service.DietImageStorage;
 import com.bapmeokja.api.user.domain.DeviceRegistration;
 import com.bapmeokja.api.user.domain.NotificationSetting;
 import com.bapmeokja.api.user.domain.NutritionGoals;
@@ -21,10 +25,13 @@ import com.bapmeokja.api.user.repository.NotificationSettingRepository;
 import com.bapmeokja.api.user.repository.RefreshTokenRepository;
 import com.bapmeokja.api.user.repository.UserRepository;
 import java.time.LocalTime;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 @Service
 @RequiredArgsConstructor
@@ -37,6 +44,10 @@ public class UserService {
     private final DeviceRegistrationRepository deviceRegistrationRepository;
     private final NutritionCalculator nutritionCalculator;
     private final PasswordEncoder passwordEncoder;
+    private final CommunityPostRepository communityPostRepository;
+    private final CommunityImageStorage communityImageStorage;
+    private final AiAnalysisRepository aiAnalysisRepository;
+    private final DietImageStorage dietImageStorage;
 
     @Transactional
     public NutritionGoalResponse initializeProfile(InitialProfileRequest request) {
@@ -155,10 +166,31 @@ public class UserService {
         if (!passwordEncoder.matches(request.currentPassword(), user.getPassword())) {
             throw new BusinessException(ErrorCode.CURRENT_PASSWORD_MISMATCH);
         }
+        List<String> postImages = communityPostRepository.findImageUrlsByUserId(user.getId());
+        List<String> mealImages = aiAnalysisRepository.findImageUrlsByUserId(user.getId());
+        communityPostRepository.releaseCountersOfUser(user.getId());
         refreshTokenRepository.deleteAllByUserId(user.getId());
         deviceRegistrationRepository.deleteAllByUserId(user.getId());
         notificationSettingRepository.deleteByUserId(user.getId());
         userRepository.delete(user);
+        afterCommit(() -> {
+            postImages.forEach(communityImageStorage::delete);
+            mealImages.forEach(dietImageStorage::delete);
+        });
+    }
+
+    // DB 삭제가 롤백되면 사진은 남아 있어야 하므로 커밋 뒤에 파일을 지운다.
+    private void afterCommit(Runnable task) {
+        if (!TransactionSynchronizationManager.isSynchronizationActive()) {
+            task.run();
+            return;
+        }
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                task.run();
+            }
+        });
     }
 
     private boolean hasCompleteProfile(User user) {

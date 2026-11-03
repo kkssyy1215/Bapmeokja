@@ -92,6 +92,7 @@ public class DietRecordService {
 
     @Transactional(readOnly = true)
     public DailyDietRecordsResponse recordsOn(Long userId, LocalDate date) {
+        AppTime.requireSupportedDate(date);
         User user = userResolver.resolve(userId);
         List<DietRecord> records = findInPeriod(user, date, date.plusDays(1));
         int totalCalorie = roundedInt(records.stream()

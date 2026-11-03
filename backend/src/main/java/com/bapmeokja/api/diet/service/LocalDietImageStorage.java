@@ -55,6 +55,23 @@ public class LocalDietImageStorage implements DietImageStorage {
         }
     }
 
+    @Override
+    public void delete(String imageUrl) {
+        String prefix = "/uploads/diet/";
+        if (imageUrl == null || !imageUrl.startsWith(prefix)) {
+            return;
+        }
+        String filename = imageUrl.substring(prefix.length());
+        if (!filename.matches("[a-f0-9]{32}\\.(jpg|jpeg|png|heic)")) {
+            return;
+        }
+        try {
+            Files.deleteIfExists(uploadRoot.resolve("diet").resolve(filename).normalize());
+        } catch (IOException ignored) {
+            // 계정 삭제 성공 여부가 파일 정리 실패에 좌우되지 않도록 한다.
+        }
+    }
+
     private void validate(MultipartFile image) {
         if (image == null || image.isEmpty()) {
             throw new BusinessException(ErrorCode.IMAGE_REQUIRED);

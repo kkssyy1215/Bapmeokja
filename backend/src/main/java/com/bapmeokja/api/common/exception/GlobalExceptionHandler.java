@@ -2,16 +2,21 @@ package com.bapmeokja.api.common.exception;
 
 import com.bapmeokja.api.common.response.ApiResponse;
 import jakarta.validation.ConstraintViolationException;
+import java.time.DateTimeException;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @Slf4j
 @RestControllerAdvice
@@ -62,17 +67,39 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.failure(code.getCode(), code.getMessage()));
     }
 
-    @ExceptionHandler({ConstraintViolationException.class,
-            HttpMessageNotReadableException.class, IllegalArgumentException.class})
+    // 쿼리 파라미터 타입 변환 실패(예: date=2026-13-40, year=abc)는 클라이언트 입력 오류이므로 400으로 응답한다.
+    @ExceptionHandler({ConstraintViolationException.class, MethodArgumentTypeMismatchException.class,
+            HttpMessageNotReadableException.class, IllegalArgumentException.class, DateTimeException.class})
     public ResponseEntity<ApiResponse<Void>> handleBadRequest(Exception exception) {
         return ResponseEntity.badRequest()
                 .body(ApiResponse.failure(ErrorCode.INVALID_PARAMETER.getCode(), ErrorCode.INVALID_PARAMETER.getMessage()));
+    }
+
+    // 없는 주소·잘못된 메서드·잘못된 형식은 서버 장애가 아니라 요청 오류이므로 해당 상태 코드로 응답한다.
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleNoResource(NoResourceFoundException exception) {
+        return failure(ErrorCode.RESOURCE_NOT_FOUND);
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMethodNotSupported(HttpRequestMethodNotSupportedException exception) {
+        return failure(ErrorCode.METHOD_NOT_ALLOWED);
+    }
+
+    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMediaTypeNotSupported(HttpMediaTypeNotSupportedException exception) {
+        return failure(ErrorCode.UNSUPPORTED_MEDIA_TYPE);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleUnexpectedException(Exception exception) {
         log.error("Unhandled server exception", exception);
         ErrorCode code = ErrorCode.INTERNAL_SERVER_ERROR;
+        return ResponseEntity.status(code.getStatus())
+                .body(ApiResponse.failure(code.getCode(), code.getMessage()));
+    }
+
+    private ResponseEntity<ApiResponse<Void>> failure(ErrorCode code) {
         return ResponseEntity.status(code.getStatus())
                 .body(ApiResponse.failure(code.getCode(), code.getMessage()));
     }

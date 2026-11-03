@@ -21,12 +21,16 @@ public enum ErrorCode {
     TERMS_REQUIRED("VALID_005", HttpStatus.BAD_REQUEST, "이용약관 및 개인정보처리방침에 동의해주세요."),
     REQUIRED_VALUE_MISSING("VALID_010", HttpStatus.BAD_REQUEST, "필수 정보를 모두 입력해주세요."),
     INVALID_PARAMETER("VALID_011", HttpStatus.BAD_REQUEST, "입력값의 범위 또는 형식을 확인해주세요."),
+    METHOD_NOT_ALLOWED("VALID_012", HttpStatus.METHOD_NOT_ALLOWED, "지원하지 않는 요청 방식입니다."),
+    UNSUPPORTED_MEDIA_TYPE("VALID_013", HttpStatus.UNSUPPORTED_MEDIA_TYPE, "지원하지 않는 요청 형식입니다."),
     IMAGE_REQUIRED("VALID_020", HttpStatus.BAD_REQUEST, "이미지를 첨부해주세요."),
 
     AI_ANALYSIS_FAILED("AI_001", HttpStatus.BAD_GATEWAY, "음식 인식에 실패했습니다. 다시 시도해주세요."),
     AI_TIMEOUT("AI_002", HttpStatus.GATEWAY_TIMEOUT, "음식 분석 시간이 초과되었습니다. 다시 시도해주세요."),
     EXTERNAL_SERVICE_UNAVAILABLE("NET_001", HttpStatus.SERVICE_UNAVAILABLE,
             "외부 서비스 연결이 원활하지 않습니다. 잠시 후 다시 시도해주세요."),
+    TOO_MANY_REQUESTS("RATE_001", HttpStatus.TOO_MANY_REQUESTS, "요청이 너무 많습니다. 잠시 후 다시 시도해주세요."),
+
     RESOURCE_NOT_FOUND("NOTFOUND_001", HttpStatus.NOT_FOUND, "요청한 정보를 찾을 수 없습니다."),
     USER_NOT_FOUND("NOTFOUND_001", HttpStatus.NOT_FOUND, "사용자 정보를 찾을 수 없습니다."),
     INTERNAL_SERVER_ERROR("SERVER_001", HttpStatus.INTERNAL_SERVER_ERROR,

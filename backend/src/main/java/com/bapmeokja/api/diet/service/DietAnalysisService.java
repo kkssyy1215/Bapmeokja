@@ -18,6 +18,7 @@ import java.math.RoundingMode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
@@ -30,16 +31,20 @@ public class DietAnalysisService {
     private final DietImageStorage imageStorage;
     private final ResourceIdGenerator idGenerator;
     private final DietUserResolver userResolver;
+    private final TransactionTemplate transactionTemplate;
 
-    @Transactional
     public AnalyzeDietResponse analyze(Long userId, MultipartFile image) {
-        User user = userResolver.resolve(userId);
         String imageUrl = imageStorage.store(image);
+        // 외부 AI 호출은 수십 초 걸릴 수 있으므로 DB 커넥션을 잡지 않도록 트랜잭션 밖에서 실행한다.
         ImageAnalysisResult result = imageAnalyzer.analyze(image);
         if (result.items() == null || result.items().isEmpty()) {
             throw new BusinessException(ErrorCode.AI_ANALYSIS_FAILED);
         }
+        return transactionTemplate.execute(status -> save(userId, imageUrl, result));
+    }
 
+    private AnalyzeDietResponse save(Long userId, String imageUrl, ImageAnalysisResult result) {
+        User user = userResolver.resolve(userId);
         AiAnalysis analysis = new AiAnalysis(
                 idGenerator.next("anl_"),
                 user,
