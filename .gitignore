@@ -53,3 +53,15 @@ backend/out/
 backend/uploads/
 backend/logs/
 *.log
+
+# python
+__pycache__/
+
+# vercel
+.vercel/
+.vercel-urls
+
+# playwright
+playwright-report/
+test-results/
+e2e-dist/

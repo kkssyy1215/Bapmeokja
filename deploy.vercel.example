@@ -1,0 +1,9 @@
+# 복사해서 쓰세요: cp deploy.vercel.example .env.vercel
+# .env.vercel은 Git에 올라가지 않습니다. 이 예시 파일에는 실제 값을 넣지 마세요.
+
+# Aiven 콘솔 > 서비스 > Overview의 Service URI 전체
+AIVEN_SERVICE_URI=
+
+# Vercel 프로젝트 이름 (주소가 https://이름.vercel.app 이 됩니다)
+VERCEL_API_PROJECT=bapmeokja-api
+VERCEL_WEB_PROJECT=bapmeokja-web

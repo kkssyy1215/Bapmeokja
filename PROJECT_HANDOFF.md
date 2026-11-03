@@ -175,7 +175,7 @@ Flyway:
 
 운영 공급자가 추가로 필요한 부분:
 
-- 음식 사진 분석은 외부 비전 AI key가 없어 heuristic fallback이다. UI에서 “사진 기반 추정값”이라고 명시하고 사용자가 모든 값을 수정한 뒤 저장한다.
+- 음식 사진 분석은 `GEMINI_API_KEY`가 있으면 Gemini로 판독하고, 없으면 heuristic fallback이다. UI에서 “사진 기반 추정값”이라고 명시하고 사용자가 모든 값을 수정한 뒤 저장한다.
 - 주변 매장은 seed DB와 Haversine 거리 계산이다. 실시간 장소/지도는 Kakao, Google, Naver 중 하나를 연결해야 한다.
 - push token·알림 설정 저장은 구현했지만 FCM/APNs 발송 worker는 없다.
 - 장보기는 외부 검색 링크와 추정가이며 실시간 상품 가격 API가 아니다.
@@ -261,7 +261,7 @@ smoke script는 매번 고유 임시 사용자를 만들어 회원가입, 로그
 - frontend typecheck 통과
 - frontend lint 통과
 - Expo production web export 통과, 33개 route
-- backend JUnit 28개 통과, failure/error 0
+- backend JUnit 72개 통과, failure/error 0 (2026-11-03, `docs/test/` 참고)
 - Docker backend·MySQL 모두 healthy
 - Flyway V1/V2와 JPA validate 성공
 - runtime OpenAPI 48 path, 57 operation
@@ -304,11 +304,11 @@ smoke script는 매번 고유 임시 사용자를 만들어 회원가입, 로그
 
 1. 운영 배포 대상과 domain 확정
 2. managed MySQL, secret manager, HTTPS, upload object storage 연결
-3. 실제 비전 AI provider adapter 구현과 평가 dataset 작성
+3. 실제 음식 사진 평가 dataset 작성과 Gemini 정확도 측정
 4. 지도/place provider 연결과 사용자 위치 권한 실기기 QA
 5. FCM/APNs worker와 알림 예약 job
 6. iOS/Android EAS build와 실기기 회귀 테스트
-7. 모니터링·오류 추적·백업·rate limit 추가
+7. 모니터링·오류 추적·백업 추가
 
 ## 18. Git 작업 원칙
 

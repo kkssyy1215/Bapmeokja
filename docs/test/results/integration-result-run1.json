@@ -1,0 +1,1332 @@
+{
+  "summary": {
+    "executedAt": "2026-10-14 19:06:44",
+    "server": "http://127.0.0.1:8080/v1",
+    "apiTotal": 57,
+    "apiCovered": 57,
+    "apiAllPassed": 55,
+    "caseTotal": 130,
+    "casePassed": 128,
+    "byKind": {
+      "정상": {
+        "total": 67,
+        "passed": 67
+      },
+      "예외": {
+        "total": 50,
+        "passed": 48
+      },
+      "DB검증": {
+        "total": 13,
+        "passed": 13
+      }
+    },
+    "failedApis": [
+      22,
+      45
+    ],
+    "missingApis": []
+  },
+  "cases": [
+    {
+      "case_id": "IT-001",
+      "api_no": 3,
+      "endpoint": "GET /auth/check/username",
+      "kind": "정상",
+      "title": "미사용 아이디 중복 확인",
+      "expected": "200 + isDuplicated=false",
+      "actual": "200",
+      "passed": true
+    },
+    {
+      "case_id": "IT-002",
+      "api_no": 4,
+      "endpoint": "GET /auth/check/email",
+      "kind": "정상",
+      "title": "미사용 이메일 중복 확인",
+      "expected": "200 + isDuplicated=false",
+      "actual": "200",
+      "passed": true
+    },
+    {
+      "case_id": "IT-003",
+      "api_no": 4,
+      "endpoint": "GET /auth/check/email",
+      "kind": "예외",
+      "title": "이메일 형식 오류",
+      "expected": "400",
+      "actual": "400 VALID_011",
+      "passed": true
+    },
+    {
+      "case_id": "IT-004",
+      "api_no": 5,
+      "endpoint": "GET /auth/check/nickname",
+      "kind": "정상",
+      "title": "미사용 닉네임 중복 확인",
+      "expected": "200 + isDuplicated=false",
+      "actual": "200",
+      "passed": true
+    },
+    {
+      "case_id": "IT-005",
+      "api_no": 2,
+      "endpoint": "POST /auth/register",
+      "kind": "정상",
+      "title": "회원가입",
+      "expected": "201",
+      "actual": "201",
+      "passed": true
+    },
+    {
+      "case_id": "IT-006",
+      "api_no": 2,
+      "endpoint": "POST /auth/register",
+      "kind": "DB검증",
+      "title": "users 테이블에 사용자 저장",
+      "expected": "1 row",
+      "actual": "1",
+      "passed": true
+    },
+    {
+      "case_id": "IT-007",
+      "api_no": 2,
+      "endpoint": "POST /auth/register",
+      "kind": "DB검증",
+      "title": "기본 알림 설정 생성",
+      "expected": "1 row",
+      "actual": "1",
+      "passed": true
+    },
+    {
+      "case_id": "IT-008",
+      "api_no": 2,
+      "endpoint": "POST /auth/register",
+      "kind": "예외",
+      "title": "중복 아이디 가입 거부",
+      "expected": "409",
+      "actual": "409 AUTH_002",
+      "passed": true
+    },
+    {
+      "case_id": "IT-009",
+      "api_no": 2,
+      "endpoint": "POST /auth/register",
+      "kind": "예외",
+      "title": "비밀번호 규칙 위반",
+      "expected": "400",
+      "actual": "400 VALID_003",
+      "passed": true
+    },
+    {
+      "case_id": "IT-010",
+      "api_no": 2,
+      "endpoint": "POST /auth/register",
+      "kind": "예외",
+      "title": "비밀번호 확인 불일치",
+      "expected": "400",
+      "actual": "400 VALID_004",
+      "passed": true
+    },
+    {
+      "case_id": "IT-011",
+      "api_no": 2,
+      "endpoint": "POST /auth/register",
+      "kind": "예외",
+      "title": "약관 미동의",
+      "expected": "400",
+      "actual": "400 VALID_005",
+      "passed": true
+    },
+    {
+      "case_id": "IT-012",
+      "api_no": 3,
+      "endpoint": "GET /auth/check/username",
+      "kind": "정상",
+      "title": "가입된 아이디는 중복으로 표시",
+      "expected": "200 + isDuplicated=true",
+      "actual": "200",
+      "passed": true
+    },
+    {
+      "case_id": "IT-013",
+      "api_no": 1,
+      "endpoint": "POST /auth/login",
+      "kind": "정상",
+      "title": "로그인 및 토큰 발급",
+      "expected": "200 + isNewUser=true",
+      "actual": "200",
+      "passed": true
+    },
+    {
+      "case_id": "IT-014",
+      "api_no": 1,
+      "endpoint": "POST /auth/login",
+      "kind": "예외",
+      "title": "잘못된 비밀번호",
+      "expected": "401",
+      "actual": "401 AUTH_001",
+      "passed": true
+    },
+    {
+      "case_id": "IT-015",
+      "api_no": 6,
+      "endpoint": "POST /auth/token/refresh",
+      "kind": "정상",
+      "title": "토큰 재발급(회전)",
+      "expected": "200 + 새 refresh token",
+      "actual": "200",
+      "passed": true
+    },
+    {
+      "case_id": "IT-016",
+      "api_no": 6,
+      "endpoint": "POST /auth/token/refresh",
+      "kind": "예외",
+      "title": "이미 사용한 refresh token 재사용 거부",
+      "expected": "401",
+      "actual": "401 AUTH_003",
+      "passed": true
+    },
+    {
+      "case_id": "IT-017",
+      "api_no": 9,
+      "endpoint": "GET /users/profile",
+      "kind": "예외",
+      "title": "토큰 없이 접근",
+      "expected": "401",
+      "actual": "401 AUTH_003",
+      "passed": true
+    },
+    {
+      "case_id": "IT-018",
+      "api_no": 9,
+      "endpoint": "GET /users/profile",
+      "kind": "예외",
+      "title": "위조 토큰 접근",
+      "expected": "401",
+      "actual": "401 AUTH_003",
+      "passed": true
+    },
+    {
+      "case_id": "IT-019",
+      "api_no": 8,
+      "endpoint": "POST /users/profile/initial",
+      "kind": "정상",
+      "title": "초기 신체정보 등록 및 목표 계산",
+      "expected": "200 + 목표 칼로리 > 0",
+      "actual": "200",
+      "passed": true
+    },
+    {
+      "case_id": "IT-020",
+      "api_no": 8,
+      "endpoint": "POST /users/profile/initial",
+      "kind": "DB검증",
+      "title": "users.daily_calorie_goal 저장",
+      "expected": "> 0",
+      "actual": "1800",
+      "passed": true
+    },
+    {
+      "case_id": "IT-021",
+      "api_no": 8,
+      "endpoint": "POST /users/profile/initial",
+      "kind": "예외",
+      "title": "나이 범위 오류",
+      "expected": "400",
+      "actual": "400 VALID_011",
+      "passed": true
+    },
+    {
+      "case_id": "IT-022",
+      "api_no": 9,
+      "endpoint": "GET /users/profile",
+      "kind": "정상",
+      "title": "프로필 조회",
+      "expected": "200 + 닉네임 일치",
+      "actual": "200",
+      "passed": true
+    },
+    {
+      "case_id": "IT-023",
+      "api_no": 10,
+      "endpoint": "PUT /users/profile",
+      "kind": "정상",
+      "title": "프로필 수정 및 목표 재계산",
+      "expected": "200",
+      "actual": "200",
+      "passed": true
+    },
+    {
+      "case_id": "IT-024",
+      "api_no": 10,
+      "endpoint": "PUT /users/profile",
+      "kind": "DB검증",
+      "title": "users.weight 갱신",
+      "expected": "53.5",
+      "actual": "53.5",
+      "passed": true
+    },
+    {
+      "case_id": "IT-025",
+      "api_no": 11,
+      "endpoint": "PUT /users/settings/notification",
+      "kind": "정상",
+      "title": "알림 설정 수정",
+      "expected": "200",
+      "actual": "200",
+      "passed": true
+    },
+    {
+      "case_id": "IT-026",
+      "api_no": 11,
+      "endpoint": "PUT /users/settings/notification",
+      "kind": "예외",
+      "title": "시각 형식 오류",
+      "expected": "400",
+      "actual": "400 VALID_010",
+      "passed": true
+    },
+    {
+      "case_id": "IT-027",
+      "api_no": 12,
+      "endpoint": "PUT /users/settings/budget",
+      "kind": "정상",
+      "title": "예산 설정",
+      "expected": "200",
+      "actual": "200",
+      "passed": true
+    },
+    {
+      "case_id": "IT-028",
+      "api_no": 12,
+      "endpoint": "PUT /users/settings/budget",
+      "kind": "DB검증",
+      "title": "외식 예산 저장",
+      "expected": "12000",
+      "actual": "12000",
+      "passed": true
+    },
+    {
+      "case_id": "IT-029",
+      "api_no": 12,
+      "endpoint": "PUT /users/settings/budget",
+      "kind": "예외",
+      "title": "음수 예산 거부",
+      "expected": "400",
+      "actual": "400 VALID_011",
+      "passed": true
+    },
+    {
+      "case_id": "IT-030",
+      "api_no": 14,
+      "endpoint": "POST /users/devices",
+      "kind": "정상",
+      "title": "푸시 기기 등록",
+      "expected": "200",
+      "actual": "200",
+      "passed": true
+    },
+    {
+      "case_id": "IT-031",
+      "api_no": 14,
+      "endpoint": "POST /users/devices",
+      "kind": "예외",
+      "title": "지원하지 않는 플랫폼",
+      "expected": "400",
+      "actual": "400 VALID_011",
+      "passed": true
+    },
+    {
+      "case_id": "IT-032",
+      "api_no": 44,
+      "endpoint": "GET /home/dashboard",
+      "kind": "정상",
+      "title": "오늘 대시보드 조회(기록 전)",
+      "expected": "200 + calorieConsumed=0",
+      "actual": "200",
+      "passed": true
+    },
+    {
+      "case_id": "IT-033",
+      "api_no": 17,
+      "endpoint": "POST /diet/analyze",
+      "kind": "정상",
+      "title": "음식 사진 분석",
+      "expected": "200 + items ≥ 1",
+      "actual": "200",
+      "passed": true
+    },
+    {
+      "case_id": "IT-034",
+      "api_no": 17,
+      "endpoint": "POST /diet/analyze",
+      "kind": "DB검증",
+      "title": "ai_analyses/ai_analysis_items 저장",
+      "expected": "2 rows",
+      "actual": "2",
+      "passed": true
+    },
+    {
+      "case_id": "IT-035",
+      "api_no": 17,
+      "endpoint": "POST /diet/analyze",
+      "kind": "예외",
+      "title": "이미지 누락",
+      "expected": "400",
+      "actual": "400 VALID_020",
+      "passed": true
+    },
+    {
+      "case_id": "IT-036",
+      "api_no": 17,
+      "endpoint": "POST /diet/analyze",
+      "kind": "예외",
+      "title": "지원하지 않는 형식(gif)",
+      "expected": "400",
+      "actual": "400 VALID_011",
+      "passed": true
+    },
+    {
+      "case_id": "IT-037",
+      "api_no": 18,
+      "endpoint": "GET /diet/items/{itemId}",
+      "kind": "정상",
+      "title": "분석 항목 상세 조회",
+      "expected": "200",
+      "actual": "200",
+      "passed": true
+    },
+    {
+      "case_id": "IT-038",
+      "api_no": 18,
+      "endpoint": "GET /diet/items/{itemId}",
+      "kind": "예외",
+      "title": "다른 사용자의 분석 항목 접근 차단",
+      "expected": "403 또는 404",
+      "actual": "404",
+      "passed": true
+    },
+    {
+      "case_id": "IT-039",
+      "api_no": 18,
+      "endpoint": "GET /diet/items/{itemId}",
+      "kind": "예외",
+      "title": "없는 항목",
+      "expected": "404",
+      "actual": "404 NOTFOUND_001",
+      "passed": true
+    },
+    {
+      "case_id": "IT-040",
+      "api_no": 19,
+      "endpoint": "POST /diet/records",
+      "kind": "정상",
+      "title": "분석 결과로 식단 저장",
+      "expected": "201",
+      "actual": "201",
+      "passed": true
+    },
+    {
+      "case_id": "IT-041",
+      "api_no": 19,
+      "endpoint": "POST /diet/records",
+      "kind": "DB검증",
+      "title": "diet_records.total_calorie = 항목 합계",
+      "expected": "243",
+      "actual": "243",
+      "passed": true
+    },
+    {
+      "case_id": "IT-042",
+      "api_no": 19,
+      "endpoint": "POST /diet/records",
+      "kind": "예외",
+      "title": "다른 사용자의 analyzeId로 저장 차단",
+      "expected": "403 또는 404",
+      "actual": "404",
+      "passed": true
+    },
+    {
+      "case_id": "IT-043",
+      "api_no": 20,
+      "endpoint": "POST /diet/records/manual",
+      "kind": "정상",
+      "title": "직접 입력 식단 저장",
+      "expected": "201",
+      "actual": "201",
+      "passed": true
+    },
+    {
+      "case_id": "IT-044",
+      "api_no": 20,
+      "endpoint": "POST /diet/records/manual",
+      "kind": "예외",
+      "title": "음식 항목 없음",
+      "expected": "400",
+      "actual": "400 VALID_011",
+      "passed": true
+    },
+    {
+      "case_id": "IT-045",
+      "api_no": 20,
+      "endpoint": "POST /diet/records/manual",
+      "kind": "예외",
+      "title": "음수 칼로리",
+      "expected": "400",
+      "actual": "400 VALID_011",
+      "passed": true
+    },
+    {
+      "case_id": "IT-046",
+      "api_no": 21,
+      "endpoint": "GET /diet/calendar",
+      "kind": "정상",
+      "title": "월간 캘린더에 오늘 표시",
+      "expected": "200 + 2026-10-14 포함",
+      "actual": "200",
+      "passed": true
+    },
+    {
+      "case_id": "IT-047",
+      "api_no": 21,
+      "endpoint": "GET /diet/calendar",
+      "kind": "예외",
+      "title": "잘못된 월(13)",
+      "expected": "400",
+      "actual": "400 VALID_011",
+      "passed": true
+    },
+    {
+      "case_id": "IT-048",
+      "api_no": 22,
+      "endpoint": "GET /diet/records",
+      "kind": "정상",
+      "title": "날짜별 식단 조회",
+      "expected": "200 + records 2건",
+      "actual": "200",
+      "passed": true
+    },
+    {
+      "case_id": "IT-049",
+      "api_no": 22,
+      "endpoint": "GET /diet/records",
+      "kind": "예외",
+      "title": "날짜 형식 오류",
+      "expected": "400",
+      "actual": "500 SERVER_001",
+      "passed": false
+    },
+    {
+      "case_id": "IT-050",
+      "api_no": 23,
+      "endpoint": "GET /diet/records/{recordId}",
+      "kind": "정상",
+      "title": "식단 상세 조회",
+      "expected": "200",
+      "actual": "200",
+      "passed": true
+    },
+    {
+      "case_id": "IT-051",
+      "api_no": 23,
+      "endpoint": "GET /diet/records/{recordId}",
+      "kind": "예외",
+      "title": "다른 사용자의 식단 조회 차단",
+      "expected": "403 또는 404",
+      "actual": "404",
+      "passed": true
+    },
+    {
+      "case_id": "IT-052",
+      "api_no": 24,
+      "endpoint": "PUT /diet/records/{recordId}",
+      "kind": "정상",
+      "title": "식단 수정",
+      "expected": "200",
+      "actual": "200",
+      "passed": true
+    },
+    {
+      "case_id": "IT-053",
+      "api_no": 24,
+      "endpoint": "PUT /diet/records/{recordId}",
+      "kind": "DB검증",
+      "title": "끼니·칼로리 갱신",
+      "expected": "DINNER/190",
+      "actual": "DINNER/190",
+      "passed": true
+    },
+    {
+      "case_id": "IT-054",
+      "api_no": 24,
+      "endpoint": "PUT /diet/records/{recordId}",
+      "kind": "예외",
+      "title": "다른 사용자의 식단 수정 차단",
+      "expected": "403 또는 404",
+      "actual": "404",
+      "passed": true
+    },
+    {
+      "case_id": "IT-055",
+      "api_no": 26,
+      "endpoint": "GET /diet/foods/search",
+      "kind": "정상",
+      "title": "음식 검색",
+      "expected": "200 + 결과 ≥ 1",
+      "actual": "200",
+      "passed": true
+    },
+    {
+      "case_id": "IT-056",
+      "api_no": 26,
+      "endpoint": "GET /diet/foods/search",
+      "kind": "정상",
+      "title": "검색 결과 없음",
+      "expected": "200 + 빈 목록",
+      "actual": "200",
+      "passed": true
+    },
+    {
+      "case_id": "IT-057",
+      "api_no": 44,
+      "endpoint": "GET /home/dashboard",
+      "kind": "정상",
+      "title": "기록 후 섭취 칼로리 반영",
+      "expected": "200 + calorieConsumed=433",
+      "actual": "200",
+      "passed": true
+    },
+    {
+      "case_id": "IT-058",
+      "api_no": 45,
+      "endpoint": "GET /statistics/daily",
+      "kind": "정상",
+      "title": "기간별 조회",
+      "expected": "200 + data 존재",
+      "actual": "200",
+      "passed": true
+    },
+    {
+      "case_id": "IT-059",
+      "api_no": 46,
+      "endpoint": "GET /statistics/weekly",
+      "kind": "정상",
+      "title": "기간별 조회",
+      "expected": "200 + data 존재",
+      "actual": "200",
+      "passed": true
+    },
+    {
+      "case_id": "IT-060",
+      "api_no": 47,
+      "endpoint": "GET /statistics/monthly",
+      "kind": "정상",
+      "title": "기간별 조회",
+      "expected": "200 + data 존재",
+      "actual": "200",
+      "passed": true
+    },
+    {
+      "case_id": "IT-061",
+      "api_no": 27,
+      "endpoint": "GET /ai/feedback/daily",
+      "kind": "정상",
+      "title": "기간별 조회",
+      "expected": "200 + data 존재",
+      "actual": "200",
+      "passed": true
+    },
+    {
+      "case_id": "IT-062",
+      "api_no": 28,
+      "endpoint": "GET /ai/feedback/weekly",
+      "kind": "정상",
+      "title": "기간별 조회",
+      "expected": "200 + data 존재",
+      "actual": "200",
+      "passed": true
+    },
+    {
+      "case_id": "IT-063",
+      "api_no": 29,
+      "endpoint": "GET /ai/feedback/monthly",
+      "kind": "정상",
+      "title": "기간별 조회",
+      "expected": "200 + data 존재",
+      "actual": "200",
+      "passed": true
+    },
+    {
+      "case_id": "IT-064",
+      "api_no": 45,
+      "endpoint": "GET /statistics/daily",
+      "kind": "예외",
+      "title": "날짜 형식 오류",
+      "expected": "400",
+      "actual": "500 SERVER_001",
+      "passed": false
+    },
+    {
+      "case_id": "IT-065",
+      "api_no": 29,
+      "endpoint": "GET /ai/feedback/monthly",
+      "kind": "예외",
+      "title": "잘못된 월(0)",
+      "expected": "400",
+      "actual": "400 VALID_011",
+      "passed": true
+    },
+    {
+      "case_id": "IT-066",
+      "api_no": 48,
+      "endpoint": "GET /menu/recommend/summary",
+      "kind": "정상",
+      "title": "잔여 영양·예산 요약",
+      "expected": "200 + 예산 12000 반영",
+      "actual": "200",
+      "passed": true
+    },
+    {
+      "case_id": "IT-067",
+      "api_no": 49,
+      "endpoint": "GET /menu/recommend/dining-out",
+      "kind": "정상",
+      "title": "외식 카테고리 추천",
+      "expected": "200 + 카테고리 ≥ 1",
+      "actual": "200",
+      "passed": true
+    },
+    {
+      "case_id": "IT-068",
+      "api_no": 50,
+      "endpoint": "GET /menu/categories/{categoryId}/items",
+      "kind": "정상",
+      "title": "카테고리 메뉴 목록",
+      "expected": "200 + 메뉴 ≥ 1",
+      "actual": "200",
+      "passed": true
+    },
+    {
+      "case_id": "IT-069",
+      "api_no": 50,
+      "endpoint": "GET /menu/categories/{categoryId}/items",
+      "kind": "예외",
+      "title": "없는 카테고리",
+      "expected": "404",
+      "actual": "404 NOTFOUND_001",
+      "passed": true
+    },
+    {
+      "case_id": "IT-070",
+      "api_no": 51,
+      "endpoint": "GET /menu/items/{itemId}",
+      "kind": "정상",
+      "title": "메뉴 상세·재료",
+      "expected": "200 + 재료 ≥ 1",
+      "actual": "200",
+      "passed": true
+    },
+    {
+      "case_id": "IT-071",
+      "api_no": 51,
+      "endpoint": "GET /menu/items/{itemId}",
+      "kind": "예외",
+      "title": "없는 메뉴",
+      "expected": "404",
+      "actual": "404 NOTFOUND_001",
+      "passed": true
+    },
+    {
+      "case_id": "IT-072",
+      "api_no": 52,
+      "endpoint": "GET /menu/nearby-stores",
+      "kind": "예외",
+      "title": "위치 동의 전 주변 매장 조회 차단",
+      "expected": "403",
+      "actual": "403 AUTH_020",
+      "passed": true
+    },
+    {
+      "case_id": "IT-073",
+      "api_no": 13,
+      "endpoint": "POST /users/location-consent",
+      "kind": "정상",
+      "title": "위치 정보 동의",
+      "expected": "200 + granted=true",
+      "actual": "200",
+      "passed": true
+    },
+    {
+      "case_id": "IT-074",
+      "api_no": 13,
+      "endpoint": "POST /users/location-consent",
+      "kind": "예외",
+      "title": "agreed 누락",
+      "expected": "400",
+      "actual": "400 VALID_011",
+      "passed": true
+    },
+    {
+      "case_id": "IT-075",
+      "api_no": 52,
+      "endpoint": "GET /menu/nearby-stores",
+      "kind": "정상",
+      "title": "동의 후 주변 매장 조회",
+      "expected": "200 + 매장 ≥ 1",
+      "actual": "200",
+      "passed": true
+    },
+    {
+      "case_id": "IT-076",
+      "api_no": 52,
+      "endpoint": "GET /menu/nearby-stores",
+      "kind": "예외",
+      "title": "위도 범위 오류",
+      "expected": "400",
+      "actual": "400 VALID_011",
+      "passed": true
+    },
+    {
+      "case_id": "IT-077",
+      "api_no": 30,
+      "endpoint": "POST /fridge/ingredients",
+      "kind": "정상",
+      "title": "재료 3개 등록",
+      "expected": "201 + registeredCount=3",
+      "actual": "201",
+      "passed": true
+    },
+    {
+      "case_id": "IT-078",
+      "api_no": 30,
+      "endpoint": "POST /fridge/ingredients",
+      "kind": "DB검증",
+      "title": "fridge_ingredients 3행 저장",
+      "expected": "3",
+      "actual": "3",
+      "passed": true
+    },
+    {
+      "case_id": "IT-079",
+      "api_no": 30,
+      "endpoint": "POST /fridge/ingredients",
+      "kind": "예외",
+      "title": "수량 0 거부",
+      "expected": "400",
+      "actual": "400 VALID_011",
+      "passed": true
+    },
+    {
+      "case_id": "IT-080",
+      "api_no": 31,
+      "endpoint": "GET /fridge/ingredients",
+      "kind": "정상",
+      "title": "재료 목록·유통기한 임박 표시",
+      "expected": "200 + 임박 재료 표시",
+      "actual": "200",
+      "passed": true
+    },
+    {
+      "case_id": "IT-081",
+      "api_no": 32,
+      "endpoint": "PUT /fridge/ingredients/{ingredientId}",
+      "kind": "정상",
+      "title": "재료 수량 수정",
+      "expected": "200",
+      "actual": "200",
+      "passed": true
+    },
+    {
+      "case_id": "IT-082",
+      "api_no": 32,
+      "endpoint": "PUT /fridge/ingredients/{ingredientId}",
+      "kind": "DB검증",
+      "title": "quantity 갱신",
+      "expected": "3",
+      "actual": "3",
+      "passed": true
+    },
+    {
+      "case_id": "IT-083",
+      "api_no": 32,
+      "endpoint": "PUT /fridge/ingredients/{ingredientId}",
+      "kind": "예외",
+      "title": "다른 사용자의 재료 수정 차단",
+      "expected": "403 또는 404",
+      "actual": "404",
+      "passed": true
+    },
+    {
+      "case_id": "IT-084",
+      "api_no": 53,
+      "endpoint": "GET /menu/recommend/home-cooking",
+      "kind": "정상",
+      "title": "집밥 카테고리 추천",
+      "expected": "200 + 카테고리 ≥ 1",
+      "actual": "200",
+      "passed": true
+    },
+    {
+      "case_id": "IT-085",
+      "api_no": 54,
+      "endpoint": "GET /menu/recipes",
+      "kind": "정상",
+      "title": "카테고리 레시피 목록",
+      "expected": "200 + 레시피 ≥ 1",
+      "actual": "200",
+      "passed": true
+    },
+    {
+      "case_id": "IT-086",
+      "api_no": 54,
+      "endpoint": "GET /menu/recipes",
+      "kind": "예외",
+      "title": "없는 카테고리",
+      "expected": "404",
+      "actual": "404 NOTFOUND_001",
+      "passed": true
+    },
+    {
+      "case_id": "IT-087",
+      "api_no": 55,
+      "endpoint": "GET /menu/recipes/{recipeId}",
+      "kind": "정상",
+      "title": "레시피 상세(재료·대체재·단계)",
+      "expected": "200 + steps ≥ 1",
+      "actual": "200",
+      "passed": true
+    },
+    {
+      "case_id": "IT-088",
+      "api_no": 55,
+      "endpoint": "GET /menu/recipes/{recipeId}",
+      "kind": "예외",
+      "title": "없는 레시피",
+      "expected": "404",
+      "actual": "404 NOTFOUND_001",
+      "passed": true
+    },
+    {
+      "case_id": "IT-089",
+      "api_no": 56,
+      "endpoint": "POST /menu/recommend/leftover",
+      "kind": "정상",
+      "title": "냉장고 재료 기반 추천",
+      "expected": "200 + 레시피 ≥ 1",
+      "actual": "200",
+      "passed": true
+    },
+    {
+      "case_id": "IT-090",
+      "api_no": 57,
+      "endpoint": "GET /menu/recipes/{recipeId}/shopping-list",
+      "kind": "정상",
+      "title": "부족 재료·예상 금액",
+      "expected": "200",
+      "actual": "200",
+      "passed": true
+    },
+    {
+      "case_id": "IT-091",
+      "api_no": 57,
+      "endpoint": "GET /menu/recipes/{recipeId}/shopping-list",
+      "kind": "예외",
+      "title": "없는 레시피",
+      "expected": "404",
+      "actual": "404 NOTFOUND_001",
+      "passed": true
+    },
+    {
+      "case_id": "IT-092",
+      "api_no": 33,
+      "endpoint": "DELETE /fridge/ingredients/{ingredientId}",
+      "kind": "예외",
+      "title": "다른 사용자의 재료 삭제 차단",
+      "expected": "403 또는 404",
+      "actual": "404",
+      "passed": true
+    },
+    {
+      "case_id": "IT-093",
+      "api_no": 33,
+      "endpoint": "DELETE /fridge/ingredients/{ingredientId}",
+      "kind": "정상",
+      "title": "재료 삭제",
+      "expected": "200",
+      "actual": "200",
+      "passed": true
+    },
+    {
+      "case_id": "IT-094",
+      "api_no": 33,
+      "endpoint": "DELETE /fridge/ingredients/{ingredientId}",
+      "kind": "DB검증",
+      "title": "행 삭제",
+      "expected": "0",
+      "actual": "0",
+      "passed": true
+    },
+    {
+      "case_id": "IT-095",
+      "api_no": 35,
+      "endpoint": "POST /community/analyze-image",
+      "kind": "정상",
+      "title": "게시글용 사진 영양 추정",
+      "expected": "200 + calorie > 0",
+      "actual": "200",
+      "passed": true
+    },
+    {
+      "case_id": "IT-096",
+      "api_no": 35,
+      "endpoint": "POST /community/analyze-image",
+      "kind": "예외",
+      "title": "이미지가 아닌 파일",
+      "expected": "400",
+      "actual": "400 VALID_011",
+      "passed": true
+    },
+    {
+      "case_id": "IT-097",
+      "api_no": 36,
+      "endpoint": "POST /community/posts",
+      "kind": "정상",
+      "title": "사진 포함 게시글 등록",
+      "expected": "201",
+      "actual": "201",
+      "passed": true
+    },
+    {
+      "case_id": "IT-098",
+      "api_no": 36,
+      "endpoint": "POST /community/posts",
+      "kind": "DB검증",
+      "title": "posts 저장(image_url 포함)",
+      "expected": "1",
+      "actual": "1",
+      "passed": true
+    },
+    {
+      "case_id": "IT-099",
+      "api_no": 36,
+      "endpoint": "POST /community/posts",
+      "kind": "예외",
+      "title": "빈 내용",
+      "expected": "400",
+      "actual": "400 VALID_010",
+      "passed": true
+    },
+    {
+      "case_id": "IT-100",
+      "api_no": 34,
+      "endpoint": "GET /community/posts",
+      "kind": "정상",
+      "title": "게시글 목록(다른 사용자 시점)",
+      "expected": "200 + 작성 글 포함",
+      "actual": "200",
+      "passed": true
+    },
+    {
+      "case_id": "IT-101",
+      "api_no": 34,
+      "endpoint": "GET /community/posts",
+      "kind": "예외",
+      "title": "페이지 크기 초과(999)",
+      "expected": "400",
+      "actual": "400 VALID_011",
+      "passed": true
+    },
+    {
+      "case_id": "IT-102",
+      "api_no": 37,
+      "endpoint": "GET /community/posts/{postId}",
+      "kind": "정상",
+      "title": "게시글 상세",
+      "expected": "200 + imageUrl 존재",
+      "actual": "200",
+      "passed": true
+    },
+    {
+      "case_id": "IT-103",
+      "api_no": 43,
+      "endpoint": "GET /v1/uploads/community/{fileName}",
+      "kind": "정상",
+      "title": "업로드 이미지 제공",
+      "expected": "200 + PNG 바이트 일치",
+      "actual": "200",
+      "passed": true
+    },
+    {
+      "case_id": "IT-104",
+      "api_no": 43,
+      "endpoint": "GET /v1/uploads/community/{fileName}",
+      "kind": "예외",
+      "title": "경로 조작 파일명 차단",
+      "expected": "400 또는 404",
+      "actual": "400",
+      "passed": true
+    },
+    {
+      "case_id": "IT-105",
+      "api_no": 38,
+      "endpoint": "PUT /community/posts/{postId}",
+      "kind": "예외",
+      "title": "다른 사용자의 게시글 수정 차단",
+      "expected": "403 또는 404",
+      "actual": "403",
+      "passed": true
+    },
+    {
+      "case_id": "IT-106",
+      "api_no": 38,
+      "endpoint": "PUT /community/posts/{postId}",
+      "kind": "정상",
+      "title": "본인 게시글 수정",
+      "expected": "200",
+      "actual": "200",
+      "passed": true
+    },
+    {
+      "case_id": "IT-107",
+      "api_no": 40,
+      "endpoint": "POST /community/posts/{postId}/comments",
+      "kind": "정상",
+      "title": "댓글 등록",
+      "expected": "201",
+      "actual": "201",
+      "passed": true
+    },
+    {
+      "case_id": "IT-108",
+      "api_no": 40,
+      "endpoint": "POST /community/posts/{postId}/comments",
+      "kind": "예외",
+      "title": "빈 댓글",
+      "expected": "400",
+      "actual": "400 VALID_010",
+      "passed": true
+    },
+    {
+      "case_id": "IT-109",
+      "api_no": 42,
+      "endpoint": "POST /community/posts/{postId}/likes",
+      "kind": "정상",
+      "title": "좋아요 등록",
+      "expected": "200 + isLiked=true, count=1",
+      "actual": "200",
+      "passed": true
+    },
+    {
+      "case_id": "IT-110",
+      "api_no": 42,
+      "endpoint": "POST /community/posts/{postId}/likes",
+      "kind": "정상",
+      "title": "좋아요 취소(토글)",
+      "expected": "200 + isLiked=false, count=0",
+      "actual": "200",
+      "passed": true
+    },
+    {
+      "case_id": "IT-111",
+      "api_no": 37,
+      "endpoint": "GET /community/posts/{postId}",
+      "kind": "정상",
+      "title": "댓글 수 반영",
+      "expected": "200 + commentCount=1",
+      "actual": "200",
+      "passed": true
+    },
+    {
+      "case_id": "IT-112",
+      "api_no": 41,
+      "endpoint": "DELETE /community/posts/{postId}/comments/{commentId}",
+      "kind": "예외",
+      "title": "타인 댓글 삭제 차단",
+      "expected": "403 또는 404",
+      "actual": "403",
+      "passed": true
+    },
+    {
+      "case_id": "IT-113",
+      "api_no": 41,
+      "endpoint": "DELETE /community/posts/{postId}/comments/{commentId}",
+      "kind": "정상",
+      "title": "본인 댓글 삭제",
+      "expected": "200",
+      "actual": "200",
+      "passed": true
+    },
+    {
+      "case_id": "IT-114",
+      "api_no": 39,
+      "endpoint": "DELETE /community/posts/{postId}",
+      "kind": "예외",
+      "title": "다른 사용자의 게시글 삭제 차단",
+      "expected": "403 또는 404",
+      "actual": "403",
+      "passed": true
+    },
+    {
+      "case_id": "IT-115",
+      "api_no": 39,
+      "endpoint": "DELETE /community/posts/{postId}",
+      "kind": "정상",
+      "title": "본인 게시글 삭제",
+      "expected": "200",
+      "actual": "200",
+      "passed": true
+    },
+    {
+      "case_id": "IT-116",
+      "api_no": 37,
+      "endpoint": "GET /community/posts/{postId}",
+      "kind": "예외",
+      "title": "삭제된 게시글 조회",
+      "expected": "404",
+      "actual": "404 NOTFOUND_001",
+      "passed": true
+    },
+    {
+      "case_id": "IT-117",
+      "api_no": 25,
+      "endpoint": "DELETE /diet/records/{recordId}",
+      "kind": "예외",
+      "title": "다른 사용자의 식단 삭제 차단",
+      "expected": "403 또는 404",
+      "actual": "404",
+      "passed": true
+    },
+    {
+      "case_id": "IT-118",
+      "api_no": 25,
+      "endpoint": "DELETE /diet/records/{recordId}",
+      "kind": "정상",
+      "title": "식단 삭제",
+      "expected": "200",
+      "actual": "200",
+      "passed": true
+    },
+    {
+      "case_id": "IT-119",
+      "api_no": 25,
+      "endpoint": "DELETE /diet/records/{recordId}",
+      "kind": "정상",
+      "title": "삭제 후 조회 시 404",
+      "expected": "404",
+      "actual": "404 NOTFOUND_001",
+      "passed": true
+    },
+    {
+      "case_id": "IT-120",
+      "api_no": 15,
+      "endpoint": "PUT /users/password",
+      "kind": "예외",
+      "title": "현재 비밀번호 불일치",
+      "expected": "401",
+      "actual": "401 AUTH_010",
+      "passed": true
+    },
+    {
+      "case_id": "IT-121",
+      "api_no": 15,
+      "endpoint": "PUT /users/password",
+      "kind": "예외",
+      "title": "새 비밀번호 확인 불일치",
+      "expected": "400",
+      "actual": "400 VALID_004",
+      "passed": true
+    },
+    {
+      "case_id": "IT-122",
+      "api_no": 15,
+      "endpoint": "PUT /users/password",
+      "kind": "정상",
+      "title": "비밀번호 변경",
+      "expected": "200",
+      "actual": "200",
+      "passed": true
+    },
+    {
+      "case_id": "IT-123",
+      "api_no": 15,
+      "endpoint": "PUT /users/password",
+      "kind": "정상",
+      "title": "변경 후 기존 refresh token 폐기",
+      "expected": "401",
+      "actual": "401 AUTH_003",
+      "passed": true
+    },
+    {
+      "case_id": "IT-124",
+      "api_no": 1,
+      "endpoint": "POST /auth/login",
+      "kind": "정상",
+      "title": "새 비밀번호로 로그인",
+      "expected": "200",
+      "actual": "200",
+      "passed": true
+    },
+    {
+      "case_id": "IT-125",
+      "api_no": 7,
+      "endpoint": "POST /auth/logout",
+      "kind": "정상",
+      "title": "로그아웃",
+      "expected": "200",
+      "actual": "200",
+      "passed": true
+    },
+    {
+      "case_id": "IT-126",
+      "api_no": 7,
+      "endpoint": "POST /auth/logout",
+      "kind": "정상",
+      "title": "로그아웃 후 refresh token 무효",
+      "expected": "401",
+      "actual": "401 AUTH_003",
+      "passed": true
+    },
+    {
+      "case_id": "IT-127",
+      "api_no": 16,
+      "endpoint": "DELETE /users/account",
+      "kind": "예외",
+      "title": "비밀번호 불일치 시 탈퇴 거부",
+      "expected": "401",
+      "actual": "401 AUTH_010",
+      "passed": true
+    },
+    {
+      "case_id": "IT-128",
+      "api_no": 16,
+      "endpoint": "DELETE /users/account",
+      "kind": "정상",
+      "title": "회원 탈퇴",
+      "expected": "200",
+      "actual": "200",
+      "passed": true
+    },
+    {
+      "case_id": "IT-129",
+      "api_no": 16,
+      "endpoint": "DELETE /users/account",
+      "kind": "DB검증",
+      "title": "사용자·종속 식단 데이터 삭제",
+      "expected": "0",
+      "actual": "0",
+      "passed": true
+    },
+    {
+      "case_id": "IT-130",
+      "api_no": 16,
+      "endpoint": "DELETE /users/account",
+      "kind": "정상",
+      "title": "탈퇴 후 로그인 불가",
+      "expected": "401",
+      "actual": "401 AUTH_001",
+      "passed": true
+    }
+  ]
+}

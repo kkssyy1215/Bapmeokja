@@ -2,16 +2,21 @@ package com.bapmeokja.api.community;
 
 import com.bapmeokja.api.common.exception.BusinessException;
 import com.bapmeokja.api.common.exception.ErrorCode;
+import com.bapmeokja.api.diet.service.FoodImageAnalyzer;
 import com.bapmeokja.api.menu.CurrentUserProvider;
 import com.bapmeokja.api.user.domain.User;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Instant;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,6 +29,7 @@ public class CommunityService {
     private final CommunityPostLikeRepository postLikeRepository;
     private final CommunityImageStorage imageStorage;
     private final CurrentUserProvider currentUserProvider;
+    private final FoodImageAnalyzer imageAnalyzer;
 
     public CommunityDtos.PostListResponse getPosts(int page, int size) {
         Page<CommunityPost> result = postRepository.findAllByOrderByCreatedAtDesc(PageRequest.of(page, size));
@@ -47,18 +53,27 @@ public class CommunityService {
         );
     }
 
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public CommunityDtos.AnalyzeImageResponse analyzeImage(MultipartFile image) {
         imageStorage.validate(image);
-        String originalName = image.getOriginalFilename() == null
-                ? ""
-                : image.getOriginalFilename().toLowerCase();
-        if (originalName.contains("salad")) {
-            return new CommunityDtos.AnalyzeImageResponse("샐러드", 320, 24.0, 22.0, 14.0);
+        FoodImageAnalyzer.ImageAnalysisResult result = imageAnalyzer.analyze(image);
+        if (result.items() == null || result.items().isEmpty()) {
+            throw new BusinessException(ErrorCode.AI_ANALYSIS_FAILED);
         }
-        if (originalName.contains("rice") || originalName.contains("bap")) {
-            return new CommunityDtos.AnalyzeImageResponse("덮밥", 620, 86.0, 27.0, 18.0);
-        }
-        return new CommunityDtos.AnalyzeImageResponse("도시락", 650, 85.0, 30.0, 18.0);
+        return new CommunityDtos.AnalyzeImageResponse(
+                result.foodName(),
+                sum(result, FoodImageAnalyzer.DetectedFood::calorie).setScale(0, RoundingMode.HALF_UP).intValue(),
+                sum(result, FoodImageAnalyzer.DetectedFood::carb).doubleValue(),
+                sum(result, FoodImageAnalyzer.DetectedFood::protein).doubleValue(),
+                sum(result, FoodImageAnalyzer.DetectedFood::fat).doubleValue()
+        );
+    }
+
+    private BigDecimal sum(
+            FoodImageAnalyzer.ImageAnalysisResult result,
+            Function<FoodImageAnalyzer.DetectedFood, BigDecimal> nutrient
+    ) {
+        return result.items().stream().map(nutrient).reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     @Transactional

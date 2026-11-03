@@ -2,6 +2,7 @@ package com.bapmeokja.api.feedback.service;
 
 import com.bapmeokja.api.common.exception.BusinessException;
 import com.bapmeokja.api.common.exception.ErrorCode;
+import com.bapmeokja.api.common.time.AppTime;
 import com.bapmeokja.api.diet.service.DietUserResolver;
 import com.bapmeokja.api.diet.service.NutritionCalculator;
 import com.bapmeokja.api.diet.service.NutritionCalculator.DailyNutritionSummary;
@@ -33,6 +34,7 @@ public class FeedbackService {
 
     @Transactional(readOnly = true)
     public FeedbackResponse daily(Long userId, LocalDate date) {
+        AppTime.requireSupportedDate(date);
         User user = userResolver.resolve(userId);
         NutritionGoals goals = nutritionCalculator.goalsOf(user);
         PeriodNutritionSummary period = periodQueryService.summarize(user, date, date.plusDays(1));
@@ -56,6 +58,7 @@ public class FeedbackService {
 
     @Transactional(readOnly = true)
     public FeedbackResponse weekly(Long userId, LocalDate startDate) {
+        AppTime.requireSupportedDate(startDate);
         User user = userResolver.resolve(userId);
         LocalDate endDate = startDate.plusDays(6);
         PeriodNutritionSummary period = periodQueryService.summarize(user, startDate, endDate.plusDays(1));

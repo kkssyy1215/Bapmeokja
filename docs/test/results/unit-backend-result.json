@@ -1,0 +1,434 @@
+[
+ {
+  "class": "auth.AuthServiceTest",
+  "name": "registersUserWithDefaultNotificationSettings()",
+  "time": "1.626",
+  "passed": true
+ },
+ {
+  "class": "auth.AuthServiceTest",
+  "name": "rejectsWrongLoginPasswordWithoutRevealingUsernameExistence()",
+  "time": "0.017",
+  "passed": true
+ },
+ {
+  "class": "auth.service.RefreshTokenCleanupJobTest",
+  "name": "deletesTokensExpiredAtCurrentTime()",
+  "time": "0.023",
+  "passed": true
+ },
+ {
+  "class": "common.exception.GlobalExceptionHandlerTest",
+  "name": "requestRoutingErrorsAreNotServerErrors()",
+  "time": "1.642",
+  "passed": true
+ },
+ {
+  "class": "common.exception.GlobalExceptionHandlerTest",
+  "name": "missingDuplicateCheckValueUsesSpecifiedValidationCode()",
+  "time": "0.0",
+  "passed": true
+ },
+ {
+  "class": "common.exception.GlobalExceptionHandlerTest",
+  "name": "dateCalculationOverflowIsABadRequest()",
+  "time": "0.053",
+  "passed": true
+ },
+ {
+  "class": "common.exception.GlobalExceptionHandlerTest",
+  "name": "malformedTypedQueryParameterReturnsBadRequest()",
+  "time": "0.034",
+  "passed": true
+ },
+ {
+  "class": "common.exception.GlobalExceptionHandlerTest",
+  "name": "missingMultipartImageUsesImageRequiredError()",
+  "time": "0.0",
+  "passed": true
+ },
+ {
+  "class": "common.exception.GlobalExceptionHandlerTest",
+  "name": "otherMissingRequiredQueryUsesRequiredValueError()",
+  "time": "0.001",
+  "passed": true
+ },
+ {
+  "class": "common.exception.GlobalExceptionHandlerTest",
+  "name": "oversizedMultipartImageExplainsTenMegabyteLimit()",
+  "time": "0.001",
+  "passed": true
+ },
+ {
+  "class": "common.response.ApiResponseTest",
+  "name": "emptySuccessIncludesNullDataAndOmitsErrorCode()",
+  "time": "0.016",
+  "passed": true
+ },
+ {
+  "class": "common.response.ApiResponseTest",
+  "name": "failureIncludesNullDataAndErrorCode()",
+  "time": "0.003",
+  "passed": true
+ },
+ {
+  "class": "community.CommunityServiceTest",
+  "name": "deletingAPostRemovesItsCommentsLikesAndImage()",
+  "time": "0.327",
+  "passed": true
+ },
+ {
+  "class": "community.CommunityServiceTest",
+  "name": "onlyTheAuthorCanEditOrDeleteAPost()",
+  "time": "0.006",
+  "passed": true
+ },
+ {
+  "class": "community.CommunityServiceTest",
+  "name": "likeTogglesOnAndOff()",
+  "time": "0.022",
+  "passed": true
+ },
+ {
+  "class": "community.CommunityServiceTest",
+  "name": "sumsTheSharedAnalyzerResultForThePost()",
+  "time": "0.006",
+  "passed": true
+ },
+ {
+  "class": "community.CommunityServiceTest",
+  "name": "onlyTheAuthorCanDeleteAComment()",
+  "time": "0.023",
+  "passed": true
+ },
+ {
+  "class": "community.CommunityServiceTest",
+  "name": "missingPostIsNotFound()",
+  "time": "0.001",
+  "passed": true
+ },
+ {
+  "class": "community.CommunityServiceTest",
+  "name": "malformedMealTimeIsRejected()",
+  "time": "0.002",
+  "passed": true
+ },
+ {
+  "class": "community.CommunityServiceTest",
+  "name": "blankPostIsRejectedBeforeAnythingIsStored()",
+  "time": "0.002",
+  "passed": true
+ },
+ {
+  "class": "community.CommunityServiceTest",
+  "name": "outOfRangeNutritionIsRejected()",
+  "time": "0.001",
+  "passed": true
+ },
+ {
+  "class": "community.CommunityServiceTest",
+  "name": "photoWithoutFoodIsReportedAsAnalysisFailure()",
+  "time": "0.001",
+  "passed": true
+ },
+ {
+  "class": "dashboard.DashboardServiceTest",
+  "name": "overeatingShowsExceededCalorieAndOvereatenTomato()",
+  "time": "0.036",
+  "passed": true
+ },
+ {
+  "class": "dashboard.DashboardServiceTest",
+  "name": "userWithoutGoalsFallsBackToDefaultGoals()",
+  "time": "0.001",
+  "passed": true
+ },
+ {
+  "class": "dashboard.DashboardServiceTest",
+  "name": "lowIntakeShowsRemainingCalorieAndHungryTomato()",
+  "time": "0.001",
+  "passed": true
+ },
+ {
+  "class": "diet.DietApplicationContextTest",
+  "name": "applicationContextLoadsWithDietDashboardStatisticsAndFeedbackApis()",
+  "time": "0.012",
+  "passed": true
+ },
+ {
+  "class": "diet.DietRecordRepositoryTest",
+  "name": "readsOnlyTheOwnersRecordsWithinTheUtcPeriodWithItems()",
+  "time": "0.086",
+  "passed": true
+ },
+ {
+  "class": "diet.config.FoodImageAnalyzerConfigTest",
+  "name": "usesTheDemoAnalyzerWithoutAnApiKey()",
+  "time": "0.001",
+  "passed": true
+ },
+ {
+  "class": "diet.config.FoodImageAnalyzerConfigTest",
+  "name": "usesGeminiWhenAnApiKeyIsConfigured()",
+  "time": "0.008",
+  "passed": true
+ },
+ {
+  "class": "diet.service.GeminiFoodImageAnalyzerTest",
+  "name": "returnsNoItemsWhenThePhotoHasNoFood()",
+  "time": "0.042",
+  "passed": true
+ },
+ {
+  "class": "diet.service.GeminiFoodImageAnalyzerTest",
+  "name": "quotaExhaustionAndServerErrorsAreReportedAsServiceUnavailable()",
+  "time": "0.008",
+  "passed": true
+ },
+ {
+  "class": "diet.service.GeminiFoodImageAnalyzerTest",
+  "name": "nonJsonModelTextIsAnalysisFailure()",
+  "time": "0.005",
+  "passed": true
+ },
+ {
+  "class": "diet.service.GeminiFoodImageAnalyzerTest",
+  "name": "sendsThePhotoToTheModelAndMapsDetectedFoods()",
+  "time": "0.011",
+  "passed": true
+ },
+ {
+  "class": "diet.service.GeminiFoodImageAnalyzerTest",
+  "name": "blockedResponseWithoutTextIsAnalysisFailure()",
+  "time": "0.004",
+  "passed": true
+ },
+ {
+  "class": "diet.service.GeminiFoodImageAnalyzerTest",
+  "name": "dropsUnusableItemsAndClampsOutOfRangeValues()",
+  "time": "0.004",
+  "passed": true
+ },
+ {
+  "class": "diet.service.GeminiFoodImageAnalyzerTest",
+  "name": "invalidKeyOrRequestIsReportedAsAnalysisFailure()",
+  "time": "0.004",
+  "passed": true
+ },
+ {
+  "class": "diet.service.HeuristicFoodImageAnalyzerTest",
+  "name": "returnsAGeneralMealInsteadOfBlockingTheUserForAnUnknownImage()",
+  "time": "0.0",
+  "passed": true
+ },
+ {
+  "class": "diet.service.HeuristicFoodImageAnalyzerTest",
+  "name": "selectsAUsefulEditableEstimateFromTheFilenameWhenNoExternalAiIsConfigured()",
+  "time": "0.004",
+  "passed": true
+ },
+ {
+  "class": "diet.service.NutritionCalculatorTest",
+  "name": "sumsEveryDietRecordFromPersistedNutritionValues()",
+  "time": "0.0",
+  "passed": true
+ },
+ {
+  "class": "diet.service.NutritionCalculatorTest",
+  "name": "percentageCanExceedOneHundred()",
+  "time": "0.0",
+  "passed": true
+ },
+ {
+  "class": "diet.service.NutritionCalculatorTest",
+  "name": "mapsCalorieRatioToThreeTomatoStates()",
+  "time": "0.0",
+  "passed": true
+ },
+ {
+  "class": "feedback.service.FeedbackComposerTest",
+  "name": "prioritizesTheMostDeficientNutrientInTheOverallFeedback()",
+  "time": "0.002",
+  "passed": true
+ },
+ {
+  "class": "feedback.service.FeedbackComposerTest",
+  "name": "givesMaintenanceFeedbackWhenCaloriesAndMacrosAreBalanced()",
+  "time": "0.001",
+  "passed": true
+ },
+ {
+  "class": "fridge.FridgeServiceTest",
+  "name": "marksIngredientExpiringWithinThreeDays()",
+  "time": "0.047",
+  "passed": true
+ },
+ {
+  "class": "menu.MenuServiceTest",
+  "name": "summaryUsesTodayNutritionAndPreservesOverOneHundredPercent()",
+  "time": "0.134",
+  "passed": true
+ },
+ {
+  "class": "recipe.RecipeServiceTest",
+  "name": "leftoverRecommendationRequiresFridgeIngredients()",
+  "time": "0.216",
+  "passed": true
+ },
+ {
+  "class": "security.JwtProviderTest",
+  "name": "issuesAndParsesAccessToken()",
+  "time": "0.074",
+  "passed": true
+ },
+ {
+  "class": "security.JwtProviderTest",
+  "name": "refusesRefreshTokenInAuthorizationHeader()",
+  "time": "0.002",
+  "passed": true
+ },
+ {
+  "class": "security.RateLimitFilterTest",
+  "name": "countsEachClientSeparatelyAndResetsAfterAMinute()",
+  "time": "0.003",
+  "passed": true
+ },
+ {
+  "class": "security.RateLimitFilterTest",
+  "name": "blocksLoginAttemptsOverTheLimitWithAJsonError()",
+  "time": "0.002",
+  "passed": true
+ },
+ {
+  "class": "security.RateLimitFilterTest",
+  "name": "leavesOtherRequestsAlone()",
+  "time": "0.0",
+  "passed": true
+ },
+ {
+  "class": "security.RateLimitFilterTest",
+  "name": "limitsPhotoAnalysisSeparatelyToProtectTheFreeQuota()",
+  "time": "0.002",
+  "passed": true
+ },
+ {
+  "class": "security.RateLimitFilterTest",
+  "name": "canBeDisabledForLocalTestRuns()",
+  "time": "0.001",
+  "passed": true
+ },
+ {
+  "class": "shopping.ShoppingServiceTest",
+  "name": "estimatesOnlyIngredientsMissingFromFridge()",
+  "time": "0.157",
+  "passed": true
+ },
+ {
+  "class": "shopping.ShoppingServiceTest",
+  "name": "estimatesZeroWhenAllIngredientsAreAlreadyStored()",
+  "time": "0.003",
+  "passed": true
+ },
+ {
+  "class": "statistics.StatisticsServiceTest",
+  "name": "outOfRangeDatesAreRejectedBeforeQuerying()",
+  "time": "0.034",
+  "passed": true
+ },
+ {
+  "class": "statistics.StatisticsServiceTest",
+  "name": "monthlyStatisticsRejectsOutOfRangeMonth()",
+  "time": "0.001",
+  "passed": true
+ },
+ {
+  "class": "statistics.StatisticsServiceTest",
+  "name": "weeklyStatisticsReturnsSevenDaysAndAveragesOnlyRecordedDays()",
+  "time": "0.004",
+  "passed": true
+ },
+ {
+  "class": "statistics.StatisticsServiceTest",
+  "name": "monthlyStatisticsCoversEveryDayOfTheMonth()",
+  "time": "0.001",
+  "passed": true
+ },
+ {
+  "class": "statistics.StatisticsServiceTest",
+  "name": "dailyStatisticsComparesConsumedNutritionWithGoals()",
+  "time": "0.001",
+  "passed": true
+ },
+ {
+  "class": "store.NearbyStoreServiceTest",
+  "name": "calculatesDistanceInMetersWithHaversineFormula()",
+  "time": "0.001",
+  "passed": true
+ },
+ {
+  "class": "user.NutritionCalculatorTest",
+  "name": "disablesPreciseModeWhenAnyBodyCompositionValueIsMissing()",
+  "time": "0.001",
+  "passed": true
+ },
+ {
+  "class": "user.NutritionCalculatorTest",
+  "name": "calculatesSpecExampleWithPreciseBodyComposition()",
+  "time": "0.0",
+  "passed": true
+ },
+ {
+  "class": "user.service.UserServiceTest",
+  "name": "accountDeletionRequiresThePasswordAndRemovesUserData()",
+  "time": "0.19",
+  "passed": true
+ },
+ {
+  "class": "user.service.UserServiceTest",
+  "name": "passwordChangeRequiresTheCurrentPassword()",
+  "time": "0.002",
+  "passed": true
+ },
+ {
+  "class": "user.service.UserServiceTest",
+  "name": "initialProfileCanOnlyBeRegisteredOnce()",
+  "time": "0.001",
+  "passed": true
+ },
+ {
+  "class": "user.service.UserServiceTest",
+  "name": "passwordChangeRevokesEverySession()",
+  "time": "0.001",
+  "passed": true
+ },
+ {
+  "class": "user.service.UserServiceTest",
+  "name": "passwordChangeRequiresMatchingConfirmation()",
+  "time": "0.001",
+  "passed": true
+ },
+ {
+  "class": "user.service.UserServiceTest",
+  "name": "bodyFatMassMustBeSmallerThanWeight()",
+  "time": "0.002",
+  "passed": true
+ },
+ {
+  "class": "user.service.UserServiceTest",
+  "name": "locationConsentReflectsTheStoredValue()",
+  "time": "0.001",
+  "passed": true
+ },
+ {
+  "class": "user.service.UserServiceTest",
+  "name": "emptyBudgetUpdateIsRejectedAndValuesAreSaved()",
+  "time": "0.001",
+  "passed": true
+ },
+ {
+  "class": "user.service.UserServiceTest",
+  "name": "nicknameTakenByAnotherUserIsRejected()",
+  "time": "0.002",
+  "passed": true
+ }
+]

@@ -8,6 +8,7 @@ import { palette, radii, shadow, spacing } from '@/constants/design';
 import { useApp } from '@/context/app-context';
 import { isMockMode, resolveApiAssetUrl, simulateRequest } from '@/services/api';
 import { communityApi } from '@/services/bapmeokja-api';
+import { formatRelativeTime } from '@/services/mappers';
 import { CommunityPostSummary } from '@/types/api';
 
 export default function CommunityScreen() {
@@ -33,7 +34,7 @@ export default function CommunityScreen() {
       <View style={styles.intro}><View><Text style={styles.introTitle}>최근 게시물</Text><Text style={styles.introText}>식단 기록과 간단한 이야기를 확인해 보세요.</Text></View><Pressable style={styles.writeButton} onPress={() => router.push('/community/new-post')}><Text style={styles.writeButtonText}>글쓰기</Text></Pressable></View>
       {loading ? <ActivityIndicator color={palette.tomato} /> : items.length ? items.map((post) => (
         <Pressable key={post.postId} style={styles.post} onPress={() => router.push({ pathname: '/community/[id]', params: { id: post.postId } })}>
-          <View style={styles.authorRow}><View style={styles.avatar}><Text style={styles.avatarText}>{post.authorNickname.slice(0, 1)}</Text></View><View><Text style={styles.author}>{post.authorNickname}</Text><Text style={styles.time}>{post.createdAt}</Text></View></View>
+          <View style={styles.authorRow}><View style={styles.avatar}><Text style={styles.avatarText}>{post.authorNickname.slice(0, 1)}</Text></View><View><Text style={styles.author}>{post.authorNickname}</Text><Text style={styles.time}>{formatRelativeTime(post.createdAt)}</Text></View></View>
           {post.thumbnailUrl ? <Image source={{ uri: resolveApiAssetUrl(post.thumbnailUrl) }} style={styles.photo} contentFit="cover" /> : <View style={styles.photoFallback}><Text style={styles.photoFallbackText}>{post.title.slice(0, 1)}</Text></View>}
           <Text style={styles.title}>{post.title}</Text>
           <View style={styles.actions}><Text style={styles.action}>좋아요 {post.likeCount}</Text><Text style={styles.action}>댓글 {post.commentCount}</Text><Text style={styles.open}>게시물 보기 ›</Text></View>

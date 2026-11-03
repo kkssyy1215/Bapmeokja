@@ -8,6 +8,7 @@ import { font, palette, radii, spacing } from '@/constants/design';
 import { useApp } from '@/context/app-context';
 import { getErrorMessage, isMockMode, resolveApiAssetUrl, simulateRequest } from '@/services/api';
 import { communityApi } from '@/services/bapmeokja-api';
+import { formatRelativeTime } from '@/services/mappers';
 import { CommunityPostDetail } from '@/types/api';
 
 export default function PostDetailScreen() {
@@ -20,9 +21,14 @@ export default function PostDetailScreen() {
   const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
-    const local = posts.find((item) => item.id === id) ?? posts[0];
-    const demo: CommunityPostDetail = { postId: local.id, content: local.content, authorNickname: local.author, createdAt: local.createdAt, likeCount: local.likes, isLiked: local.liked, commentCount: local.comments.length, nutritionInfo: { foodName: local.mealName, calorie: local.nutrients.calories, carb: local.nutrients.carbs, protein: local.nutrients.protein, fat: local.nutrients.fat }, comments: local.comments.map((item) => ({ commentId: item.id, authorNickname: item.author, content: item.content, createdAt: item.createdAt })) };
-    (isMockMode ? simulateRequest(demo, 300) : communityApi.detail(id)).then(setPost).catch((error) => Alert.alert('게시물을 불러오지 못했어요', getErrorMessage(error))).finally(() => setLoading(false));
+    const load = (): Promise<CommunityPostDetail> => {
+      if (!isMockMode) return communityApi.detail(id);
+      // 시연 데이터는 시연 모드에서만 있다. 서버 모드의 posts는 비어 있으므로 여기서만 읽는다.
+      const local = posts.find((item) => item.id === id) ?? posts[0];
+      const demo: CommunityPostDetail = { postId: local.id, content: local.content, authorNickname: local.author, createdAt: local.createdAt, likeCount: local.likes, isLiked: local.liked, commentCount: local.comments.length, nutritionInfo: { foodName: local.mealName, calorie: local.nutrients.calories, carb: local.nutrients.carbs, protein: local.nutrients.protein, fat: local.nutrients.fat }, comments: local.comments.map((item) => ({ commentId: item.id, authorNickname: item.author, content: item.content, createdAt: item.createdAt })) };
+      return simulateRequest(demo, 300);
+    };
+    load().then(setPost).catch((error) => Alert.alert('게시물을 불러오지 못했어요', getErrorMessage(error))).finally(() => setLoading(false));
   }, [id, posts]);
 
   const like = async () => {
@@ -85,13 +91,13 @@ export default function PostDetailScreen() {
   const isMyPost = !isMockMode && post.authorNickname === profile.nickname;
 
   return <Screen><Header title="게시물" left={<IconButton label="←" onPress={() => router.back()} />} right={isMyPost ? <Pressable disabled={deleting} onPress={removePost} hitSlop={8}><Text style={styles.delete}>{deleting ? '삭제 중' : '삭제'}</Text></Pressable> : undefined} />
-    <View style={styles.authorRow}><View style={styles.avatar}><Text style={styles.avatarText}>{post.authorNickname.slice(0, 1)}</Text></View><View><Text style={styles.author}>{post.authorNickname}</Text><Text style={styles.time}>{post.createdAt}</Text></View></View>
+    <View style={styles.authorRow}><View style={styles.avatar}><Text style={styles.avatarText}>{post.authorNickname.slice(0, 1)}</Text></View><View><Text style={styles.author}>{post.authorNickname}</Text><Text style={styles.time}>{formatRelativeTime(post.createdAt)}</Text></View></View>
     <Text style={styles.content}>{post.content}</Text>
     {post.imageUrl ? <Image source={{ uri: resolveApiAssetUrl(post.imageUrl) }} style={styles.photo} contentFit="cover" /> : null}
     {post.nutritionInfo ? <Card style={styles.nutrition}><View style={styles.nutritionTop}><View><Text style={styles.analysisLabel}>사진 기반 영양 추정</Text><Text style={styles.mealName}>{post.nutritionInfo.foodName}</Text></View><Text style={styles.kcal}>{post.nutritionInfo.calorie} kcal</Text></View><NutrientChips carbs={post.nutritionInfo.carb} protein={post.nutritionInfo.protein} fat={post.nutritionInfo.fat} /><Text style={styles.estimateNotice}>사진을 바탕으로 계산한 참고용 추정값이며 실제 영양 정보와 다를 수 있어요.</Text></Card> : null}
     <View style={styles.actions}><Pressable onPress={like}><Text style={[styles.action, post.isLiked && styles.liked]}>{post.isLiked ? '♥' : '♡'} 좋아요 {post.likeCount}</Text></Pressable><Text style={styles.action}>댓글 {post.commentCount}</Text></View>
     <View style={styles.divider} /><Text style={styles.commentTitle}>댓글 {post.commentCount}</Text>
-    {post.comments.length ? post.comments.map((item) => <View key={item.commentId} style={styles.comment}><View style={styles.commentAvatar}><Text style={styles.commentAvatarText}>{item.authorNickname.slice(0, 1)}</Text></View><View style={styles.commentBody}><View style={styles.commentHead}><Text style={styles.commentAuthor}>{item.authorNickname}</Text><View style={styles.commentMeta}><Text style={styles.commentTime}>{item.createdAt}</Text>{!isMockMode && item.authorNickname === profile.nickname ? <Pressable onPress={() => removeComment(item.commentId)} hitSlop={8}><Text style={styles.commentDelete}>삭제</Text></Pressable> : null}</View></View><Text style={styles.commentText}>{item.content}</Text></View></View>) : <Text style={styles.empty}>첫 댓글을 남겨 보세요.</Text>}
+    {post.comments.length ? post.comments.map((item) => <View key={item.commentId} style={styles.comment}><View style={styles.commentAvatar}><Text style={styles.commentAvatarText}>{item.authorNickname.slice(0, 1)}</Text></View><View style={styles.commentBody}><View style={styles.commentHead}><Text style={styles.commentAuthor}>{item.authorNickname}</Text><View style={styles.commentMeta}><Text style={styles.commentTime}>{formatRelativeTime(item.createdAt)}</Text>{!isMockMode && item.authorNickname === profile.nickname ? <Pressable onPress={() => removeComment(item.commentId)} hitSlop={8}><Text style={styles.commentDelete}>삭제</Text></Pressable> : null}</View></View><Text style={styles.commentText}>{item.content}</Text></View></View>) : <Text style={styles.empty}>첫 댓글을 남겨 보세요.</Text>}
     <Field value={comment} onChangeText={setComment} placeholder="따뜻한 댓글을 남겨 주세요" maxLength={1000} returnKeyType="send" onSubmitEditing={submit} />
     <PrimaryButton title="댓글 등록" variant="secondary" onPress={submit} loading={submitting} disabled={!comment.trim()} />
   </Screen>;

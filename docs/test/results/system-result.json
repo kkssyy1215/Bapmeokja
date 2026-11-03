@@ -1,0 +1,815 @@
+{
+  "summary": {
+    "executedAt": "2026-11-03 13:38:08",
+    "server": "http://127.0.0.1:8080/v1",
+    "scenarioTotal": 9,
+    "scenarioPassed": 9,
+    "stepTotal": 103,
+    "stepPassed": 103,
+    "failedScenarios": []
+  },
+  "scenarios": [
+    {
+      "scenario_id": "ST-01",
+      "name": "신규 사용자 가입부터 홈 화면 진입까지",
+      "feature": "F01 인증 · F02 신체정보 · F03 홈",
+      "precondition": "앱 최초 실행, 계정 없음",
+      "steps": [
+        {
+          "no": 1,
+          "action": "username 중복 확인",
+          "expected": "사용 가능",
+          "actual": "{'isDuplicated': False}",
+          "passed": true
+        },
+        {
+          "no": 2,
+          "action": "email 중복 확인",
+          "expected": "사용 가능",
+          "actual": "{'isDuplicated': False}",
+          "passed": true
+        },
+        {
+          "no": 3,
+          "action": "nickname 중복 확인",
+          "expected": "사용 가능",
+          "actual": "{'isDuplicated': False}",
+          "passed": true
+        },
+        {
+          "no": 4,
+          "action": "회원가입",
+          "expected": "201",
+          "actual": "201",
+          "passed": true
+        },
+        {
+          "no": 5,
+          "action": "가입 직후 자동 로그인 → 신규 사용자 판정",
+          "expected": "isNewUser=true",
+          "actual": "True",
+          "passed": true
+        },
+        {
+          "no": 6,
+          "action": "신체정보 입력 → 목표 칼로리 계산",
+          "expected": "1200~3500 kcal",
+          "actual": "1900",
+          "passed": true
+        },
+        {
+          "no": 7,
+          "action": "재로그인 시 기존 사용자로 판정",
+          "expected": "isNewUser=false",
+          "actual": "False",
+          "passed": true
+        },
+        {
+          "no": 8,
+          "action": "홈 대시보드 목표 칼로리 = 계산값",
+          "expected": "calorieGoal=1900",
+          "actual": "1900",
+          "passed": true
+        },
+        {
+          "no": 9,
+          "action": "홈 대시보드 오늘 섭취량 0",
+          "expected": "calorieConsumed=0",
+          "actual": "0",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "scenario_id": "ST-02",
+      "name": "사진으로 식단 기록 후 홈·캘린더·통계 반영",
+      "feature": "F04 식단 기록 · F05 조회 · F06 통계",
+      "precondition": "로그인 + 신체정보 등록 완료",
+      "steps": [
+        {
+          "no": 1,
+          "action": "회원가입",
+          "expected": "201",
+          "actual": "201",
+          "passed": true
+        },
+        {
+          "no": 2,
+          "action": "로그인",
+          "expected": "200",
+          "actual": "200",
+          "passed": true
+        },
+        {
+          "no": 3,
+          "action": "초기 신체정보 등록",
+          "expected": "200",
+          "actual": "200",
+          "passed": true
+        },
+        {
+          "no": 4,
+          "action": "음식 사진 업로드 → 분석 결과",
+          "expected": "음식 항목 ≥ 1",
+          "actual": "2",
+          "passed": true
+        },
+        {
+          "no": 5,
+          "action": "인식 음식 상세 영양정보 확인",
+          "expected": "200",
+          "actual": "200",
+          "passed": true
+        },
+        {
+          "no": 6,
+          "action": "양을 1.5배로 수정 후 저장",
+          "expected": "201, totalCalorie=647",
+          "actual": "647",
+          "passed": true
+        },
+        {
+          "no": 7,
+          "action": "홈 대시보드 섭취량 반영",
+          "expected": "calorieConsumed=647",
+          "actual": "647",
+          "passed": true
+        },
+        {
+          "no": 8,
+          "action": "캘린더에 오늘 날짜 표시",
+          "expected": "2026-11-03 포함",
+          "actual": "['2026-11-03']",
+          "passed": true
+        },
+        {
+          "no": 9,
+          "action": "오늘 식단 목록에 점심 1건",
+          "expected": "LUNCH 1건",
+          "actual": "['LUNCH']",
+          "passed": true
+        },
+        {
+          "no": 10,
+          "action": "일간 통계에 섭취 칼로리 반영",
+          "expected": "647 포함",
+          "actual": "포함",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "scenario_id": "ST-03",
+      "name": "직접 입력 기록의 수정·삭제",
+      "feature": "F04 수동 입력 · F05 수정/삭제",
+      "precondition": "로그인 + 신체정보 등록 완료",
+      "steps": [
+        {
+          "no": 1,
+          "action": "회원가입",
+          "expected": "201",
+          "actual": "201",
+          "passed": true
+        },
+        {
+          "no": 2,
+          "action": "로그인",
+          "expected": "200",
+          "actual": "200",
+          "passed": true
+        },
+        {
+          "no": 3,
+          "action": "초기 신체정보 등록",
+          "expected": "200",
+          "actual": "200",
+          "passed": true
+        },
+        {
+          "no": 4,
+          "action": "음식 검색 '달걀'",
+          "expected": "결과 ≥ 1",
+          "actual": "1",
+          "passed": true
+        },
+        {
+          "no": 5,
+          "action": "검색 결과로 아침 기록",
+          "expected": "201",
+          "actual": "201",
+          "passed": true
+        },
+        {
+          "no": 6,
+          "action": "끼니·양 수정",
+          "expected": "200",
+          "actual": "200",
+          "passed": true
+        },
+        {
+          "no": 7,
+          "action": "상세 화면에 수정 내용 반영",
+          "expected": "DINNER, 286kcal",
+          "actual": "DINNER, 286",
+          "passed": true
+        },
+        {
+          "no": 8,
+          "action": "기록 삭제",
+          "expected": "200",
+          "actual": "200",
+          "passed": true
+        },
+        {
+          "no": 9,
+          "action": "목록에서 사라짐",
+          "expected": "0건",
+          "actual": "0",
+          "passed": true
+        },
+        {
+          "no": 10,
+          "action": "홈 섭취량 원복",
+          "expected": "calorieConsumed=0",
+          "actual": "0",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "scenario_id": "ST-04",
+      "name": "기록 누적 후 기간별 통계·AI 피드백 확인",
+      "feature": "F06 통계 · F07 피드백",
+      "precondition": "오늘 아침·점심·저녁 기록",
+      "steps": [
+        {
+          "no": 1,
+          "action": "회원가입",
+          "expected": "201",
+          "actual": "201",
+          "passed": true
+        },
+        {
+          "no": 2,
+          "action": "로그인",
+          "expected": "200",
+          "actual": "200",
+          "passed": true
+        },
+        {
+          "no": 3,
+          "action": "초기 신체정보 등록",
+          "expected": "200",
+          "actual": "200",
+          "passed": true
+        },
+        {
+          "no": 4,
+          "action": "BREAKFAST 기록",
+          "expected": "201",
+          "actual": "201",
+          "passed": true
+        },
+        {
+          "no": 5,
+          "action": "LUNCH 기록",
+          "expected": "201",
+          "actual": "201",
+          "passed": true
+        },
+        {
+          "no": 6,
+          "action": "DINNER 기록",
+          "expected": "201",
+          "actual": "201",
+          "passed": true
+        },
+        {
+          "no": 7,
+          "action": "일간 통계 조회",
+          "expected": "200 + 1550kcal 반영",
+          "actual": "200",
+          "passed": true
+        },
+        {
+          "no": 8,
+          "action": "주간 통계 조회",
+          "expected": "200 + 1550kcal 반영",
+          "actual": "200",
+          "passed": true
+        },
+        {
+          "no": 9,
+          "action": "월간 통계 조회",
+          "expected": "200 + 1550kcal 반영",
+          "actual": "200",
+          "passed": true
+        },
+        {
+          "no": 10,
+          "action": "일간 피드백 문구 생성",
+          "expected": "200 + 피드백 문구",
+          "actual": "200",
+          "passed": true
+        },
+        {
+          "no": 11,
+          "action": "주간 피드백 문구 생성",
+          "expected": "200 + 피드백 문구",
+          "actual": "200",
+          "passed": true
+        },
+        {
+          "no": 12,
+          "action": "월간 피드백 문구 생성",
+          "expected": "200 + 피드백 문구",
+          "actual": "200",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "scenario_id": "ST-05",
+      "name": "남은 영양 기반 외식 추천과 주변 매장 찾기",
+      "feature": "F08-A 외식 추천",
+      "precondition": "로그인 + 점심 기록 + 예산 설정",
+      "steps": [
+        {
+          "no": 1,
+          "action": "회원가입",
+          "expected": "201",
+          "actual": "201",
+          "passed": true
+        },
+        {
+          "no": 2,
+          "action": "로그인",
+          "expected": "200",
+          "actual": "200",
+          "passed": true
+        },
+        {
+          "no": 3,
+          "action": "초기 신체정보 등록",
+          "expected": "200",
+          "actual": "200",
+          "passed": true
+        },
+        {
+          "no": 4,
+          "action": "외식 예산 11,000원 설정",
+          "expected": "200",
+          "actual": "200",
+          "passed": true
+        },
+        {
+          "no": 5,
+          "action": "추천 메인: 잔여 칼로리·예산 표시",
+          "expected": "예산 11000, 섭취 500",
+          "actual": "11000/500",
+          "passed": true
+        },
+        {
+          "no": 6,
+          "action": "외식 카테고리 추천 + 추천 사유",
+          "expected": "카테고리 ≥ 1, 사유 존재",
+          "actual": "4",
+          "passed": true
+        },
+        {
+          "no": 7,
+          "action": "예산 미입력 시 설정 예산 적용",
+          "expected": "appliedBudget=11000",
+          "actual": "11000",
+          "passed": true
+        },
+        {
+          "no": 8,
+          "action": "카테고리 메뉴 목록",
+          "expected": "메뉴 ≥ 1",
+          "actual": "2",
+          "passed": true
+        },
+        {
+          "no": 9,
+          "action": "메뉴 상세·재료 확인",
+          "expected": "재료 ≥ 1",
+          "actual": "3",
+          "passed": true
+        },
+        {
+          "no": 10,
+          "action": "위치 동의 전 주변 매장 → 동의 요구",
+          "expected": "403",
+          "actual": "403",
+          "passed": true
+        },
+        {
+          "no": 11,
+          "action": "위치 정보 이용 동의",
+          "expected": "200",
+          "actual": "200",
+          "passed": true
+        },
+        {
+          "no": 12,
+          "action": "강남역 반경 1km 매장 조회",
+          "expected": "매장 ≥ 1",
+          "actual": "1",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "scenario_id": "ST-06",
+      "name": "냉장고 재료로 집밥 추천 → 레시피 → 장보기",
+      "feature": "F08-B 집밥 · 냉장고 · 장보기",
+      "precondition": "로그인 완료",
+      "steps": [
+        {
+          "no": 1,
+          "action": "회원가입",
+          "expected": "201",
+          "actual": "201",
+          "passed": true
+        },
+        {
+          "no": 2,
+          "action": "로그인",
+          "expected": "200",
+          "actual": "200",
+          "passed": true
+        },
+        {
+          "no": 3,
+          "action": "초기 신체정보 등록",
+          "expected": "200",
+          "actual": "200",
+          "passed": true
+        },
+        {
+          "no": 4,
+          "action": "냉장고 재료 3개 등록",
+          "expected": "201, 3개",
+          "actual": "3",
+          "passed": true
+        },
+        {
+          "no": 5,
+          "action": "유통기한 임박 재료 표시",
+          "expected": "닭가슴살",
+          "actual": "['닭가슴살']",
+          "passed": true
+        },
+        {
+          "no": 6,
+          "action": "남은 재료 기반 레시피 추천",
+          "expected": "레시피 ≥ 1",
+          "actual": "['닭가슴살 달걀 볶음밥', '닭가슴살 시저 샐러드', '두부 애호박 된장찌개']",
+          "passed": true
+        },
+        {
+          "no": 7,
+          "action": "집밥 카테고리 추천(예산 8000)",
+          "expected": "카테고리 ≥ 1",
+          "actual": "3",
+          "passed": true
+        },
+        {
+          "no": 8,
+          "action": "카테고리 레시피 목록",
+          "expected": "레시피 ≥ 1",
+          "actual": "2",
+          "passed": true
+        },
+        {
+          "no": 9,
+          "action": "레시피 상세: 재료·대체재·조리 단계",
+          "expected": "재료/단계 ≥ 1",
+          "actual": "재료 4, 단계 3",
+          "passed": true
+        },
+        {
+          "no": 10,
+          "action": "장보기 리스트(부족 재료·예상 금액)",
+          "expected": "200",
+          "actual": "200",
+          "passed": true
+        },
+        {
+          "no": 11,
+          "action": "요리 후 계란 수량 6 → 2",
+          "expected": "200",
+          "actual": "200",
+          "passed": true
+        },
+        {
+          "no": 12,
+          "action": "다 쓴 닭가슴살 삭제",
+          "expected": "200",
+          "actual": "200",
+          "passed": true
+        },
+        {
+          "no": 13,
+          "action": "냉장고 최종 상태",
+          "expected": "계란 2, 닭가슴살 없음",
+          "actual": "{'밥': 1.0, '계란': 2.0}",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "scenario_id": "ST-07",
+      "name": "커뮤니티 글 작성·댓글·좋아요·삭제 (2인)",
+      "feature": "F09 커뮤니티",
+      "precondition": "사용자 A, B 로그인",
+      "steps": [
+        {
+          "no": 1,
+          "action": "회원가입",
+          "expected": "201",
+          "actual": "201",
+          "passed": true
+        },
+        {
+          "no": 2,
+          "action": "로그인",
+          "expected": "200",
+          "actual": "200",
+          "passed": true
+        },
+        {
+          "no": 3,
+          "action": "회원가입",
+          "expected": "201",
+          "actual": "201",
+          "passed": true
+        },
+        {
+          "no": 4,
+          "action": "로그인",
+          "expected": "200",
+          "actual": "200",
+          "passed": true
+        },
+        {
+          "no": 5,
+          "action": "A: 사진 영양 추정",
+          "expected": "200 + 칼로리",
+          "actual": "243",
+          "passed": true
+        },
+        {
+          "no": 6,
+          "action": "A: 사진·영양정보 포함 게시글 등록",
+          "expected": "201",
+          "actual": "201",
+          "passed": true
+        },
+        {
+          "no": 7,
+          "action": "B: 목록에서 A의 글 확인",
+          "expected": "포함",
+          "actual": "200",
+          "passed": true
+        },
+        {
+          "no": 8,
+          "action": "B: 상세 화면",
+          "expected": "본문·이미지 표시",
+          "actual": "True",
+          "passed": true
+        },
+        {
+          "no": 9,
+          "action": "B: 게시글 이미지 로드",
+          "expected": "200 image",
+          "actual": "200",
+          "passed": true
+        },
+        {
+          "no": 10,
+          "action": "B: 댓글 작성",
+          "expected": "201",
+          "actual": "201",
+          "passed": true
+        },
+        {
+          "no": 11,
+          "action": "B: 좋아요",
+          "expected": "isLiked=true, 1",
+          "actual": "{'isLiked': True, 'likeCount': 1}",
+          "passed": true
+        },
+        {
+          "no": 12,
+          "action": "A: 댓글·좋아요 수 확인",
+          "expected": "댓글 1, 좋아요 1",
+          "actual": "댓글 1, 좋아요 1",
+          "passed": true
+        },
+        {
+          "no": 13,
+          "action": "B: 남의 글 수정 시도 → 차단",
+          "expected": "403",
+          "actual": "403",
+          "passed": true
+        },
+        {
+          "no": 14,
+          "action": "A: 본인 글 수정",
+          "expected": "200",
+          "actual": "200",
+          "passed": true
+        },
+        {
+          "no": 15,
+          "action": "B: 본인 댓글 삭제",
+          "expected": "200",
+          "actual": "200",
+          "passed": true
+        },
+        {
+          "no": 16,
+          "action": "A: 글 삭제",
+          "expected": "200",
+          "actual": "200",
+          "passed": true
+        },
+        {
+          "no": 17,
+          "action": "B: 삭제된 글 접근",
+          "expected": "404",
+          "actual": "404",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "scenario_id": "ST-08",
+      "name": "설정: 프로필·알림·비밀번호 변경·탈퇴",
+      "feature": "F10 설정/프로필",
+      "precondition": "로그인 + 신체정보 등록 완료",
+      "steps": [
+        {
+          "no": 1,
+          "action": "회원가입",
+          "expected": "201",
+          "actual": "201",
+          "passed": true
+        },
+        {
+          "no": 2,
+          "action": "로그인",
+          "expected": "200",
+          "actual": "200",
+          "passed": true
+        },
+        {
+          "no": 3,
+          "action": "초기 신체정보 등록",
+          "expected": "200",
+          "actual": "200",
+          "passed": true
+        },
+        {
+          "no": 4,
+          "action": "프로필 수정(감량 목표)",
+          "expected": "200",
+          "actual": "200",
+          "passed": true
+        },
+        {
+          "no": 5,
+          "action": "홈 목표 칼로리 재계산",
+          "expected": "2000 → 더 낮은 값",
+          "actual": "2000 → 1600",
+          "passed": true
+        },
+        {
+          "no": 6,
+          "action": "알림 설정 변경",
+          "expected": "200",
+          "actual": "200",
+          "passed": true
+        },
+        {
+          "no": 7,
+          "action": "프로필 조회에 반영",
+          "expected": "닉네임 변경",
+          "actual": "바뀐닉5021",
+          "passed": true
+        },
+        {
+          "no": 8,
+          "action": "비밀번호 변경",
+          "expected": "200",
+          "actual": "200",
+          "passed": true
+        },
+        {
+          "no": 9,
+          "action": "기존 비밀번호 로그인 실패",
+          "expected": "401",
+          "actual": "401",
+          "passed": true
+        },
+        {
+          "no": 10,
+          "action": "새 비밀번호 로그인",
+          "expected": "200",
+          "actual": "200",
+          "passed": true
+        },
+        {
+          "no": 11,
+          "action": "회원 탈퇴",
+          "expected": "200",
+          "actual": "200",
+          "passed": true
+        },
+        {
+          "no": 12,
+          "action": "탈퇴 계정 로그인 불가",
+          "expected": "401",
+          "actual": "401",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "scenario_id": "ST-09",
+      "name": "세션 유지·만료·로그아웃 보안 흐름",
+      "feature": "F01 인증(JWT)",
+      "precondition": "로그인 완료",
+      "steps": [
+        {
+          "no": 1,
+          "action": "회원가입",
+          "expected": "201",
+          "actual": "201",
+          "passed": true
+        },
+        {
+          "no": 2,
+          "action": "로그인",
+          "expected": "200",
+          "actual": "200",
+          "passed": true
+        },
+        {
+          "no": 3,
+          "action": "토큰 없이 보호 API 접근",
+          "expected": "401",
+          "actual": "401",
+          "passed": true
+        },
+        {
+          "no": 4,
+          "action": "access 만료 상황 → refresh로 재발급",
+          "expected": "200",
+          "actual": "200",
+          "passed": true
+        },
+        {
+          "no": 5,
+          "action": "재발급 토큰으로 API 계속 사용",
+          "expected": "200",
+          "actual": "200",
+          "passed": true
+        },
+        {
+          "no": 6,
+          "action": "탈취된 이전 refresh 재사용 차단",
+          "expected": "401",
+          "actual": "401",
+          "passed": true
+        },
+        {
+          "no": 7,
+          "action": "로그아웃",
+          "expected": "200",
+          "actual": "200",
+          "passed": true
+        },
+        {
+          "no": 8,
+          "action": "로그아웃 후 refresh 불가",
+          "expected": "401",
+          "actual": "401",
+          "passed": true
+        }
+      ],
+      "passed": true
+    }
+  ]
+}

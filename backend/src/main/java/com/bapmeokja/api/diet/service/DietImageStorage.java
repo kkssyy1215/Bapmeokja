@@ -4,4 +4,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface DietImageStorage {
     String store(MultipartFile image);
+
+    void delete(String imageUrl);
 }

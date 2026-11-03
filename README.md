@@ -74,7 +74,7 @@ npm run lint
 npx expo export --platform web
 
 cd backend
-JAVA_HOME=/path/to/java17 ./gradlew test --no-daemon
+./gradlew test --no-daemon
 ```
 
 Docker 백엔드가 실행 중이면 핵심 사용자 흐름을 실제 HTTP 요청으로 검사할 수 있습니다. 스크립트가 임시 계정을 만들고 회원가입 → 로그인 → 온보딩 → 대시보드/추천 조회를 확인한 뒤 계정을 삭제합니다.
@@ -83,7 +83,15 @@ Docker 백엔드가 실행 중이면 핵심 사용자 흐름을 실제 HTTP 요�
 ./scripts/api-smoke-test.sh
 ```
 
-`.github/workflows/ci.yml`은 push와 pull request마다 프론트 타입 검사·린트·웹 export와 백엔드 테스트를 실행합니다.
+통합·시스템·탐색·화면 테스트와 결과서는 `npm run test:integration`, `test:system`, `test:exploratory`, `test:e2e`와 [`docs/test/`](docs/test/README.md)를 참고하세요.
+
+`.github/workflows/ci.yml`은 pull request와 `main` push마다 프론트 검사, 백엔드 단위 테스트, 실제 MySQL·서버 대상 통합·시스템 테스트를 실행하고, `main`에서 백엔드 테스트가 통과하면 서버 이미지를 GHCR에 올립니다.
+
+## 문서
+
+- [시스템 아키텍처](docs/guides/시스템-아키텍처.md)
+- [CI/CD 구성](docs/guides/CI-CD-구성.md)
+- [배포 가이드](docs/guides/배포-가이드.md) (실제 AI 사진 분석 켜는 방법 포함)
 
 ## 주요 폴더
 

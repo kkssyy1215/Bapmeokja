@@ -3,10 +3,11 @@ package com.bapmeokja.api.diet.service;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Locale;
-import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-@Service
+/**
+ * API 키가 없는 개발·시연 환경용 분석기. 사진을 판독하지 않고 파일명 키워드로 수정 가능한 예시 값을 고른다.
+ */
 public class HeuristicFoodImageAnalyzer implements FoodImageAnalyzer {
 
     @Override

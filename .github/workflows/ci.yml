@@ -38,3 +38,97 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - run: chmod +x gradlew
       - run: ./gradlew test --no-daemon
+      - name: Upload unit test and coverage reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-unit-reports
+          path: |
+            backend/build/reports/tests/test
+            backend/build/reports/jacoco/test
+
+  api-tests:
+    # 실제 MySQL + Spring Boot 컨테이너를 띄우고 57개 API 통합 테스트와 사용자 시나리오 시스템 테스트를 실행한다.
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker compose up -d --build
+      - name: Wait for backend health
+        run: |
+          for i in $(seq 1 60); do
+            curl -fs http://127.0.0.1:8080/actuator/health | grep -q '"status":"UP"' && exit 0
+            sleep 3
+          done
+          docker compose logs backend
+          exit 1
+      - name: Integration tests (API ↔ DB)
+        run: python3 scripts/qa/integration_test.py
+      - name: System tests (user scenarios)
+        if: always()
+        run: python3 scripts/qa/system_test.py
+      - name: Upload API test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-test-results
+          path: docs/test/results
+      - if: always()
+        run: docker compose down -v
+
+  e2e:
+    # 운영 빌드 화면을 실제 서버와 함께 Chrome으로 조작한다.
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: docker compose up -d --build
+      - name: Wait for backend health
+        run: |
+          for i in $(seq 1 60); do
+            curl -fs http://127.0.0.1:8080/actuator/health | grep -q '"status":"UP"' && exit 0
+            sleep 3
+          done
+          docker compose logs backend
+          exit 1
+      - name: Browser tests (Playwright)
+        run: npm run test:e2e
+      - name: Upload browser test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-report
+          path: |
+            playwright-report
+            test-results
+      - if: always()
+        run: docker compose down -v
+
+  publish-image:
+    # main 브랜치에서 백엔드 테스트가 모두 통과하면 서버 이미지를 GitHub Container Registry에 올린다.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [backend, api-tests]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/bapmeokja-backend:latest
+            ghcr.io/${{ github.repository_owner }}/bapmeokja-backend:${{ github.sha }}

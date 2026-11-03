@@ -54,7 +54,7 @@ export default function StatsScreen() {
       {loading ? <View style={styles.loading}><ActivityIndicator color={palette.tomato} /><Text style={styles.loadingText}>통계를 불러오고 있어요</Text></View> : null}
       {period === 'daily' && daily ? <>
         <Card>
-          <View style={styles.chartHeader}><View><Text style={styles.cardLabel}>오늘 섭취 칼로리</Text><Text style={styles.big}>{daily.calorieConsumed.toLocaleString()} <Text style={styles.bigUnit}>kcal</Text></Text></View><Text style={[styles.status, daily.caloriePercentage > 100 && styles.statusOver]}>{daily.caloriePercentage > 100 ? '목표 초과' : '목표 범위'}</Text></View>
+          <View style={styles.chartHeader}><View><Text style={styles.cardLabel}>오늘 섭취 칼로리</Text><Text style={styles.big}>{daily.calorieConsumed.toLocaleString()} <Text style={styles.bigUnit}>kcal</Text></Text></View><Text style={[styles.status, daily.caloriePercentage > 100 && styles.statusOver, daily.caloriePercentage < 80 && styles.statusUnder]}>{daily.caloriePercentage > 100 ? '목표 초과' : daily.caloriePercentage < 80 ? '목표 미달' : '목표 범위'}</Text></View>
           <View style={styles.progressTrack}><View style={[styles.progressFill, { width: `${Math.min(100, daily.caloriePercentage)}%` }]} /></View><View style={styles.progressLabels}><Text style={styles.progressText}>0</Text><Text style={styles.progressText}>{daily.calorieGoal.toLocaleString()} kcal</Text></View>
         </Card>
         <Card><SectionTitle title="영양소 균형" /><View style={styles.macroList}><MacroBar label="탄수화물" value={daily.carb.consumedGram} goal={daily.carb.goalGram} color={palette.leaf} /><MacroBar label="단백질" value={daily.protein.consumedGram} goal={daily.protein.goalGram} color={palette.yellow} /><MacroBar label="지방" value={daily.fat.consumedGram} goal={daily.fat.goalGram} color={palette.tomato} /></View></Card>
@@ -77,6 +77,8 @@ const styles = StyleSheet.create({
   bigUnit: { fontSize: 12, color: palette.muted },
   status: { color: palette.leaf, backgroundColor: palette.leafSoft, borderRadius: radii.pill, overflow: 'hidden', paddingHorizontal: 10, paddingVertical: 7, fontSize: 11, fontWeight: '800' },
   statusOver: { color: palette.tomato, backgroundColor: palette.tomatoSoft },
+  // 홈 토마토 상태(HUNGRY: 목표의 80% 미만)와 같은 기준을 쓴다.
+  statusUnder: { color: palette.ink, backgroundColor: palette.yellowSoft },
   progressTrack: { height: 14, backgroundColor: palette.line, borderRadius: 7, overflow: 'hidden', marginTop: spacing.lg },
   progressFill: { height: '100%', borderRadius: 7, backgroundColor: palette.tomato },
   progressLabels: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 6 },

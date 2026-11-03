@@ -122,6 +122,22 @@ function daysUntil(date?: string) {
   return `D-${Math.max(0, Math.ceil((target.getTime() - today.getTime()) / 86_400_000))}`;
 }
 
+/**
+ * 서버는 작성 시각을 ISO(UTC) 문자열로 보내고, 시연 데이터는 '12분 전' 같은 문구를 쓴다.
+ * ISO 값만 상대 시간으로 바꾸고 이미 사람이 읽는 문구는 그대로 둔다.
+ */
+export function formatRelativeTime(value: string, now = new Date()) {
+  if (!/^\d{4}-\d{2}-\d{2}T/.test(value)) return value;
+  const time = new Date(value);
+  if (Number.isNaN(time.getTime())) return value;
+  const minutes = Math.floor((now.getTime() - time.getTime()) / 60_000);
+  if (minutes < 1) return '방금 전';
+  if (minutes < 60) return `${minutes}분 전`;
+  if (minutes < 60 * 24) return `${Math.floor(minutes / 60)}시간 전`;
+  if (minutes < 60 * 24 * 7) return `${Math.floor(minutes / (60 * 24))}일 전`;
+  return `${time.getFullYear()}.${String(time.getMonth() + 1).padStart(2, '0')}.${String(time.getDate()).padStart(2, '0')}`;
+}
+
 export function fridgeItemFromApi(item: FridgeIngredient): FridgeItem {
   return {
     id: item.ingredientId,

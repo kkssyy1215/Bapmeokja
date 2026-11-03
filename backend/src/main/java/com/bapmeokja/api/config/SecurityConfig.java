@@ -1,6 +1,7 @@
 package com.bapmeokja.api.config;
 
 import com.bapmeokja.api.security.JwtAuthenticationFilter;
+import com.bapmeokja.api.security.RateLimitFilter;
 import com.bapmeokja.api.security.RestAccessDeniedHandler;
 import com.bapmeokja.api.security.RestAuthenticationEntryPoint;
 import java.util.List;
@@ -25,6 +26,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final RateLimitFilter rateLimitFilter;
     private final RestAuthenticationEntryPoint authenticationEntryPoint;
     private final RestAccessDeniedHandler accessDeniedHandler;
     private final CorsProperties corsProperties;
@@ -56,6 +58,7 @@ public class SecurityConfig {
                         ).permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(rateLimitFilter, JwtAuthenticationFilter.class)
                 .build();
     }
 
