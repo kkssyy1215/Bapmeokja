@@ -1,5 +1,4 @@
 
-import { setMealImagePreview } from '@/services/meal-image-store';
 import * as ImageManipulator from 'expo-image-manipulator';
 import * as ImagePicker from 'expo-image-picker';
 
@@ -32,6 +31,7 @@ import {
 } from '@/constants/design';
 
 import { useApp } from '@/context/app-context';
+import { saveMealImage } from '@/services/meal-image-store';
 
 export default function RecordsScreen() {
   const { meals } = useApp();
@@ -94,19 +94,19 @@ export default function RecordsScreen() {
         );
       }
 
-      // 사진 표시용 데이터를 메모리에 저장
-      setMealImagePreview(
+      // 원본 URI와 미리보기 데이터는 메모리에 저장한다.
+      // 라우터 파라미터는 디코딩되면서 URI가 바뀔 수 있어 짧은 id만 넘긴다.
+      const imageId = saveMealImage(
         manipulated.uri,
         manipulated.base64
       );
 
       console.log('[Records] 사진 변환 성공');
 
-      // 라우터에는 큰 Base64 데이터 대신 URI만 전달
       router.push({
         pathname: '/meal-analysis',
         params: {
-          uri: manipulated.uri,
+          imageId,
         },
       });
     } catch (error) {
