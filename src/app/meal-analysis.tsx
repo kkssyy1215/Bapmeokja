@@ -156,6 +156,7 @@ export default function MealAnalysisScreen() {
   const [imageError, setImageError] = useState(false);
   const [, setImageLoaded] = useState(false);
   const previewData = getMealImagePreview(params.uri);
+  const imageUri = previewData || params.uri || null;
 
   console.log(
     '[MealAnalysis] 메모리 사진 데이터:',
@@ -617,12 +618,10 @@ export default function MealAnalysisScreen() {
 
       {/* 음식 사진 표시 */}
       <View style={styles.imageWrap}>
-        {params.uri ? (
+        {imageUri ? (
           <Image
-            key={params.uri}
-            source={{
-              uri: getMealImagePreview(params.uri) ?? ''
-            }}
+            key={imageUri}
+            source={{ uri: imageUri }}
             style={styles.image}
             resizeMode="cover"
             onLoad={() => {
@@ -641,7 +640,7 @@ export default function MealAnalysisScreen() {
 
               console.log(
                 '[MealAnalysis] 실패한 URI:',
-                params.uri
+                imageUri
               );
 
               setImageError(true);

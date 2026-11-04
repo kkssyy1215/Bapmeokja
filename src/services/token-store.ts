@@ -2,8 +2,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 
-const ACCESS_TOKEN_KEY = '@bapmeokja/access-token';
-const REFRESH_TOKEN_KEY = '@bapmeokja/refresh-token';
+const ACCESS_TOKEN_KEY = 'bapmeokja_access_token';
+const REFRESH_TOKEN_KEY = 'bapmeokja_refresh_token';
 
 let accessToken: string | null = null;
 let refreshToken: string | null = null;

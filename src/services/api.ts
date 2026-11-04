@@ -65,13 +65,13 @@ type RetryConfig = InternalAxiosRequestConfig & { _retry?: boolean };
 
 export const api = create({
   baseURL: API_BASE_URL,
-  timeout: 12_000,
+  timeout: 30_000,
   headers: { Accept: 'application/json', 'Accept-Language': 'ko' },
 });
 
 const refreshClient = create({
   baseURL: API_BASE_URL,
-  timeout: 12_000,
+  timeout: 30_000,
   headers: { Accept: 'application/json', 'Accept-Language': 'ko' },
 });
 
