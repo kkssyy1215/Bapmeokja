@@ -1,3 +1,4 @@
+
 import { router } from 'expo-router';
 import { StyleSheet, Text, View } from 'react-native';
 
@@ -13,11 +14,73 @@ const sections = [
 ];
 
 export default function LegalScreen() {
-  return <Screen><Header title="약관 및 개인정보" subtitle="캡스톤 서비스 기준 안내" left={<IconButton label="←" onPress={() => router.back()} />} />
-    <View style={styles.version}><Text style={styles.versionText}>시행일 2026.08.25 · 버전 1.0</Text></View>
-    {sections.map(([title, content], index) => <View key={title} style={styles.section}><Text style={styles.title}>{index + 1}. {title}</Text><Text style={styles.content}>{content}</Text></View>)}
-    <Text style={styles.note}>실제 상용 배포 전에는 운영 주체, 문의처, 보유 기간, 제3자 제공·처리 위탁, 국외 이전, 미성년자 정책을 법률 검토 후 보완해야 합니다.</Text>
-  </Screen>;
+  const handleBack = () => {
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace('/(tabs)/home');
+    }
+  };
+
+  return (
+    <Screen>
+      <Header
+        title="약관 및 개인정보"
+        subtitle="캡스톤 서비스 기준 안내"
+        left={<IconButton label="←" onPress={handleBack} />}
+      />
+      <View style={styles.version}>
+        <Text style={styles.versionText}>
+          시행일 2026.08.25 · 버전 1.0
+        </Text>
+      </View>
+      {sections.map(([title, content], index) => (
+        <View key={title} style={styles.section}>
+          <Text style={styles.title}>{index + 1}. {title}</Text>
+          <Text style={styles.content}>{content}</Text>
+        </View>
+      ))}
+      <Text style={styles.note}>
+        실제 상용 배포 전에는 운영 주체, 문의처, 보유 기간, 제3자 제공·처리 위탁, 국외 이전, 미성년자 정책을 법률 검토 후 보완해야 합니다.
+      </Text>
+    </Screen>
+  );
 }
 
-const styles = StyleSheet.create({ version: { alignSelf: 'flex-start', backgroundColor: palette.surfaceWarm, borderRadius: radii.pill, paddingHorizontal: 12, paddingVertical: 7 }, versionText: { ...font.caption, color: palette.muted, fontWeight: '700' }, section: { backgroundColor: palette.surface, borderWidth: 1, borderColor: palette.line, borderRadius: radii.lg, padding: spacing.md, gap: spacing.xs }, title: { ...font.subheading, color: palette.ink }, content: { ...font.body, color: palette.muted, lineHeight: 21 }, note: { ...font.caption, color: palette.danger, lineHeight: 18, padding: spacing.sm } });
+const styles = StyleSheet.create({
+  version: {
+    alignSelf: 'flex-start',
+    backgroundColor: palette.surfaceWarm,
+    borderRadius: radii.pill,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+  },
+  versionText: {
+    ...font.caption,
+    color: palette.muted,
+    fontWeight: '700',
+  },
+  section: {
+    backgroundColor: palette.surface,
+    borderWidth: 1,
+    borderColor: palette.line,
+    borderRadius: radii.lg,
+    padding: spacing.md,
+    gap: spacing.xs,
+  },
+  title: {
+    ...font.subheading,
+    color: palette.ink,
+  },
+  content: {
+    ...font.body,
+    color: palette.muted,
+    lineHeight: 21,
+  },
+  note: {
+    ...font.caption,
+    color: palette.danger,
+    lineHeight: 18,
+    padding: spacing.sm,
+  },
+});

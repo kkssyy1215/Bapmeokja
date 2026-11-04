@@ -154,8 +154,9 @@ export default function MealAnalysisScreen() {
   const { saveAnalyzedMeal, meals } = useApp();
 
   const [imageError, setImageError] = useState(false);
-  const [imageLoaded, setImageLoaded] = useState(false);
+  const [, setImageLoaded] = useState(false);
   const previewData = getMealImagePreview(params.uri);
+  const imageUri = previewData || params.uri || null;
 
   console.log(
     '[MealAnalysis] 메모리 사진 데이터:',
@@ -233,28 +234,28 @@ export default function MealAnalysisScreen() {
   const [editItems, setEditItems] =
     useState<EditableDietItem[]>([]);
 
-  useEffect(() => {
-    console.log(
-      '[MealAnalysis] 선택한 사진 URI:',
-      params.uri
-    );
-
-    console.log(
-      '[MealAnalysis] Mock Mode:',
-      isMockMode
-    );
-
-    setImageError(false);
-    setImageLoaded(false);
-  }, [params.uri]);
+ useEffect(() => {
+  console.log(
+    '[MealAnalysis] 선택한 사진 URI:',
+    params.uri
+  );
+  console.log(
+    '[MealAnalysis] Mock Mode:',
+    isMockMode
+  );
+}, [params.uri]);
 
   useEffect(() => {
-    if (savedMeal) {
-      setMealType(savedMeal.type);
-      setAnalysis(savedMealToAnalysis(savedMeal));
-      setAnalyzing(false);
-    }
-  }, [savedMeal]);
+  if (!savedMeal) return;
+
+  const timer = setTimeout(() => {
+    setMealType(savedMeal.type);
+    setAnalysis(savedMealToAnalysis(savedMeal));
+    setAnalyzing(false);
+  }, 0);
+
+  return () => clearTimeout(timer);
+}, [savedMeal]);
 
   const analyze = useCallback(async () => {
     if (savedMeal) return;
@@ -617,12 +618,10 @@ export default function MealAnalysisScreen() {
 
       {/* 음식 사진 표시 */}
       <View style={styles.imageWrap}>
-        {params.uri ? (
+        {imageUri ? (
           <Image
-            key={params.uri}
-            source={{
-              uri: getMealImagePreview(params.uri) ?? ''
-            }}
+            key={imageUri}
+            source={{ uri: imageUri }}
             style={styles.image}
             resizeMode="cover"
             onLoad={() => {
@@ -641,7 +640,7 @@ export default function MealAnalysisScreen() {
 
               console.log(
                 '[MealAnalysis] 실패한 URI:',
-                params.uri
+                imageUri
               );
 
               setImageError(true);
