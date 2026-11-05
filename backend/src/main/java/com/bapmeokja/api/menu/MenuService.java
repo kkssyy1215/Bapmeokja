@@ -9,7 +9,6 @@ import com.bapmeokja.api.user.domain.User;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,26 +49,21 @@ public class MenuService {
         validateBudget(appliedBudget);
         DailyNutritionSummary consumed = nutritionQueryService.summarizeToday(user);
         String reason = nutritionReason(user, consumed);
-        // 예산 안에서 주문할 수 있는 메뉴가 있는 종류만, 저렴한 순서로 추천한다.
+        // 예산 안에서 주문할 수 있는 메뉴를 종류가 아니라 구체적인 메뉴 단위로, 저렴한 순서로 추천한다.
         List<MenuDtos.RecommendedCategory> categories = categoryRepository.findAll().stream()
-                .flatMap(category -> {
-                    List<MenuItem> affordable = itemRepository.findByCategoryIdOrderByAvgPriceAsc(category.getId()).stream()
-                            .filter(item -> item.getAvgPrice() <= appliedBudget)
-                            .toList();
-                    if (affordable.isEmpty()) {
-                        return Stream.empty();
-                    }
-                    return Stream.of(new MenuDtos.RecommendedCategory(
-                            category.getId(),
-                            category.getName(),
-                            category.getIconUrl(),
-                            reason + " 예산 안 메뉴 " + affordable.size() + "개",
-                            affordable.get(0).getAvgPrice(),
-                            true
-                    ));
-                })
+                .flatMap(category -> itemRepository.findByCategoryIdOrderByAvgPriceAsc(category.getId()).stream()
+                        .filter(item -> item.getAvgPrice() <= appliedBudget)
+                        .map(item -> new MenuDtos.RecommendedCategory(
+                                category.getId(),
+                                category.getName(),
+                                item.getImageUrl(),
+                                reason,
+                                item.getAvgPrice(),
+                                true,
+                                item.getId(),
+                                item.getName()
+                        )))
                 .sorted(Comparator.comparingInt(MenuDtos.RecommendedCategory::estimatedCost))
-                .limit(6)
                 .toList();
         return new MenuDtos.DiningRecommendationResponse(categories, appliedBudget);
     }

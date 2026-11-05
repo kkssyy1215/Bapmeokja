@@ -1,4 +1,18 @@
-import { expect, Locator, Page, request } from '@playwright/test';
+import { test as base, expect, Locator, Page, request } from '@playwright/test';
+
+/** 앱 확인창이 뜨면 확인 버튼을 누른다. 모든 테스트에서 쓴다. */
+export async function acceptAppDialogs(page: Page): Promise<void> {
+  await page.addLocatorHandler(page.getByRole('alertdialog'), async (dialog) => {
+    await dialog.locator('[data-testid="dialog-confirm"]').click();
+  });
+}
+
+export const test = base.extend({
+  page: async ({ page }, use) => {
+    await acceptAppDialogs(page);
+    await use(page);
+  },
+});
 
 export const API_URL = process.env.E2E_API_URL ?? 'http://127.0.0.1:8080/v1';
 export const PASSWORD = 'E2eTest!2026';

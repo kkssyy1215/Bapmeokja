@@ -1,5 +1,5 @@
-import { expect, Page, test } from '@playwright/test';
-import { createUserByApi, field, loginToHome, openTab, press, visible } from './helpers';
+import { expect, Page } from '@playwright/test';
+import { createUserByApi, field, loginToHome, openTab, press, test, visible } from './helpers';
 
 async function writePost(page: Page, text: string) {
   await openTab(page, '커뮤니티');
@@ -37,8 +37,6 @@ test('내 글을 삭제할 수 있다', async ({ page }) => {
   await writePost(page, text);
   await visible(page, text).click();
   await expect(page).toHaveURL(/\/community\/post_/);
-
-  page.on('dialog', (dialog) => dialog.accept());
   await press(page, '삭제');
   await expect(page).not.toHaveURL(/\/community\/post_/);
   await expect(visible(page, '최근 게시물')).toBeVisible();
@@ -110,8 +108,6 @@ test('댓글에 답글을 달면 그 아래에 모이고 함께 삭제된다', a
   const reply = await visible(page, '달린 답글').boundingBox();
   expect(reply!.x).toBeGreaterThan(root!.x);
   expect(reply!.y).toBeGreaterThan(root!.y);
-
-  page.on('dialog', (dialog) => dialog.accept());
   await page.getByRole('button', { name: '댓글 삭제하기' }).locator('visible=true').first().click();
   await expect(page.getByText('달린 답글', { exact: true }).locator('visible=true')).toHaveCount(0);
   await expect(visible(page, '댓글 0')).toBeVisible();

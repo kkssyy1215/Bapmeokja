@@ -217,6 +217,8 @@ export type RecommendationCategory = {
   reason: string;
   estimatedCost?: number;
   isWithinBudget?: boolean;
+  itemId?: string;
+  menuName?: string;
 };
 
 export type DiningMenuItem = {

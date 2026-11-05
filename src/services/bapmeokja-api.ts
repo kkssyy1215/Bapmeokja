@@ -32,7 +32,7 @@ import {
   WeeklyStatistics,
 } from '@/types/api';
 
-import { requestData } from './api';
+import { requestData, revokeSession } from './api';
 import { tokenStore } from './token-store';
 
 async function imageFormData(uri: string, fieldName = 'image') {
@@ -60,13 +60,8 @@ export const authApi = {
   checkUsername: (value: string) => requestData<DuplicateCheckResponse>({ method: 'GET', url: '/auth/check/username', params: { value } }),
   checkEmail: (value: string) => requestData<DuplicateCheckResponse>({ method: 'GET', url: '/auth/check/email', params: { value } }),
   checkNickname: (value: string) => requestData<DuplicateCheckResponse>({ method: 'GET', url: '/auth/check/nickname', params: { value } }),
-  async logout() {
-    try {
-      await requestData<null>({ method: 'POST', url: '/auth/logout' });
-    } finally {
-      await tokenStore.clear();
-    }
-  },
+  /** 서버의 로그인 정보를 지운다. 토큰 재발급이나 세션 만료 처리를 거치지 않는다. */
+  logout: () => revokeSession(),
 };
 
 export const userApi = {

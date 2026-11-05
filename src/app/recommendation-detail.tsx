@@ -30,7 +30,7 @@ const demo: Record<'outside' | 'home', Detail> = {
 };
 
 export default function RecommendationDetailScreen() {
-  const { id = 'cat_001', mode = 'outside' } = useLocalSearchParams<{ id?: string; mode?: 'outside' | 'home' }>();
+  const { id = 'cat_001', itemId, name, price, mode = 'outside' } = useLocalSearchParams<{ id?: string; itemId?: string; name?: string; price?: string; mode?: 'outside' | 'home' }>();
   const [detail, setDetail] = useState<Detail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -38,21 +38,26 @@ export default function RecommendationDetailScreen() {
   useEffect(() => {
     let mounted = true;
     const request = async () => {
-      if (isMockMode) return simulateRequest(demo[mode], 500);
+      if (isMockMode) return simulateRequest({ ...demo[mode], name: name ?? demo[mode].name, price: price ? Number(price) : demo[mode].price }, 500);
       if (mode === 'home') {
         const list = await menuApi.recipes(id);
         if (!list.recipes.length) throw new Error('추천 레시피가 없습니다.');
         const recipe = await menuApi.recipe(list.recipes[0].recipeId);
         return { id: recipe.recipeId, name: recipe.name, imageUrl: recipe.imageUrl, calorie: recipe.calorie, carb: recipe.carb, protein: recipe.protein, fat: recipe.fat, price: recipe.estimatedCost, cookingTime: recipe.cookingTimeMinutes, difficulty: recipe.difficulty, ingredients: recipe.ingredients, steps: recipe.steps } satisfies Detail;
       }
-      const list = await menuApi.diningItems(id);
-      if (!list.items.length) throw new Error('추천 메뉴가 없습니다.');
-      const item = await menuApi.diningItem(list.items[0].itemId);
+      // 추천 목록에서 고른 메뉴를 그대로 연다.
+      let targetId = itemId;
+      if (!targetId) {
+        const list = await menuApi.diningItems(id);
+        if (!list.items.length) throw new Error('추천 메뉴가 없습니다.');
+        targetId = list.items[0].itemId;
+      }
+      const item = await menuApi.diningItem(targetId);
       return { id: item.itemId, name: item.name, imageUrl: item.imageUrl, calorie: item.calorie, carb: item.carb, protein: item.protein, fat: item.fat, price: item.avgPrice, ingredients: item.ingredients.map((ingredient) => ({ name: ingredient.name, amount: `${ingredient.weightGram}g` })) } satisfies Detail;
     };
     request().then((result) => mounted && setDetail(result)).catch((requestError) => mounted && setError(getErrorMessage(requestError))).finally(() => mounted && setLoading(false));
     return () => { mounted = false; };
-  }, [id, mode]);
+  }, [id, itemId, mode, name, price]);
 
   if (loading) return <Screen><Header title={mode === 'home' ? '집밥 레시피' : '메뉴 상세'} left={<IconButton label="←" onPress={() => goBack()} />} /><View style={styles.center}><ActivityIndicator color={palette.tomato} /><Text style={styles.centerText}>추천 정보를 불러오고 있어요</Text></View></Screen>;
   if (!detail) return <Screen><Header title="추천 상세" left={<IconButton label="←" onPress={() => goBack()} />} /><View style={styles.center}><Text style={styles.centerTitle}>정보를 불러오지 못했어요</Text><Text style={styles.centerText}>{error}</Text><PrimaryButton title="돌아가기" onPress={() => goBack()} /></View></Screen>;
@@ -66,7 +71,7 @@ export default function RecommendationDetailScreen() {
     <SectionTitle title="재료" />
     <Card>{detail.ingredients.map((ingredient, index) => <View key={`${ingredient.name}-${index}`} style={[styles.ingredient, index > 0 && styles.ingredientBorder]}><View><Text style={styles.ingredientName}>{ingredient.name}</Text><Text style={styles.ingredientAmount}>{ingredient.amount}</Text></View>{ingredient.alternatives?.length ? <Text style={styles.alternative}>대체: {ingredient.alternatives[0].name}</Text> : null}</View>)}</Card>
     {detail.steps?.length ? <><SectionTitle title="조리 순서" />{detail.steps.map((step) => <View key={step.stepNo} style={styles.step}><View style={styles.stepNumber}><Text style={styles.stepNumberText}>{step.stepNo}</Text></View><Text style={styles.stepText}>{step.description}</Text></View>)}</> : null}
-    {isHome ? <PrimaryButton title="장보기 목록 확인" variant="secondary" onPress={() => router.push({ pathname: '/shopping-list', params: { recipeId: detail.id } } as never)} /> : <PrimaryButton title="주변 매장 보기" onPress={() => router.push({ pathname: '/nearby', params: { categoryId: id } })} />}
+    {isHome ? <PrimaryButton title="장보기 목록 확인" variant="secondary" onPress={() => router.push({ pathname: '/shopping-list', params: { recipeId: detail.id } } as never)} /> : <PrimaryButton title="주변 매장 보기" onPress={() => router.push({ pathname: '/nearby', params: { categoryId: id, categoryName: detail.name } })} />}
   </Screen>;
 }
 

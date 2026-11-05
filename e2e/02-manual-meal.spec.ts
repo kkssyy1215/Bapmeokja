@@ -1,5 +1,5 @@
-import { expect, test } from '@playwright/test';
-import { addManualMeal, createUserByApi, field, loginToHome, press, visible } from './helpers';
+import { expect } from '@playwright/test';
+import { addManualMeal, createUserByApi, field, loginToHome, press, test, visible } from './helpers';
 
 test('직접 입력한 식단이 홈과 캘린더에 반영된다', async ({ page }) => {
   await loginToHome(page, await createUserByApi());
@@ -27,8 +27,6 @@ test('저장한 식단을 수정하고 삭제할 수 있다', async ({ page }) =
   await expect(page).toHaveURL(/\/home/);
   await expect(visible(page, '제육볶음')).toBeVisible();
   await expect(visible(page, /^720/)).toBeVisible();
-
-  page.on('dialog', (dialog) => dialog.accept());
   await press(page, '제육볶음');
   await press(page, '식단 삭제');
   await expect(page).toHaveURL(/\/home/);

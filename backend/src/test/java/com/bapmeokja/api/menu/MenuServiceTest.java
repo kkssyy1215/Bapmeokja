@@ -32,32 +32,33 @@ class MenuServiceTest {
         MenuCategory poke = category("poke", "포케");
         MenuCategory snack = category("snack", "간편식");
         when(categories.findAll()).thenReturn(List.of(poke, snack));
-        List<MenuItem> pokeItems = List.of(item(10900), item(12900));
-        List<MenuItem> snackItems = List.of(item(3800), item(4900));
+        List<MenuItem> pokeItems = List.of(item("menu_1", "닭가슴살 포케", 10900), item("menu_2", "연어 포케", 12900));
+        List<MenuItem> snackItems = List.of(item("menu_3", "참치 김밥", 3800), item("menu_4", "닭가슴살 컵밥", 4900));
         when(items.findByCategoryIdOrderByAvgPriceAsc("poke")).thenReturn(pokeItems);
         when(items.findByCategoryIdOrderByAvgPriceAsc("snack")).thenReturn(snackItems);
         service = new MenuService(categories, items, mock(MenuItemIngredientRepository.class), nutrition, currentUser);
     }
 
     @Test
-    void budgetChangesWhichCategoriesAreRecommended() {
-        assertThat(names(5000)).containsExactly("간편식");
-        assertThat(names(11000)).containsExactly("간편식", "포케");
+    void recommendsSpecificMenusWithinTheBudgetCheapestFirst() {
+        assertThat(names(5000)).containsExactly("참치 김밥", "닭가슴살 컵밥");
+        assertThat(names(11000)).containsExactly("참치 김밥", "닭가슴살 컵밥", "닭가슴살 포케");
         assertThat(names(3000)).isEmpty();
     }
 
     @Test
-    void reportsCheapestPriceWithinBudget() {
-        MenuDtos.RecommendedCategory category = service.recommendDiningOut(11000).recommendedCategories().get(1);
+    void carriesWhatTheMenuAndStoreScreensNeed() {
+        MenuDtos.RecommendedCategory menu = service.recommendDiningOut(11000).recommendedCategories().get(2);
 
-        assertThat(category.estimatedCost()).isEqualTo(10900);
-        assertThat(category.isWithinBudget()).isTrue();
-        assertThat(category.reason()).contains("예산 안 메뉴 1개");
+        assertThat(menu.itemId()).isEqualTo("menu_1");
+        assertThat(menu.categoryId()).isEqualTo("poke");
+        assertThat(menu.estimatedCost()).isEqualTo(10900);
+        assertThat(menu.isWithinBudget()).isTrue();
     }
 
     private List<String> names(int budget) {
         return service.recommendDiningOut(budget).recommendedCategories().stream()
-                .map(MenuDtos.RecommendedCategory::categoryName)
+                .map(MenuDtos.RecommendedCategory::menuName)
                 .toList();
     }
 
@@ -68,8 +69,10 @@ class MenuServiceTest {
         return category;
     }
 
-    private MenuItem item(int price) {
+    private MenuItem item(String id, String name, int price) {
         MenuItem item = mock(MenuItem.class);
+        when(item.getId()).thenReturn(id);
+        when(item.getName()).thenReturn(name);
         when(item.getAvgPrice()).thenReturn(price);
         return item;
     }

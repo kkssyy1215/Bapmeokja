@@ -302,7 +302,13 @@ export function AppProvider({ children }: PropsWithChildren) {
   }, []);
 
   const signOut = useCallback(async () => {
-    if (!isMockMode) await authApi.logout().catch(() => tokenStore.clear());
+    // 잠든 서버를 기다리느라 멈춘 것처럼 보이지 않게 잠깐만 기다린다. 이 기기의 로그인 정보는 항상 지운다.
+    if (!isMockMode) {
+      await Promise.race([
+        authApi.logout().catch(() => undefined),
+        new Promise((resolve) => setTimeout(resolve, 1500)),
+      ]);
+    }
     await cancelLocalNotifications().catch(() => undefined);
     await resetUserScope();
   }, [resetUserScope]);

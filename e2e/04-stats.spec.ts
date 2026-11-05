@@ -1,5 +1,5 @@
-import { expect, test } from '@playwright/test';
-import { addManualMeal, createUserByApi, loginToHome, openTab, press, visible } from './helpers';
+import { expect } from '@playwright/test';
+import { addManualMeal, createUserByApi, loginToHome, openTab, press, test, visible } from './helpers';
 
 test('기록이 일간·주간·월간 통계와 AI 피드백에 반영된다', async ({ page }) => {
   await loginToHome(page, await createUserByApi());

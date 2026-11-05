@@ -88,6 +88,12 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+export async function revokeSession() {
+  const token = tokenStore.getAccessToken();
+  if (!token) return;
+  await refreshClient.post('/auth/logout', null, { headers: { Authorization: `Bearer ${token}` } });
+}
+
 async function refreshAccessToken() {
   if (refreshPromise) return refreshPromise;
   const refreshToken = tokenStore.getRefreshToken();

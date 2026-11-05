@@ -1,5 +1,5 @@
-import { expect, test } from '@playwright/test';
-import { field, login, newUser, press, visible } from './helpers';
+import { expect } from '@playwright/test';
+import { field, login, newUser, press, test, visible } from './helpers';
 
 test('회원가입 → 기본 정보 입력 → 홈 진입', async ({ page }) => {
   const user = newUser();

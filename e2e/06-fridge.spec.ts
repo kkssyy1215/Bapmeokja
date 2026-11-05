@@ -1,5 +1,5 @@
-import { expect, test } from '@playwright/test';
-import { createUserByApi, field, loginToHome, openTab, press, visible } from './helpers';
+import { expect } from '@playwright/test';
+import { createUserByApi, field, loginToHome, openTab, press, test, visible } from './helpers';
 
 test('냉장고 재료를 추가하면 집밥 추천으로 이어진다', async ({ page }) => {
   await loginToHome(page, await createUserByApi());
@@ -30,8 +30,6 @@ test('냉장고 재료를 삭제할 수 있다', async ({ page }) => {
   await field(page, '단위').fill('모');
   await press(page, '냉장고에 추가');
   await expect(visible(page, '두부')).toBeVisible();
-
-  page.on('dialog', (dialog) => dialog.accept());
   await press(page, '삭제');
   await expect(page.getByText('두부', { exact: true })).toHaveCount(0);
 });

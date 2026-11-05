@@ -11,17 +11,53 @@ import { MenuSummary, RecommendationCategory } from '@/types/api';
 
 const demoCategories: Record<'outside' | 'home', RecommendationCategory[]> = {
   outside: [
-    { categoryId: 'cat_005', categoryName: '간편식', reason: '가볍게 한 끼를 채우기 좋아요.', estimatedCost: 3800 },
-    { categoryId: 'cat_002', categoryName: '샌드위치', reason: '남은 칼로리 안에서 균형을 맞추기 쉬워요.', estimatedCost: 5500 },
-    { categoryId: 'cat_003', categoryName: '순두부', reason: '부담이 적고 따뜻하게 먹을 수 있어요.', estimatedCost: 9000 },
-    { categoryId: 'cat_001', categoryName: '포케', reason: '부족한 단백질을 채우기 좋아요.', estimatedCost: 10900 },
+    { categoryId: 'cat_005', categoryName: '간편식', itemId: 'menu_009', menuName: '참치 야채 김밥', reason: '', estimatedCost: 3800 },
+    { categoryId: 'cat_005', categoryName: '간편식', itemId: 'menu_010', menuName: '닭가슴살 컵밥', reason: '', estimatedCost: 4900 },
+    { categoryId: 'cat_005', categoryName: '간편식', itemId: 'menu_012', menuName: '주먹밥 세트', reason: '', estimatedCost: 3500 },
+    { categoryId: 'cat_005', categoryName: '간편식', itemId: 'menu_013', menuName: '유부초밥 세트', reason: '', estimatedCost: 4000 },
+    { categoryId: 'cat_005', categoryName: '간편식', itemId: 'menu_014', menuName: '컵누들과 삶은 달걀', reason: '', estimatedCost: 4200 },
+    { categoryId: 'cat_005', categoryName: '간편식', itemId: 'menu_017', menuName: '컵 떡볶이', reason: '', estimatedCost: 3900 },
+    { categoryId: 'cat_005', categoryName: '간편식', itemId: 'menu_020', menuName: '고구마와 달걀 세트', reason: '', estimatedCost: 3900 },
+    { categoryId: 'cat_005', categoryName: '간편식', itemId: 'menu_011', menuName: '소불고기 김밥', reason: '', estimatedCost: 4500 },
+    { categoryId: 'cat_005', categoryName: '간편식', itemId: 'menu_018', menuName: '소시지 볶음밥', reason: '', estimatedCost: 4700 },
+    { categoryId: 'cat_005', categoryName: '간편식', itemId: 'menu_019', menuName: '잔치국수', reason: '', estimatedCost: 5000 },
+    { categoryId: 'cat_002', categoryName: '샌드위치', itemId: 'menu_003', menuName: '에그마요 통밀 샌드위치', reason: '', estimatedCost: 5500 },
+    { categoryId: 'cat_002', categoryName: '샌드위치', itemId: 'menu_004', menuName: '닭가슴살 클럽 샌드위치', reason: '', estimatedCost: 7200 },
+    { categoryId: 'cat_003', categoryName: '한식', itemId: 'menu_006', menuName: '두부 된장찌개 정식', reason: '', estimatedCost: 9000 },
+    { categoryId: 'cat_003', categoryName: '한식', itemId: 'menu_005', menuName: '소고기 비빔밥', reason: '', estimatedCost: 9500 },
+    { categoryId: 'cat_003', categoryName: '한식', itemId: 'menu_021', menuName: '김치찌개 정식', reason: '', estimatedCost: 8000 },
+    { categoryId: 'cat_003', categoryName: '한식', itemId: 'menu_022', menuName: '제육덮밥', reason: '', estimatedCost: 7500 },
+    { categoryId: 'cat_004', categoryName: '샐러드', itemId: 'menu_007', menuName: '리코타 치즈 샐러드', reason: '', estimatedCost: 9800 },
+    { categoryId: 'cat_004', categoryName: '샐러드', itemId: 'menu_027', menuName: '닭가슴살 샐러드', reason: '', estimatedCost: 7900 },
+    { categoryId: 'cat_001', categoryName: '포케', itemId: 'menu_001', menuName: '닭가슴살 현미 포케', reason: '', estimatedCost: 10900 },
+    { categoryId: 'cat_001', categoryName: '포케', itemId: 'menu_002', menuName: '연어 아보카도 포케', reason: '', estimatedCost: 12900 },
   ],
   home: [
-    { categoryId: 'hcat_001', categoryName: '두부 달걀 덮밥', reason: '냉장고 재료를 바로 활용할 수 있어요.', estimatedCost: 4800 },
-    { categoryId: 'hcat_003', categoryName: '참치 두부전', reason: '남은 두부를 한 번에 사용할 수 있어요.', estimatedCost: 5200 },
-    { categoryId: 'hcat_002', categoryName: '애호박 닭가슴살 볶음', reason: '단백질 목표를 채우기 좋은 조합이에요.', estimatedCost: 5900 },
+    { categoryId: 'hcat_004', categoryName: '달걀 볶음밥', reason: '', estimatedCost: 2500 },
+    { categoryId: 'hcat_005', categoryName: '콩나물 비빔밥', reason: '', estimatedCost: 3000 },
+    { categoryId: 'hcat_006', categoryName: '오므라이스', reason: '', estimatedCost: 3800 },
+    { categoryId: 'hcat_007', categoryName: '참치 김치찌개', reason: '', estimatedCost: 4000 },
+    { categoryId: 'hcat_008', categoryName: '시금치 프리타타', reason: '', estimatedCost: 4200 },
+    { categoryId: 'hcat_001', categoryName: '닭가슴살 볶음밥', reason: '', estimatedCost: 4500 },
+    { categoryId: 'hcat_009', categoryName: '두부 스테이크', reason: '', estimatedCost: 4800 },
+    { categoryId: 'hcat_010', categoryName: '닭가슴살 덮밥', reason: '', estimatedCost: 5500 },
+    { categoryId: 'hcat_011', categoryName: '제육볶음', reason: '', estimatedCost: 6000 },
+    { categoryId: 'hcat_012', categoryName: '버섯 불고기', reason: '', estimatedCost: 6500 },
+    { categoryId: 'hcat_013', categoryName: '연어 덮밥', reason: '', estimatedCost: 7500 },
   ],
 };
+
+// 한 번에 보여 줄 메뉴 수. 새로고침하면 다음 묶음을 보여 준다.
+const PAGE_SIZE = 5;
+
+function shuffled<T>(items: T[]) {
+  const result = [...items];
+  for (let i = result.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+}
 
 const BUDGET_PRESETS = [5000, 10000];
 
@@ -30,6 +66,7 @@ export default function RecommendScreen() {
   const [mode, setMode] = useState<'outside' | 'home'>('outside');
   const [budget, setBudget] = useState(10000);
   const [summary, setSummary] = useState<MenuSummary | null>(null);
+  const [pool, setPool] = useState<RecommendationCategory[]>([]);
   const [categories, setCategories] = useState<RecommendationCategory[]>([]);
   const [loading, setLoading] = useState(false);
   const [customOpen, setCustomOpen] = useState(false);
@@ -44,7 +81,9 @@ export default function RecommendScreen() {
         : await Promise.all([menuApi.summary(), mode === 'outside' ? menuApi.diningOut(budget).then((result) => result.recommendedCategories) : menuApi.homeCooking(budget).then((result) => result.recommendedCategories)]);
       setSummary(nextSummary);
       // 예산을 넘는 메뉴는 보여 주지 않아 예산을 바꾸면 추천도 바뀌게 한다.
-      setCategories(nextCategories.filter((item) => item.isWithinBudget !== false));
+      const available = shuffled(nextCategories.filter((item) => item.isWithinBudget !== false));
+      setPool(available);
+      setCategories(available.slice(0, PAGE_SIZE));
     } catch (error) {
       Alert.alert('추천을 불러오지 못했어요', getErrorMessage(error));
     } finally {
@@ -54,6 +93,13 @@ export default function RecommendScreen() {
 
   useFocusEffect(useCallback(() => { load(); }, [load]));
 
+  // 지금 보이는 메뉴를 빼고 다음 묶음을 고른다. 남은 메뉴가 모자라면 앞에서 본 메뉴로 채운다.
+  const showNextMenus = () => {
+    const showing = new Set(categories);
+    const fresh = shuffled(pool.filter((item) => !showing.has(item)));
+    setCategories(fresh.length ? fresh.slice(0, PAGE_SIZE) : shuffled(pool).slice(0, PAGE_SIZE));
+  };
+
   const openNearby = (category?: RecommendationCategory) => {
     const target = category ?? categories[0];
     Alert.alert('위치 정보 사용', '현재 위치는 주변 식당을 찾는 동안에만 사용합니다.', [
@@ -61,7 +107,7 @@ export default function RecommendScreen() {
       { text: '동의하고 계속', onPress: async () => {
         try {
           if (!isMockMode) await userApi.setLocationConsent(true);
-          router.push({ pathname: '/nearby', params: { categoryId: target?.categoryId ?? 'cat_001', categoryName: target?.categoryName ?? '맛집' } });
+          router.push({ pathname: '/nearby', params: { categoryId: target?.categoryId ?? 'cat_001', categoryName: target?.menuName ?? target?.categoryName ?? '맛집' } });
         } catch (error) { Alert.alert('위치 설정 실패', getErrorMessage(error)); }
       } },
     ]);
@@ -109,21 +155,20 @@ export default function RecommendScreen() {
           <View style={styles.customButton}><PrimaryButton title="적용" onPress={applyCustomBudget} disabled={!customText.trim()} /></View>
         </View>
       ) : null}
-      <SectionTitle title={mode === 'outside' ? '추천 외식 메뉴' : '추천 집밥 메뉴'} action="새로고침" onAction={load} />
+      <SectionTitle title={mode === 'outside' ? '추천 외식 메뉴' : '추천 집밥 메뉴'} action="새로고침" onAction={showNextMenus} />
       {loading ? <ActivityIndicator color={palette.tomato} /> : categories.length ? (
         <ListGroup>
           {categories.map((item, index) => (
-            <View key={item.categoryId} style={styles.item}>
-              <Pressable accessibilityRole="button" style={styles.itemBody} onPress={() => router.push({ pathname: '/recommendation-detail', params: { id: item.categoryId, mode } })}>
+            <View key={item.itemId ?? item.categoryId} style={styles.item}>
+              <Pressable accessibilityRole="button" style={styles.itemBody} onPress={() => router.push({ pathname: '/recommendation-detail', params: { id: item.categoryId, itemId: item.itemId, name: item.menuName ?? item.categoryName, price: item.estimatedCost, mode } })}>
                 <View style={[styles.rank, index === 0 && styles.rankFirst]}><Text style={[styles.rankText, index === 0 && styles.rankTextFirst]}>{index + 1}</Text></View>
                 <View style={styles.foodInfo}>
-                  <Text style={styles.foodName}>{item.categoryName}</Text>
-                  <Text style={styles.reason}>{item.reason}</Text>
+                  <Text style={styles.foodName}>{item.menuName ?? item.categoryName}</Text>
                   <View style={styles.metaRow}>{item.estimatedCost ? <Text style={styles.meta}>예상 {item.estimatedCost.toLocaleString()}원</Text> : <Text style={styles.meta}>상세 메뉴 보기</Text>}</View>
                 </View>
               </Pressable>
               {mode === 'outside'
-                ? <Pressable accessibilityRole="button" accessibilityLabel={`${item.categoryName} 파는 식당 찾기`} hitSlop={6} style={styles.storeButton} onPress={() => openNearby(item)}><Icon name="map-pin" size={17} color={palette.tomato} /></Pressable>
+                ? <Pressable accessibilityRole="button" accessibilityLabel={`${item.menuName ?? item.categoryName} 파는 식당 찾기`} hitSlop={6} style={styles.storeButton} onPress={() => openNearby(item)}><Icon name="map-pin" size={17} color={palette.tomato} /></Pressable>
                 : <Icon name="chevron-right" size={18} color={palette.muted} />}
             </View>
           ))}
@@ -134,7 +179,7 @@ export default function RecommendScreen() {
 }
 
 const styles = StyleSheet.create({
-  item: { minHeight: 76, flexDirection: 'row', alignItems: 'center', gap: 10 },
+  item: { minHeight: 66, flexDirection: 'row', alignItems: 'center', gap: 10 },
   itemBody: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12 },
   storeButton: { width: 38, height: 38, borderRadius: 19, backgroundColor: palette.accentSoft, alignItems: 'center', justifyContent: 'center' },
   linkCard: { backgroundColor: palette.accentSoft, borderRadius: radii.lg, paddingHorizontal: 14, paddingVertical: 2 },
@@ -150,7 +195,6 @@ const styles = StyleSheet.create({
   budgetPills: { flexDirection: 'row', gap: 6 },
   foodInfo: { flex: 1 },
   foodName: { color: palette.ink, fontSize: 16, fontWeight: '500', letterSpacing: -0.2 },
-  reason: { color: palette.muted, fontSize: 13, lineHeight: 18, marginTop: 2 },
   metaRow: { flexDirection: 'row', gap: spacing.sm, marginTop: 4 },
   meta: { color: palette.tomato, fontSize: 13, fontWeight: '500' },
 });

@@ -1,5 +1,5 @@
-import { expect, test } from '@playwright/test';
-import { createUserByApi, field, login, loginToHome, newUser, press, visible } from './helpers';
+import { expect } from '@playwright/test';
+import { createUserByApi, field, login, loginToHome, newUser, press, test, visible } from './helpers';
 
 test('프로필을 수정하면 저장 후 이전 화면으로 돌아간다', async ({ page }) => {
   const user = await createUserByApi();
@@ -37,7 +37,6 @@ test('회원 탈퇴하면 로그인 화면으로 가고 다시 로그인할 수 
   await press(page, '회원 탈퇴');
   await field(page, '현재 비밀번호').fill(user.password);
   await field(page, "확인을 위해 '회원탈퇴' 입력").fill('회원탈퇴');
-  page.on('dialog', (dialog) => dialog.accept());
   await press(page, '계정과 데이터 영구 삭제');
 
   await expect(page.getByPlaceholder('아이디를 입력하세요')).toBeVisible();

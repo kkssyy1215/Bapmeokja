@@ -1,5 +1,5 @@
-import { expect, test } from '@playwright/test';
-import { createUserByApi, loginToHome, openTab, press, visible } from './helpers';
+import { expect } from '@playwright/test';
+import { createUserByApi, loginToHome, openTab, press, test, visible } from './helpers';
 
 test('사진을 올려 분석하고 저장하면 홈으로 돌아가 반영된다', async ({ page }) => {
   await loginToHome(page, await createUserByApi());
