@@ -39,15 +39,19 @@ public class RecipeService {
         Map<String, List<Recipe>> recipesByCategory = recipes.stream()
                 .collect(Collectors.groupingBy(recipe -> recipe.getCategory().getId()));
 
+        // 메뉴마다 재료를 따로 조회하면 메뉴 수만큼 쿼리가 나가므로 한 번에 읽는다.
+        Set<String> fridgeRecipeIds = fridgeNames.isEmpty() ? Set.of() : ingredientRepository
+                .findByRecipeIdIn(recipes.stream().map(Recipe::getId).toList())
+                .stream()
+                .filter(ingredient -> fridgeNames.contains(normalize(ingredient.getName())))
+                .map(ingredient -> ingredient.getRecipe().getId())
+                .collect(Collectors.toSet());
+
         List<RecipeDtos.HomeCategory> categories = categoryRepository.findAll().stream()
                 .map(category -> {
                     List<Recipe> categoryRecipes = recipesByCategory.getOrDefault(category.getId(), List.of());
                     int cost = categoryRecipes.stream().mapToInt(Recipe::getEstimatedCost).min().orElse(0);
-                    boolean canUseFridge = categoryRecipes.stream()
-                            .flatMap(recipe -> ingredientRepository.findByRecipeIdOrderByIdAsc(recipe.getId()).stream())
-                            .map(RecipeIngredient::getName)
-                            .map(this::normalize)
-                            .anyMatch(fridgeNames::contains);
+                    boolean canUseFridge = categoryRecipes.stream().map(Recipe::getId).anyMatch(fridgeRecipeIds::contains);
                     String reason = canUseFridge
                             ? "냉장고에 있는 재료를 활용할 수 있습니다."
                             : "오늘의 영양 균형을 채우기 좋은 메뉴입니다.";
