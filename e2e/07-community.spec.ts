@@ -4,7 +4,7 @@ import { createUserByApi, field, loginToHome, openTab, press, visible } from './
 async function writePost(page: Page, text: string) {
   await openTab(page, '커뮤니티');
   // 하단 탭에도 같은 글자가 있어 화면의 첫 번째 버튼을 누른다.
-  await page.getByText('＋', { exact: true }).locator('visible=true').first().click();
+  await page.getByRole('button', { name: '글쓰기' }).locator('visible=true').first().click();
   await expect(page).toHaveURL(/\/community\/new-post/);
   await field(page, '내용').fill(text);
   await press(page, '게시하기');

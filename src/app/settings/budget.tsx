@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react';
 import { Alert, StyleSheet, Text, View } from 'react-native';
 
 import { Field, Header, IconButton, PrimaryButton, Screen } from '@/components/ui';
-import { font, palette, radii, spacing } from '@/constants/design';
+import { font, palette, radii, shadow, spacing } from '@/constants/design';
 import { useApp } from '@/context/app-context';
 import { getErrorMessage, isMockMode, simulateRequest } from '@/services/api';
 import { userApi } from '@/services/bapmeokja-api';
@@ -62,9 +62,9 @@ export default function BudgetSettingsScreen() {
 
 const styles = StyleSheet.create({
   guide: { backgroundColor: palette.yellowSoft, borderRadius: radii.md, padding: spacing.md },
-  guideTitle: { ...font.subheading, color: '#765B21' },
-  guideText: { ...font.caption, color: '#765B21', lineHeight: 18, marginTop: 4 },
-  summary: { backgroundColor: palette.surface, borderWidth: 1, borderColor: palette.line, borderRadius: radii.md, padding: spacing.md, gap: spacing.xs },
+  guideTitle: { ...font.subheading, color: palette.amber },
+  guideText: { ...font.caption, lineHeight: 18, marginTop: 4, color: palette.amber },
+  summary: { backgroundColor: palette.surface, borderRadius: radii.md, padding: spacing.md, gap: spacing.xs, ...shadow },
   summaryTitle: { ...font.caption, color: palette.muted },
   summaryValue: { ...font.subheading, color: palette.ink },
 });

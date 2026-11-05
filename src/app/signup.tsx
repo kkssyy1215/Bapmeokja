@@ -1,9 +1,9 @@
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, StyleSheet, Text, View } from 'react-native';
 
-import { Field, Header, IconButton, PrimaryButton, Screen } from '@/components/ui';
-import { font, palette, radii, spacing } from '@/constants/design';
+import { Field, Header, IconButton, PrimaryButton, Screen, Pressable } from '@/components/ui';
+import { font, palette, radii, shadow, spacing } from '@/constants/design';
 import { useApp } from '@/context/app-context';
 
 type CheckState = 'idle' | 'checking' | 'available' | 'duplicate';
@@ -100,18 +100,18 @@ const styles = StyleSheet.create({
   description: { ...font.body, color: palette.muted },
   form: { gap: spacing.md },
   checkedWrap: { position: 'relative' },
-  checkButton: { position: 'absolute', right: 8, top: 29, minWidth: 72, height: 36, borderRadius: radii.sm, backgroundColor: palette.ink, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 9 },
-  checkButtonDone: { backgroundColor: palette.leafSoft },
+  checkButton: { position: 'absolute', right: 7, top: 31, minWidth: 72, height: 34, borderRadius: 17, backgroundColor: palette.surface, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 9 },
+  checkButtonDone: { backgroundColor: palette.sunken },
   checkButtonDisabled: { opacity: 0.45 },
-  checkText: { color: '#fff', fontSize: 11, fontWeight: '800' },
+  checkText: { fontSize: 12, fontWeight: '500', color: palette.ink },
   checkTextDone: { color: palette.leaf },
   success: { color: palette.leaf, fontSize: 12 },
-  agreementCard: { backgroundColor: palette.surface, borderRadius: radii.md, borderWidth: 1, borderColor: palette.line, paddingHorizontal: spacing.md },
+  agreementCard: { backgroundColor: palette.surface, borderRadius: radii.md, paddingHorizontal: spacing.md, ...shadow },
   agreement: { minHeight: 52, flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   agreementCheck: { flex: 1, minHeight: 52, flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  agreementText: { color: palette.ink, fontSize: 13, fontWeight: '600' },
-  viewLegal: { color: palette.tomato, fontSize: 12, fontWeight: '800', textDecorationLine: 'underline' },
-  checkCircle: { width: 22, height: 22, borderRadius: 11, borderWidth: 1.5, borderColor: palette.line, overflow: 'hidden', textAlign: 'center', lineHeight: 19, color: '#fff', fontSize: 12, fontWeight: '900' },
-  checkCircleActive: { backgroundColor: palette.leaf, borderColor: palette.leaf },
+  agreementText: { color: palette.ink, fontSize: 13, fontWeight: '500' },
+  viewLegal: { color: palette.muted, fontSize: 13, textDecorationLine: 'underline' },
+  checkCircle: { width: 22, height: 22, borderRadius: 11, borderWidth: 1.5, borderColor: '#C4C8CD', overflow: 'hidden', textAlign: 'center', lineHeight: 19, color: palette.onAccent, fontSize: 12, fontWeight: '600' },
+  checkCircleActive: { backgroundColor: palette.accent, borderColor: palette.accent },
   line: { height: 1, backgroundColor: palette.line },
 });

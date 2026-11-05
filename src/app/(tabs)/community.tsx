@@ -1,9 +1,9 @@
 import { Image } from 'expo-image';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
-import { Card, EmptyState, Header, Screen } from '@/components/ui';
+import { Card, EmptyState, Header, Icon, IconButton, Pressable, Screen, SectionTitle } from '@/components/ui';
 import { palette, radii, shadow, spacing } from '@/constants/design';
 import { useApp } from '@/context/app-context';
 import { isMockMode, resolveApiAssetUrl, simulateRequest } from '@/services/api';
@@ -30,40 +30,37 @@ export default function CommunityScreen() {
 
   return (
     <Screen>
-      <Header title="한끼 이야기" subtitle="오늘 먹은 한 끼를 나눠요" />
-      <View style={styles.intro}><View><Text style={styles.introTitle}>최근 게시물</Text><Text style={styles.introText}>식단 기록과 간단한 이야기를 확인해 보세요.</Text></View><Pressable style={styles.writeButton} onPress={() => router.push('/community/new-post')}><Text style={styles.writeButtonText}>글쓰기</Text></Pressable></View>
-      {loading ? <ActivityIndicator color={palette.tomato} /> : items.length ? items.map((post) => (
-        <Pressable key={post.postId} style={styles.post} onPress={() => router.push({ pathname: '/community/[id]', params: { id: post.postId } })}>
-          <View style={styles.authorRow}><View style={styles.avatar}><Text style={styles.avatarText}>{post.authorNickname.slice(0, 1)}</Text></View><View><Text style={styles.author}>{post.authorNickname}</Text><Text style={styles.time}>{formatRelativeTime(post.createdAt)}</Text></View></View>
-          {post.thumbnailUrl ? <Image source={{ uri: resolveApiAssetUrl(post.thumbnailUrl) }} style={styles.photo} contentFit="cover" /> : <View style={styles.photoFallback}><Text style={styles.photoFallbackText}>{post.title.slice(0, 1)}</Text></View>}
-          <Text style={styles.title}>{post.title}</Text>
-          <View style={styles.actions}><Text style={styles.action}>좋아요 {post.likeCount}</Text><Text style={styles.action}>댓글 {post.commentCount}</Text><Text style={styles.open}>게시물 보기 ›</Text></View>
-        </Pressable>
-      )) : <Card><EmptyState emoji="🍽️" title="아직 게시물이 없어요" description="첫 번째 식단 이야기를 남겨 보세요." /></Card>}
-      <Pressable style={styles.fab} onPress={() => router.push('/community/new-post')}><Text style={styles.fabText}>＋</Text></Pressable>
+        <Header title="커뮤니티" subtitle="오늘 먹은 한 끼를 나눠요" right={<IconButton label="＋" onPress={() => router.push('/community/new-post')} accessibilityLabel="글쓰기" />} />
+        <SectionTitle title="최근 게시물" />
+        {loading ? <ActivityIndicator color={palette.tomato} /> : items.length ? items.map((post) => (
+          <Pressable key={post.postId} accessibilityRole="button" style={styles.post} onPress={() => router.push({ pathname: '/community/[id]', params: { id: post.postId } })}>
+            <View style={styles.authorRow}>
+              <View style={styles.avatar}><Text style={styles.avatarText}>{post.authorNickname.slice(0, 1)}</Text></View>
+              <Text style={styles.author}>{post.authorNickname}</Text>
+              <Text style={styles.time}>{formatRelativeTime(post.createdAt)}</Text>
+            </View>
+            {post.thumbnailUrl ? <Image source={{ uri: resolveApiAssetUrl(post.thumbnailUrl) }} style={styles.photo} contentFit="cover" /> : null}
+            <Text style={styles.title}>{post.title}</Text>
+            <View style={styles.actions}>
+              <View style={styles.action}><Icon name="heart" size={15} color={palette.tomato} /><Text style={styles.actionText}>{post.likeCount}</Text></View>
+              <View style={styles.action}><Icon name="message-circle" size={15} color={palette.muted} /><Text style={styles.actionText}>{post.commentCount}</Text></View>
+            </View>
+          </Pressable>
+        )) : <Card><EmptyState icon="message-circle" title="아직 게시물이 없어요" description="첫 번째 식단 이야기를 남겨 보세요." /></Card>}
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  intro: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  introTitle: { color: palette.ink, fontSize: 17, fontWeight: '900' },
-  introText: { color: palette.muted, fontSize: 11, marginTop: 3 },
-  writeButton: { borderRadius: radii.pill, backgroundColor: palette.ink, paddingHorizontal: 14, paddingVertical: 9 },
-  writeButtonText: { color: '#fff', fontSize: 11, fontWeight: '800' },
-  post: { backgroundColor: palette.surface, borderRadius: radii.xl, padding: spacing.md, borderWidth: 1, borderColor: palette.line, gap: spacing.md, ...shadow },
+  post: { backgroundColor: palette.surface, borderRadius: radii.lg, padding: spacing.md, gap: 12, ...shadow },
   authorRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  avatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: palette.tomatoSoft, alignItems: 'center', justifyContent: 'center' },
-  avatarText: { color: palette.tomatoDark, fontSize: 14, fontWeight: '900' },
-  author: { color: palette.ink, fontWeight: '800', fontSize: 13 },
-  time: { color: palette.muted, fontSize: 9, marginTop: 2 },
-  photo: { height: 190, borderRadius: radii.lg },
-  photoFallback: { height: 150, borderRadius: radii.lg, backgroundColor: palette.surfaceWarm, alignItems: 'center', justifyContent: 'center' },
-  photoFallbackText: { color: palette.tomatoDark, fontSize: 48, fontWeight: '900' },
-  title: { color: palette.ink, fontSize: 15, fontWeight: '900' },
-  actions: { flexDirection: 'row', alignItems: 'center', gap: spacing.lg },
-  action: { color: palette.muted, fontSize: 11, fontWeight: '700' },
-  open: { color: palette.tomato, marginLeft: 'auto', fontSize: 11, fontWeight: '800' },
-  fab: { position: 'absolute', right: 22, bottom: 105, width: 56, height: 56, borderRadius: 28, backgroundColor: palette.tomato, alignItems: 'center', justifyContent: 'center', ...shadow },
-  fabText: { color: '#fff', fontSize: 28, fontWeight: '300', marginTop: -2 },
+  avatar: { width: 34, height: 34, borderRadius: 17, backgroundColor: palette.accentSoft, alignItems: 'center', justifyContent: 'center' },
+  avatarText: { color: palette.tomato, fontSize: 14, fontWeight: '600' },
+  author: { flex: 1, color: palette.ink, fontSize: 14, fontWeight: '500' },
+  time: { color: palette.muted, fontSize: 12 },
+  photo: { height: 200, borderRadius: radii.md },
+  title: { color: palette.ink, fontSize: 16, lineHeight: 22, fontWeight: '500', letterSpacing: -0.2 },
+  actions: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  action: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+  actionText: { color: palette.muted, fontSize: 13 },
 });

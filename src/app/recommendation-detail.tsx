@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
 import { Card, Header, IconButton, MacroBar, PrimaryButton, Screen, SectionTitle } from '@/components/ui';
-import { font, palette, radii, spacing } from '@/constants/design';
+import { font, palette, radii, shadow, spacing } from '@/constants/design';
 import { getErrorMessage, isMockMode, simulateRequest } from '@/services/api';
 import { menuApi } from '@/services/bapmeokja-api';
 
@@ -59,9 +59,9 @@ export default function RecommendationDetailScreen() {
   const isHome = mode === 'home';
   const difficulty = detail.difficulty === 'EASY' ? '쉬움' : detail.difficulty === 'MEDIUM' ? '보통' : detail.difficulty === 'HARD' ? '어려움' : '';
   return <Screen><Header title={isHome ? '집밥 레시피' : '메뉴 상세'} left={<IconButton label="←" onPress={() => router.back()} />} />
-    <View style={styles.hero}>{detail.imageUrl ? <Image source={{ uri: detail.imageUrl }} style={styles.image} contentFit="cover" /> : <View style={styles.initial}><Text style={styles.initialText}>{detail.name.slice(0, 1)}</Text></View>}</View>
+    {detail.imageUrl ? <View style={styles.hero}><Image source={{ uri: detail.imageUrl }} style={styles.image} contentFit="cover" /></View> : null}
     <View style={styles.titleWrap}><Text style={styles.kind}>{isHome ? `${detail.cookingTime ?? 0}분 · ${difficulty}` : '외식 추천 메뉴'}</Text><Text style={styles.title}>{detail.name}</Text></View>
-    <Card><View style={styles.calorieTop}><View><Text style={styles.cardLabel}>영양 정보</Text><Text style={styles.calories}>{detail.calorie} <Text style={styles.unit}>kcal</Text></Text></View>{detail.price ? <View style={styles.price}><Text style={styles.priceLabel}>{isHome ? '예상 재료비' : '평균 가격'}</Text><Text style={styles.priceValue}>{detail.price.toLocaleString()}원</Text></View> : null}</View><View style={styles.macros}><MacroBar label="탄수화물" value={detail.carb} goal={100} color={palette.leaf} /><MacroBar label="단백질" value={detail.protein} goal={60} color={palette.yellow} /><MacroBar label="지방" value={detail.fat} goal={30} color={palette.tomato} /></View></Card>
+    <Card><View style={styles.calorieTop}><View><Text style={styles.cardLabel}>영양 정보</Text><Text style={styles.calories}>{detail.calorie} <Text style={styles.unit}>kcal</Text></Text></View>{detail.price ? <View style={styles.price}><Text style={styles.priceLabel}>{isHome ? '예상 재료비' : '평균 가격'}</Text><Text style={styles.priceValue}>{detail.price.toLocaleString()}원</Text></View> : null}</View><View style={styles.macros}><MacroBar label="탄수화물" value={detail.carb} goal={100} color={palette.leafFill} /><MacroBar label="단백질" value={detail.protein} goal={60} color={palette.yellow} /><MacroBar label="지방" value={detail.fat} goal={30} color={palette.tomatoFill} /></View></Card>
     <SectionTitle title="재료" />
     <Card>{detail.ingredients.map((ingredient, index) => <View key={`${ingredient.name}-${index}`} style={[styles.ingredient, index > 0 && styles.ingredientBorder]}><View><Text style={styles.ingredientName}>{ingredient.name}</Text><Text style={styles.ingredientAmount}>{ingredient.amount}</Text></View>{ingredient.alternatives?.length ? <Text style={styles.alternative}>대체: {ingredient.alternatives[0].name}</Text> : null}</View>)}</Card>
     {detail.steps?.length ? <><SectionTitle title="조리 순서" />{detail.steps.map((step) => <View key={step.stepNo} style={styles.step}><View style={styles.stepNumber}><Text style={styles.stepNumberText}>{step.stepNo}</Text></View><Text style={styles.stepText}>{step.description}</Text></View>)}</> : null}
@@ -73,28 +73,26 @@ const styles = StyleSheet.create({
   center: { minHeight: 430, alignItems: 'center', justifyContent: 'center', gap: spacing.sm, paddingHorizontal: spacing.xl },
   centerTitle: { ...font.heading, color: palette.ink },
   centerText: { ...font.body, color: palette.muted, textAlign: 'center' },
-  hero: { height: 250, backgroundColor: '#F0E2CE', borderRadius: radii.xl, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
+  hero: { height: 200, borderRadius: radii.lg, alignItems: 'center', justifyContent: 'center', overflow: 'hidden', backgroundColor: palette.sunken },
   image: { width: '100%', height: '100%' },
-  initial: { width: 126, height: 126, borderRadius: 63, backgroundColor: palette.surface, alignItems: 'center', justifyContent: 'center' },
-  initialText: { color: palette.tomatoDark, fontSize: 48, fontWeight: '900' },
   titleWrap: { gap: 4 },
-  kind: { color: palette.tomato, fontSize: 11, fontWeight: '900' },
+  kind: { color: palette.tomato, fontSize: 13, fontWeight: '500' },
   title: { ...font.title, color: palette.ink },
   calorieTop: { flexDirection: 'row', justifyContent: 'space-between' },
-  cardLabel: { color: palette.muted, fontSize: 11 },
-  calories: { color: palette.ink, fontSize: 28, fontWeight: '900', marginTop: 3 },
-  unit: { color: palette.muted, fontSize: 11 },
+  cardLabel: { color: palette.muted, fontSize: 12 },
+  calories: { color: palette.ink, fontSize: 28, fontWeight: '600', marginTop: 3 },
+  unit: { color: palette.muted, fontSize: 12 },
   price: { alignItems: 'flex-end' },
-  priceLabel: { color: palette.muted, fontSize: 10 },
-  priceValue: { color: palette.leaf, fontSize: 16, fontWeight: '900', marginTop: 4 },
+  priceLabel: { color: palette.muted, fontSize: 12 },
+  priceValue: { color: palette.leaf, fontSize: 16, fontWeight: '600', marginTop: 4 },
   macros: { gap: 12, marginTop: spacing.md },
   ingredient: { minHeight: 58, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  ingredientBorder: { borderTopWidth: 1, borderTopColor: palette.line },
-  ingredientName: { color: palette.ink, fontWeight: '800' },
-  ingredientAmount: { color: palette.muted, fontSize: 11, marginTop: 3 },
-  alternative: { color: palette.leaf, fontSize: 10, fontWeight: '800' },
-  step: { flexDirection: 'row', gap: spacing.md, backgroundColor: palette.surface, borderRadius: radii.lg, padding: spacing.md, alignItems: 'center', borderWidth: 1, borderColor: palette.line },
-  stepNumber: { width: 34, height: 34, borderRadius: 17, backgroundColor: palette.tomatoSoft, alignItems: 'center', justifyContent: 'center' },
-  stepNumberText: { color: palette.tomato, fontWeight: '900' },
+  ingredientBorder: {},
+  ingredientName: { color: palette.ink, fontWeight: '500' },
+  ingredientAmount: { color: palette.muted, fontSize: 12, marginTop: 3 },
+  alternative: { color: palette.leaf, fontSize: 12, fontWeight: '500' },
+  step: { flexDirection: 'row', gap: spacing.md, backgroundColor: palette.surface, borderRadius: radii.lg, padding: spacing.md, alignItems: 'center', ...shadow },
+  stepNumber: { width: 30, height: 30, borderRadius: 15, backgroundColor: palette.accentSoft, alignItems: 'center', justifyContent: 'center' },
+  stepNumberText: { color: palette.tomato, fontWeight: '600' },
   stepText: { ...font.body, color: palette.ink, flex: 1 },
 });

@@ -59,5 +59,5 @@ export default function PasswordSettingsScreen() {
 const styles = StyleSheet.create({
   guide: { backgroundColor: palette.blueSoft, borderRadius: radii.md, padding: spacing.md },
   guideTitle: { ...font.subheading, color: palette.blue },
-  guideText: { ...font.caption, color: '#5F6D86', lineHeight: 18, marginTop: 4 },
+  guideText: { ...font.caption, lineHeight: 18, marginTop: 4, color: palette.muted },
 });

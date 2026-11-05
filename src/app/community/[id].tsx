@@ -1,10 +1,10 @@
 import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, StyleSheet, Text, View } from 'react-native';
 
-import { Card, Field, Header, IconButton, NutrientChips, PrimaryButton, Screen } from '@/components/ui';
-import { font, palette, radii, spacing } from '@/constants/design';
+import { Card, Field, Header, IconButton, NutrientChips, PrimaryButton, Screen, Pressable } from '@/components/ui';
+import { font, palette, radii, shadow, spacing } from '@/constants/design';
 import { useApp } from '@/context/app-context';
 import { getErrorMessage, isMockMode, resolveApiAssetUrl, simulateRequest } from '@/services/api';
 import { communityApi } from '@/services/bapmeokja-api';
@@ -95,7 +95,7 @@ export default function PostDetailScreen() {
     <Text style={styles.content}>{post.content}</Text>
     {post.imageUrl ? <Image source={{ uri: resolveApiAssetUrl(post.imageUrl) }} style={styles.photo} contentFit="cover" /> : null}
     {post.nutritionInfo ? <Card style={styles.nutrition}><View style={styles.nutritionTop}><View><Text style={styles.analysisLabel}>사진 기반 영양 추정</Text><Text style={styles.mealName}>{post.nutritionInfo.foodName}</Text></View><Text style={styles.kcal}>{post.nutritionInfo.calorie} kcal</Text></View><NutrientChips carbs={post.nutritionInfo.carb} protein={post.nutritionInfo.protein} fat={post.nutritionInfo.fat} /><Text style={styles.estimateNotice}>사진을 바탕으로 계산한 참고용 추정값이며 실제 영양 정보와 다를 수 있어요.</Text></Card> : null}
-    <View style={styles.actions}><Pressable onPress={like}><Text style={[styles.action, post.isLiked && styles.liked]}>{post.isLiked ? '♥' : '♡'} 좋아요 {post.likeCount}</Text></Pressable><Text style={styles.action}>댓글 {post.commentCount}</Text></View>
+    <View style={styles.actions}><Pressable accessibilityRole="button" hitSlop={8} onPress={like}><Text style={[styles.action, post.isLiked && styles.liked]}>{post.isLiked ? '♥' : '♡'} 좋아요 {post.likeCount}</Text></Pressable></View>
     <View style={styles.divider} /><Text style={styles.commentTitle}>댓글 {post.commentCount}</Text>
     {post.comments.length ? post.comments.map((item) => <View key={item.commentId} style={styles.comment}><View style={styles.commentAvatar}><Text style={styles.commentAvatarText}>{item.authorNickname.slice(0, 1)}</Text></View><View style={styles.commentBody}><View style={styles.commentHead}><Text style={styles.commentAuthor}>{item.authorNickname}</Text><View style={styles.commentMeta}><Text style={styles.commentTime}>{formatRelativeTime(item.createdAt)}</Text>{!isMockMode && item.authorNickname === profile.nickname ? <Pressable onPress={() => removeComment(item.commentId)} hitSlop={8}><Text style={styles.commentDelete}>삭제</Text></Pressable> : null}</View></View><Text style={styles.commentText}>{item.content}</Text></View></View>) : <Text style={styles.empty}>첫 댓글을 남겨 보세요.</Text>}
     <Field value={comment} onChangeText={setComment} placeholder="따뜻한 댓글을 남겨 주세요" maxLength={1000} returnKeyType="send" onSubmitEditing={submit} />
@@ -105,33 +105,33 @@ export default function PostDetailScreen() {
 
 const styles = StyleSheet.create({
   authorRow: { flexDirection: 'row', gap: spacing.sm, alignItems: 'center' },
-  avatar: { width: 45, height: 45, borderRadius: 23, backgroundColor: palette.surfaceWarm, alignItems: 'center', justifyContent: 'center' },
-  avatarText: { color: palette.tomatoDark, fontSize: 15, fontWeight: '900' },
-  author: { color: palette.ink, fontWeight: '800' },
-  time: { color: palette.muted, fontSize: 10, marginTop: 3 },
+  avatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: palette.accentSoft, alignItems: 'center', justifyContent: 'center' },
+  avatarText: { color: palette.tomato, fontSize: 15, fontWeight: '600' },
+  author: { color: palette.ink, fontWeight: '500' },
+  time: { color: palette.muted, fontSize: 12, marginTop: 3 },
   content: { ...font.body, color: palette.ink },
-  photo: { height: 285, borderRadius: radii.xl },
-  nutrition: { backgroundColor: palette.background },
+  photo: { height: 260, borderRadius: radii.lg },
+  nutrition: { backgroundColor: palette.accentSoft, boxShadow: 'none' },
   nutritionTop: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: spacing.sm },
-  analysisLabel: { color: palette.tomato, fontSize: 10, fontWeight: '900' },
-  mealName: { color: palette.ink, fontWeight: '800', marginTop: 3 },
-  kcal: { color: palette.ink, fontWeight: '900' },
+  analysisLabel: { color: palette.tomato, fontSize: 12, fontWeight: '500' },
+  mealName: { color: palette.ink, fontWeight: '500', marginTop: 3 },
+  kcal: { color: palette.ink, fontWeight: '600' },
   estimateNotice: { ...font.caption, color: palette.muted, lineHeight: 17, marginTop: spacing.sm },
   actions: { flexDirection: 'row', gap: spacing.lg, alignItems: 'center' },
-  action: { color: palette.muted, fontWeight: '700', fontSize: 12 },
+  action: { color: palette.muted, fontWeight: '500', fontSize: 12 },
   liked: { color: palette.tomato },
-  delete: { color: palette.danger, fontSize: 12, fontWeight: '900' },
+  delete: { color: palette.danger, fontSize: 12, fontWeight: '600' },
   divider: { height: 1, backgroundColor: palette.line },
   commentTitle: { ...font.subheading, color: palette.ink },
   comment: { flexDirection: 'row', gap: spacing.sm },
-  commentAvatar: { width: 34, height: 34, borderRadius: 17, backgroundColor: palette.tomatoSoft, alignItems: 'center', justifyContent: 'center' },
-  commentAvatarText: { color: palette.tomatoDark, fontSize: 11, fontWeight: '900' },
-  commentBody: { flex: 1, backgroundColor: palette.surface, borderRadius: radii.md, padding: spacing.sm },
+  commentAvatar: { width: 32, height: 32, borderRadius: 16, backgroundColor: palette.accentSoft, alignItems: 'center', justifyContent: 'center' },
+  commentAvatarText: { color: palette.tomato, fontSize: 12, fontWeight: '600' },
+  commentBody: { flex: 1, backgroundColor: palette.surface, borderRadius: radii.md, padding: spacing.sm, ...shadow },
   commentHead: { flexDirection: 'row', justifyContent: 'space-between' },
   commentMeta: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  commentAuthor: { color: palette.ink, fontWeight: '800', fontSize: 11 },
-  commentTime: { color: palette.muted, fontSize: 9 },
-  commentDelete: { color: palette.danger, fontSize: 9, fontWeight: '800' },
+  commentAuthor: { color: palette.ink, fontWeight: '500', fontSize: 12 },
+  commentTime: { color: palette.muted, fontSize: 12 },
+  commentDelete: { color: palette.danger, fontSize: 12, fontWeight: '500' },
   commentText: { ...font.body, color: palette.ink, marginTop: 4 },
   empty: { ...font.body, color: palette.muted, textAlign: 'center', padding: spacing.lg },
 });

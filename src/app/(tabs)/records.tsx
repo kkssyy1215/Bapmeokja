@@ -8,27 +8,14 @@ import { useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
-  Pressable,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
 
-import {
-  Card,
-  Header,
-  IconButton,
-  Screen,
-  SectionTitle,
-} from '@/components/ui';
+import { Card, EmptyState, Header, Icon, IconButton, ListGroup, MealRow, Note, Pressable, Screen, SectionTitle } from '@/components/ui';
 
-import {
-  font,
-  palette,
-  radii,
-  shadow,
-  spacing,
-} from '@/constants/design';
+import { palette, radii, shadow, spacing } from '@/constants/design';
 
 import { useApp } from '@/context/app-context';
 import { saveMealImage } from '@/services/meal-image-store';
@@ -129,409 +116,56 @@ export default function RecordsScreen() {
 
   return (
     <Screen>
-      {/* 상단 헤더 */}
       <Header
         title="식단 기록"
         subtitle="사진 한 장이면 충분해요"
-        right={
-          <IconButton
-            label="◫"
-            onPress={() =>
-              router.push('/history')
-            }
-            accessibilityLabel="식단 달력"
-          />
-        }
+        right={<IconButton label="◫" onPress={() => router.push('/history')} accessibilityLabel="식단 달력" />}
       />
 
-      {/* 메인 배너 */}
-      <View style={styles.hero}>
-        <Text style={styles.sparkle}>
-          PHOTO FOOD SCAN
-        </Text>
-
-        <Text style={styles.title}>
-          지금 먹은 음식을{'\n'}
-          기록해 볼까요?
-        </Text>
-
-        <Text style={styles.description}>
-          사진에 보이는 음식과 양으로
-          영양 정보를 추정해요.
-          저장 전에 직접 확인하고
-          수정할 수 있어요.
-        </Text>
-
-        <View style={styles.dish}>
-          <Text style={styles.dishEmoji}>
-            🍱
-          </Text>
-
-          <View style={styles.scanLine} />
-        </View>
-      </View>
-
-      {/* 카메라 촬영 */}
-      <Pressable
-        style={styles.camera}
-        onPress={() => pick(true)}
-        disabled={picking}
-      >
-        <View style={styles.actionIcon}>
-          <Text style={styles.actionEmoji}>
-            📷
-          </Text>
-        </View>
-
-        <View style={styles.actionCopy}>
-          <Text style={styles.actionTitle}>
-            카메라로 촬영
-          </Text>
-
-          <Text style={styles.actionSub}>
-            지금 바로 찍고 분석하기
-          </Text>
-        </View>
-
-        <Text style={styles.chevron}>
-          ›
-        </Text>
-      </Pressable>
-
-      {/* 앨범 선택 / 직접 입력 */}
-      <View style={styles.actionGrid}>
-        <Pressable
-          style={styles.smallAction}
-          onPress={() => pick(false)}
-          disabled={picking}
-        >
-          <Text style={styles.smallEmoji}>
-            🖼️
-          </Text>
-
-          <Text style={styles.smallTitle}>
-            앨범에서 선택
-          </Text>
-
-          <Text style={styles.smallSub}>
-            저장된 음식 사진
-          </Text>
+      <View style={styles.bento}>
+        <Pressable accessibilityRole="button" style={styles.camera} onPress={() => pick(true)} disabled={picking}>
+          <View style={styles.cameraIcon}><Icon name="camera" size={22} color={palette.onAccent} /></View>
+          <View>
+            <Text style={styles.cameraTitle}>카메라로 촬영</Text>
+            <Text style={styles.cameraSub}>찍으면 바로 분석해요</Text>
+          </View>
         </Pressable>
-
-        <Pressable
-          style={styles.smallAction}
-          onPress={() =>
-            router.push('/manual-entry')
-          }
-        >
-          <Text style={styles.smallEmoji}>
-            ⌨️
-          </Text>
-
-          <Text style={styles.smallTitle}>
-            직접 입력
-          </Text>
-
-          <Text style={styles.smallSub}>
-            음식명과 양 입력
-          </Text>
-        </Pressable>
-      </View>
-
-      {/* 이미지 처리 중 안내 */}
-      {picking && (
-        <View style={styles.processing}>
-          <ActivityIndicator
-            color={palette.tomato}
-          />
-
-          <Text style={styles.processingText}>
-            사진을 준비하고 있어요...
-          </Text>
+        <View style={styles.side}>
+          <Pressable accessibilityRole="button" style={styles.tile} onPress={() => pick(false)} disabled={picking}>
+            <View style={styles.tileIcon}><Icon name="image" size={17} color={palette.tomato} /></View>
+            <Text style={styles.tileTitle}>앨범에서 선택</Text>
+          </Pressable>
+          <Pressable accessibilityRole="button" style={styles.tile} onPress={() => router.push('/manual-entry')}>
+            <View style={styles.tileIcon}><Icon name="edit-3" size={17} color={palette.tomato} /></View>
+            <Text style={styles.tileTitle}>직접 입력</Text>
+          </Pressable>
         </View>
-      )}
-
-      {/* 최근 기록 */}
-      <SectionTitle
-        title="최근 기록"
-        action="전체 보기"
-        onAction={() =>
-          router.push('/history')
-        }
-      />
-
-      <Card style={styles.recentCard}>
-        {meals.slice(0, 3).map(
-          (meal, index) => (
-            <Pressable
-              key={meal.id}
-              onPress={() =>
-                router.push({
-                  pathname:
-                    '/meal-analysis',
-                  params: {
-                    saved: '1',
-                    id: meal.id,
-                  },
-                })
-              }
-              style={[
-                styles.recent,
-                index > 0 &&
-                  styles.recentBorder,
-              ]}
-            >
-              <Text style={styles.recentEmoji}>
-                {meal.emoji}
-              </Text>
-
-              <View style={styles.recentInfo}>
-                <Text style={styles.recentName}>
-                  {meal.name}
-                </Text>
-
-                <Text style={styles.recentMeta}>
-                  {meal.type} ·{' '}
-                  {meal.calories} kcal
-                </Text>
-              </View>
-
-              <Text style={styles.chevronSmall}>
-                ›
-              </Text>
-            </Pressable>
-          )
-        )}
-      </Card>
-
-      {/* 사용 안내 */}
-      <View style={styles.guide}>
-        <Text style={styles.guideTitle}>
-          사진 분석은 참고용이에요
-        </Text>
-
-        <Text style={styles.guideText}>
-          • 음식 전체가 보이도록
-          위에서 촬영해 주세요.
-          {'\n'}
-          • 사진 기반 추정값은 실제와
-          다를 수 있으니 저장 전에
-          음식명, 양, 영양값을
-          확인해 주세요.
-        </Text>
       </View>
+
+      {picking ? <View style={styles.processing}><ActivityIndicator color={palette.tomato} /><Text style={styles.processingText}>사진을 준비하고 있어요</Text></View> : null}
+
+      <Note>사진 분석은 참고용이에요. 저장 전에 음식명과 양을 확인해 주세요.</Note>
+
+      <SectionTitle title="최근 기록" action="전체 보기" onAction={() => router.push('/history')} />
+      {meals.length ? (
+        <ListGroup>
+          {meals.slice(0, 5).map((meal) => <MealRow key={meal.id} meal={meal} onPress={() => router.push({ pathname: '/meal-analysis', params: { saved: '1', id: meal.id } })} />)}
+        </ListGroup>
+      ) : <Card><EmptyState icon="edit-3" title="아직 기록이 없어요" description="첫 식사를 사진으로 남겨 보세요." /></Card>}
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  hero: {
-    minHeight: 250,
-    borderRadius: radii.xl,
-    backgroundColor: palette.ink,
-    padding: spacing.lg,
-    overflow: 'hidden',
-  },
-
-  sparkle: {
-    color: '#FF9F8D',
-    fontSize: 10,
-    fontWeight: '900',
-    letterSpacing: 1.7,
-  },
-
-  title: {
-    ...font.title,
-    color: '#fff',
-    marginTop: 8,
-    lineHeight: 37,
-  },
-
-  description: {
-    ...font.caption,
-    color: '#C9C4BA',
-    marginTop: 8,
-    maxWidth: 230,
-  },
-
-  dish: {
-    position: 'absolute',
-    right: -10,
-    bottom: -20,
-    width: 150,
-    height: 150,
-    backgroundColor: '#3A3833',
-    borderRadius: 75,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  dishEmoji: {
-    fontSize: 76,
-  },
-
-  scanLine: {
-    position: 'absolute',
-    width: 120,
-    height: 2,
-    backgroundColor: palette.tomato,
-    top: 70,
-  },
-
-  camera: {
-    minHeight: 82,
-    backgroundColor: palette.tomato,
-    borderRadius: radii.lg,
-    padding: spacing.md,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    ...shadow,
-  },
-
-  actionIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: 'rgba(255,255,255,.2)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  actionEmoji: {
-    fontSize: 23,
-  },
-
-  actionCopy: {
-    flex: 1,
-  },
-
-  actionTitle: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '900',
-  },
-
-  actionSub: {
-    color: '#FFE4DE',
-    fontSize: 11,
-    marginTop: 3,
-  },
-
-  chevron: {
-    color: '#fff',
-    fontSize: 30,
-  },
-
-  actionGrid: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-  },
-
-  smallAction: {
-    flex: 1,
-    minHeight: 125,
-    backgroundColor: palette.surface,
-    borderRadius: radii.lg,
-    padding: spacing.md,
-    borderWidth: 1,
-    borderColor: palette.line,
-  },
-
-  smallEmoji: {
-    fontSize: 28,
-  },
-
-  smallTitle: {
-    fontWeight: '800',
-    color: palette.ink,
-    marginTop: spacing.sm,
-  },
-
-  smallSub: {
-    color: palette.muted,
-    fontSize: 11,
-    marginTop: 3,
-  },
-
-  processing: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.sm,
-    padding: spacing.md,
-  },
-
-  processingText: {
-    color: palette.muted,
-    fontSize: 12,
-  },
-
-  recentCard: {
-    paddingVertical: 4,
-  },
-
-  recent: {
-    minHeight: 70,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    paddingVertical: 9,
-  },
-
-  recentBorder: {
-    borderTopWidth: 1,
-    borderTopColor: palette.line,
-  },
-
-  recentEmoji: {
-    fontSize: 28,
-    width: 45,
-    height: 45,
-    textAlign: 'center',
-    paddingTop: 7,
-    backgroundColor: palette.surfaceWarm,
-    borderRadius: radii.md,
-    overflow: 'hidden',
-  },
-
-  recentInfo: {
-    flex: 1,
-  },
-
-  recentName: {
-    color: palette.ink,
-    fontSize: 14,
-    fontWeight: '800',
-  },
-
-  recentMeta: {
-    color: palette.muted,
-    fontSize: 11,
-    marginTop: 3,
-  },
-
-  chevronSmall: {
-    color: palette.muted,
-    fontSize: 25,
-  },
-
-  guide: {
-    backgroundColor: palette.blueSoft,
-    borderRadius: radii.md,
-    padding: spacing.md,
-    gap: spacing.xs,
-  },
-
-  guideTitle: {
-    color: palette.blue,
-    fontWeight: '800',
-    fontSize: 13,
-  },
-
-  guideText: {
-    ...font.caption,
-    color: '#5F6D86',
-    lineHeight: 19,
-  },
+  bento: { flexDirection: 'row', gap: 12, minHeight: 172 },
+  side: { flex: 1, gap: 12 },
+  camera: { flex: 1.1, backgroundColor: palette.accent, borderRadius: radii.lg, padding: 16, justifyContent: 'space-between' },
+  cameraIcon: { width: 42, height: 42, borderRadius: 14, backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' },
+  cameraTitle: { color: palette.onAccent, fontSize: 17, fontWeight: '600', letterSpacing: -0.3 },
+  cameraSub: { color: palette.onAccent, fontSize: 13, marginTop: 2 },
+  tile: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: palette.surface, borderRadius: radii.lg, paddingHorizontal: 12, ...shadow },
+  tileIcon: { width: 34, height: 34, borderRadius: 11, backgroundColor: palette.accentSoft, alignItems: 'center', justifyContent: 'center' },
+  tileTitle: { flex: 1, color: palette.ink, fontSize: 14, fontWeight: '500', letterSpacing: -0.2 },
+  processing: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.sm },
+  processingText: { color: palette.muted, fontSize: 13 },
 });

@@ -1,10 +1,10 @@
 import * as Location from 'expo-location';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Linking, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Linking, Platform, StyleSheet, Text, View } from 'react-native';
 
-import { Card, EmptyState, Header, IconButton, PrimaryButton, Screen } from '@/components/ui';
-import { font, palette, radii, spacing } from '@/constants/design';
+import { Card, EmptyState, Header, IconButton, PrimaryButton, Screen, Pressable } from '@/components/ui';
+import { font, palette, radii, shadow, spacing } from '@/constants/design';
 import { getErrorMessage, isMockMode, simulateRequest } from '@/services/api';
 import { menuApi } from '@/services/bapmeokja-api';
 import { NearbyStore } from '@/types/api';
@@ -134,42 +134,41 @@ export default function NearbyScreen() {
   return <Screen><Header title="주변 식당" subtitle="추천 메뉴를 판매하는 가까운 매장" left={<IconButton label="←" onPress={() => router.back()} />} />
     <View style={styles.mapPlaceholder}><View style={[styles.mapCircle, locationMode !== 'device' && styles.mapCircleDemo]}><Text style={styles.mapCircleText}>{mapLabel}</Text></View><Text style={styles.mapTitle}>{mapTitle}</Text><Text style={styles.mapText}>{locationMode === 'device' ? '가까운 매장을 선택하면 기기의 지도 앱에서 위치를 확인할 수 있어요.' : message || '위치 권한을 확인한 뒤 다시 시도해 주세요.'}</Text></View>
     {(locationMode === 'unavailable' || locationMode === 'error') && !loading ? <View style={styles.locationHelp}><Text style={styles.locationHelpTitle}>{locationMode === 'unavailable' ? '위치 확인이 필요해요' : '매장 정보를 불러오지 못했어요'}</Text><Text style={styles.locationHelpText}>{message} 위치 권한을 확인해 다시 시도하거나, 서울시청 기준 시연 위치를 직접 선택할 수 있어요.</Text><View style={styles.locationActions}><View style={styles.flex}><PrimaryButton title="다시 확인" variant="secondary" onPress={findFromDevice} /></View><View style={styles.flex}><PrimaryButton title="시연 위치 사용" onPress={useDemoPosition} /></View></View></View> : null}
-    {locationMode === 'demo' && !loading ? <View style={styles.demoNotice}><Text style={styles.demoNoticeText}>{message}</Text>{!isMockMode ? <Text style={styles.useLocation} onPress={findFromDevice}>현재 위치 다시 확인</Text> : null}</View> : null}
+    {locationMode === 'demo' && !loading && !isMockMode ? <Text accessibilityRole="button" style={styles.useLocation} onPress={findFromDevice}>현재 위치 다시 확인</Text> : null}
     <View style={styles.sectionHeader}><Text style={styles.sectionTitle}>가까운 매장</Text><Text style={styles.count}>{stores.length}곳</Text></View>
-    {loading ? <ActivityIndicator color={palette.tomato} /> : stores.length ? stores.map((store, index) => <Card key={store.storeId}><View style={styles.storeHeader}><View style={[styles.rank, index === 0 && styles.rankFirst]}><Text style={styles.rankText}>{index + 1}</Text></View><View style={styles.storeInfo}><Text style={styles.storeName}>{store.name}</Text><Text style={styles.address}>{store.address}</Text></View><Text style={styles.distance}>{store.distance < 1000 ? `${store.distance}m` : `${(store.distance / 1000).toFixed(1)}km`}</Text></View>{store.menus.map((menu) => <View key={menu.name} style={styles.menu}><View><Text style={styles.menuName}>{menu.name}</Text><Text style={styles.menuCalorie}>{menu.calorie} kcal</Text></View><Text style={styles.price}>{menu.price.toLocaleString()}원</Text></View>)}<Pressable accessibilityRole="link" onPress={() => openMap(store)} style={styles.mapLink}><Text style={styles.mapLinkText}>지도 앱에서 보기 ↗</Text></Pressable></Card>) : <Card><EmptyState emoji="⌖" title="주변에 적합한 식당이 없어요" description="검색 반경을 넓히거나 다른 메뉴를 선택해 보세요." /></Card>}
+    {loading ? <ActivityIndicator color={palette.tomato} /> : stores.length ? stores.map((store, index) => <Card key={store.storeId}><View style={styles.storeHeader}><View style={[styles.rank, index === 0 && styles.rankFirst]}><Text style={[styles.rankText, index === 0 && styles.rankTextFirst]}>{index + 1}</Text></View><View style={styles.storeInfo}><Text style={styles.storeName}>{store.name}</Text><Text style={styles.address}>{store.address}</Text></View><Text style={styles.distance}>{store.distance < 1000 ? `${store.distance}m` : `${(store.distance / 1000).toFixed(1)}km`}</Text></View>{store.menus.map((menu) => <View key={menu.name} style={styles.menu}><View><Text style={styles.menuName}>{menu.name}</Text><Text style={styles.menuCalorie}>{menu.calorie} kcal</Text></View><Text style={styles.price}>{menu.price.toLocaleString()}원</Text></View>)}<Pressable accessibilityRole="link" onPress={() => openMap(store)} style={styles.mapLink}><Text style={styles.mapLinkText}>지도 앱에서 보기 ↗</Text></Pressable></Card>) : <Card><EmptyState icon="map-pin" title="주변에 적합한 식당이 없어요" description="검색 반경을 넓히거나 다른 메뉴를 선택해 보세요." /></Card>}
   </Screen>;
 }
 
 const styles = StyleSheet.create({
-  mapPlaceholder: { minHeight: 210, borderRadius: radii.xl, backgroundColor: '#E8E5DD', alignItems: 'center', justifyContent: 'center', padding: spacing.lg },
-  mapCircle: { width: 70, height: 70, borderRadius: 35, backgroundColor: 'rgba(85,134,216,.18)', borderWidth: 1, borderColor: palette.blue, alignItems: 'center', justifyContent: 'center' },
-  mapCircleDemo: { backgroundColor: palette.yellowSoft, borderColor: palette.yellow },
-  mapCircleText: { color: palette.blue, fontSize: 11, fontWeight: '900' },
+  mapPlaceholder: { minHeight: 150, borderRadius: radii.lg, alignItems: 'center', justifyContent: 'center', padding: spacing.lg, backgroundColor: palette.accentSoft },
+  mapCircle: { width: 52, height: 52, borderRadius: 26, alignItems: 'center', justifyContent: 'center', backgroundColor: palette.surface },
+  mapCircleDemo: { backgroundColor: palette.background },
+  mapCircleText: { color: palette.tomato, fontSize: 12, fontWeight: '500' },
   mapTitle: { ...font.subheading, color: palette.ink, marginTop: spacing.md },
   mapText: { ...font.caption, color: palette.muted, textAlign: 'center', marginTop: 4 },
-  locationHelp: { backgroundColor: palette.surface, borderWidth: 1, borderColor: palette.line, borderRadius: radii.lg, padding: spacing.md, gap: spacing.sm },
-  locationHelpTitle: { color: palette.ink, fontSize: 14, fontWeight: '900' },
+  locationHelp: { backgroundColor: palette.surface, borderRadius: radii.lg, padding: spacing.md, gap: spacing.sm, ...shadow },
+  locationHelpTitle: { color: palette.ink, fontSize: 14, fontWeight: '600' },
   locationHelpText: { ...font.caption, color: palette.muted, lineHeight: 18 },
   locationActions: { flexDirection: 'row', gap: spacing.sm },
   flex: { flex: 1 },
-  demoNotice: { backgroundColor: palette.yellowSoft, borderRadius: radii.md, padding: spacing.md, flexDirection: 'row', gap: spacing.sm, alignItems: 'center' },
-  demoNoticeText: { ...font.caption, color: '#6E5B34', flex: 1, lineHeight: 17 },
-  useLocation: { color: palette.tomato, fontSize: 10, fontWeight: '900' },
+  useLocation: { color: palette.tomato, fontSize: 14, textAlign: 'center', paddingVertical: 6 },
   sectionHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   sectionTitle: { ...font.heading, color: palette.ink },
-  count: { color: palette.muted, fontSize: 11 },
+  count: { color: palette.muted, fontSize: 12 },
   storeHeader: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  rank: { width: 28, height: 28, borderRadius: 14, backgroundColor: palette.ink, alignItems: 'center', justifyContent: 'center' },
-  rankFirst: { backgroundColor: palette.tomato },
-  rankText: { color: '#fff', fontSize: 11, fontWeight: '900' },
+  rank: { width: 30, height: 30, borderRadius: 15, alignItems: 'center', justifyContent: 'center', backgroundColor: palette.accentSoft },
+  rankFirst: { backgroundColor: palette.accent },
+  rankText: { fontSize: 13, fontWeight: '600', color: palette.tomato },
+  rankTextFirst: { color: palette.onAccent },
   storeInfo: { flex: 1 },
-  storeName: { color: palette.ink, fontWeight: '900' },
-  address: { color: palette.muted, fontSize: 10, marginTop: 3 },
-  distance: { color: palette.leaf, fontSize: 11, fontWeight: '900' },
-  menu: { marginTop: spacing.md, paddingTop: spacing.md, borderTopWidth: 1, borderTopColor: palette.line, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  menuName: { color: palette.ink, fontSize: 12, fontWeight: '800' },
-  menuCalorie: { color: palette.muted, fontSize: 10, marginTop: 3 },
-  price: { color: palette.ink, fontSize: 12, fontWeight: '900' },
-  mapLink: { marginTop: spacing.md, minHeight: 42, borderRadius: radii.md, backgroundColor: palette.leafSoft, alignItems: 'center', justifyContent: 'center' },
-  mapLinkText: { color: palette.leaf, fontSize: 12, fontWeight: '900' },
+  storeName: { color: palette.ink, fontWeight: '600' },
+  address: { color: palette.muted, fontSize: 12, marginTop: 3 },
+  distance: { color: palette.leaf, fontSize: 12, fontWeight: '600' },
+  menu: { marginTop: spacing.md, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  menuName: { color: palette.ink, fontSize: 12, fontWeight: '500' },
+  menuCalorie: { color: palette.muted, fontSize: 12, marginTop: 3 },
+  price: { color: palette.ink, fontSize: 12, fontWeight: '600' },
+  mapLink: { marginTop: spacing.md, minHeight: 44, borderRadius: radii.md, backgroundColor: palette.accentSoft, alignItems: 'center', justifyContent: 'center' },
+  mapLinkText: { color: palette.tomato, fontSize: 14, fontWeight: '500' },
 });

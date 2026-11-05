@@ -1,10 +1,13 @@
+import { Image } from 'expo-image';
 import { Redirect, router } from 'expo-router';
 import { useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
-import { Field, PrimaryButton, Screen } from '@/components/ui';
-import { font, palette, radii, shadow, spacing } from '@/constants/design';
+import { Field, PrimaryButton, Screen, Pressable } from '@/components/ui';
+import { font, palette, spacing } from '@/constants/design';
 import { useApp } from '@/context/app-context';
+
+const character = require('../../assets/characters/tomato-balanced.png');
 
 export default function LoginScreen() {
   const { hydrated, isAuthenticated, login, apiMode } = useApp();
@@ -35,38 +38,32 @@ export default function LoginScreen() {
   return (
     <Screen style={styles.content}>
       <View style={styles.hero}>
-        <View style={styles.mascotWrap}><Text style={styles.mascot}>🍅</Text></View>
+        <View style={styles.characterWrap}><Image source={character} style={styles.character} contentFit="contain" accessibilityLabel="토마토 캐릭터" /></View>
         <Text style={styles.logo}>밥 먹자!</Text>
         <Text style={styles.tagline}>오늘 먹은 것을 가볍게 기록해 보세요</Text>
       </View>
-      <View style={styles.formCard}>
-        <View style={styles.formTitleRow}><Text style={styles.formTitle}>로그인</Text><Text style={styles.mode}>{apiMode === 'mock' ? '로컬 데모' : '서버 연결'}</Text></View>
+      <View style={styles.form}>
         <Field label="아이디" value={username} onChangeText={setUsername} placeholder="아이디를 입력하세요" autoCapitalize="none" autoComplete="username" textContentType="username" />
         <Field label="비밀번호" value={password} onChangeText={setPassword} placeholder="비밀번호를 입력하세요" secureTextEntry autoComplete="current-password" textContentType="password" returnKeyType="done" onSubmitEditing={submit} error={error} />
-        <Text style={styles.loginHelp}>로그인이 되지 않으면 아이디와 비밀번호를 다시 확인해 주세요.</Text>
         <PrimaryButton title="로그인" onPress={submit} loading={loading} />
-        {apiMode === 'mock' ? <Pressable style={styles.demoNote} onPress={submit}><Text style={styles.demoNoteTitle}>빠른 시연</Text><Text style={styles.demoNoteText}>입력된 데모 계정으로 바로 시작</Text></Pressable> : null}
         <View style={styles.signupRow}><Text style={styles.signupText}>처음 오셨나요?</Text><Pressable onPress={() => router.push('/signup')}><Text style={styles.signupLink}> 회원가입</Text></Pressable></View>
       </View>
+      <Text style={styles.mode}>{apiMode === 'mock' ? '로컬 데모' : '서버 연결'}</Text>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
   loader: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: palette.background },
-  content: { paddingTop: spacing.lg, justifyContent: 'center' },
-  hero: { minHeight: 220, borderRadius: radii.xl, alignItems: 'center', justifyContent: 'center', padding: spacing.lg, backgroundColor: palette.surfaceWarm },
-  mascotWrap: { width: 100, height: 100, borderRadius: 50, alignItems: 'center', justifyContent: 'center', backgroundColor: '#FFE0D4' },
-  mascot: { fontSize: 68 },
-  logo: { fontSize: 34, fontWeight: '900', color: palette.ink, letterSpacing: -1.2, marginTop: 12 },
+  content: { paddingTop: spacing.xl, gap: spacing.xl },
+  hero: { alignItems: 'center', paddingTop: spacing.lg },
+  characterWrap: { width: 150, height: 150, borderRadius: 75, backgroundColor: palette.accentSoft, alignItems: 'center', justifyContent: 'center' },
+  character: { width: 108, height: 118 },
+  logo: { fontSize: 30, fontWeight: '600', color: palette.ink, letterSpacing: -0.8, marginTop: spacing.md },
   tagline: { ...font.body, color: palette.muted, marginTop: 4 },
-  formCard: { backgroundColor: palette.surface, borderRadius: radii.xl, padding: spacing.lg, gap: spacing.md, marginTop: -18, marginHorizontal: 10, ...shadow },
-  formTitleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  formTitle: { ...font.heading, color: palette.ink },
-  mode: { color: palette.leaf, backgroundColor: palette.leafSoft, overflow: 'hidden', borderRadius: radii.pill, paddingHorizontal: 9, paddingVertical: 5, fontSize: 10, fontWeight: '800' },
-  loginHelp: { color: palette.muted, fontSize: 11, textAlign: 'right', marginTop: -8 },
-  demoNote: { backgroundColor: palette.surfaceWarm, borderRadius: radii.md, padding: spacing.sm, alignItems: 'center' },
-  demoNoteTitle: { color: palette.ink, fontSize: 12, fontWeight: '800' },
-  demoNoteText: { color: palette.muted, fontSize: 10, marginTop: 2 },
-  signupRow: { flexDirection: 'row', justifyContent: 'center' }, signupText: { color: palette.muted, fontSize: 13 }, signupLink: { color: palette.tomato, fontSize: 13, fontWeight: '800' },
+  form: { gap: spacing.md },
+  mode: { color: palette.muted, fontSize: 12, textAlign: 'center' },
+  signupRow: { flexDirection: 'row', justifyContent: 'center', marginTop: 2 },
+  signupText: { color: palette.muted, fontSize: 14 },
+  signupLink: { color: palette.tomato, fontSize: 14, fontWeight: '500' },
 });

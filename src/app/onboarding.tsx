@@ -1,9 +1,9 @@
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, StyleSheet, Text, View } from 'react-native';
 
-import { Field, Header, IconButton, Pill, PrimaryButton, Screen } from '@/components/ui';
-import { font, palette, radii, spacing } from '@/constants/design';
+import { Field, Header, IconButton, Pill, PrimaryButton, Screen, Pressable } from '@/components/ui';
+import { font, palette, radii, shadow, spacing } from '@/constants/design';
 import { useApp } from '@/context/app-context';
 import { ActivityLevelCode, GenderCode, GoalCode } from '@/types/api';
 
@@ -69,13 +69,12 @@ export default function OnboardingScreen() {
   return (
     <Screen>
       <Header title="기본 정보 설정" subtitle="권장 섭취량 계산에 사용해요" left={<IconButton label="←" onPress={() => router.back()} />} />
-      <View style={styles.progress}><View style={styles.progressFill} /></View>
       <View style={styles.intro}><Text style={styles.title}>나에게 맞는 하루 목표를{`\n`}계산해 볼게요</Text><Text style={styles.description}>입력한 정보는 식단 분석과 목표 계산에만 사용됩니다.</Text></View>
 
       <View style={styles.section}><Text style={styles.label}>성별</Text><View style={styles.pills}><Pill label="여성" active={gender === 'F'} onPress={() => setGender('F')} /><Pill label="남성" active={gender === 'M'} onPress={() => setGender('M')} /></View></View>
       <View style={styles.fields}><Field label="나이 (세)" value={age} onChangeText={setAge} keyboardType="number-pad" /><Field label="키 (cm)" value={height} onChangeText={setHeight} keyboardType="decimal-pad" /><Field label="몸무게 (kg)" value={weight} onChangeText={setWeight} keyboardType="decimal-pad" /></View>
 
-      <View style={styles.section}><Text style={styles.label}>평소 활동량</Text><View style={styles.optionList}>{activities.map((item) => <Pressable key={item.code} onPress={() => setActivityLevel(item.code)} style={[styles.option, activityLevel === item.code && styles.optionActive]}><View style={[styles.radio, activityLevel === item.code && styles.radioActive]} /> <View><Text style={styles.optionTitle}>{item.label}</Text><Text style={styles.optionText}>{item.description}</Text></View></Pressable>)}</View></View>
+      <View style={styles.section}><Text style={styles.label}>평소 활동량</Text><View style={styles.optionList}>{activities.map((item) => <Pressable key={item.code} onPress={() => setActivityLevel(item.code)} style={[styles.option, activityLevel === item.code && styles.optionActive]}><View style={[styles.radio, activityLevel === item.code && styles.radioActive]} /><View><Text style={styles.optionTitle}>{item.label}</Text><Text style={styles.optionText}>{item.description}</Text></View></Pressable>)}</View></View>
 
       <View style={styles.section}><Text style={styles.label}>목표</Text><View style={styles.goalList}>{goals.map((item) => <Pressable key={item.code} onPress={() => setGoal(item.code)} style={[styles.goal, goal === item.code && styles.goalActive]}><Text style={[styles.goalTitle, goal === item.code && styles.goalTitleActive]}>{item.label}</Text><Text style={styles.goalText}>{item.detail}</Text></Pressable>)}</View></View>
 
@@ -87,31 +86,29 @@ export default function OnboardingScreen() {
 }
 
 const styles = StyleSheet.create({
-  progress: { height: 4, borderRadius: 2, backgroundColor: palette.line },
-  progressFill: { width: '100%', height: '100%', borderRadius: 2, backgroundColor: palette.tomato },
   intro: { paddingVertical: spacing.lg, gap: spacing.sm },
   title: { ...font.title, color: palette.ink, fontSize: 25, lineHeight: 34 },
   description: { ...font.body, color: palette.muted },
   section: { gap: spacing.sm },
-  label: { ...font.subheading, color: palette.ink },
+  label: { color: palette.muted, fontSize: 13, marginLeft: 4 },
   pills: { flexDirection: 'row', gap: spacing.sm },
   fields: { gap: spacing.md },
   optionList: { gap: spacing.xs },
-  option: { minHeight: 58, flexDirection: 'row', alignItems: 'center', gap: spacing.sm, borderWidth: 1, borderColor: palette.line, backgroundColor: palette.surface, borderRadius: radii.md, paddingHorizontal: spacing.md },
-  optionActive: { borderColor: palette.tomato, backgroundColor: palette.tomatoSoft },
-  radio: { width: 18, height: 18, borderRadius: 9, borderWidth: 2, borderColor: '#B8B2A8' },
-  radioActive: { borderWidth: 5, borderColor: palette.tomato, backgroundColor: '#fff' },
-  optionTitle: { color: palette.ink, fontSize: 13, fontWeight: '800' },
-  optionText: { color: palette.muted, fontSize: 10, marginTop: 2 },
+  option: { minHeight: 58, flexDirection: 'row', alignItems: 'center', gap: spacing.sm, backgroundColor: palette.surface, borderRadius: radii.md, paddingHorizontal: spacing.md, ...shadow },
+  optionActive: { backgroundColor: palette.accentSoft },
+  radio: { width: 18, height: 18, borderRadius: 9, borderWidth: 1.5, borderColor: '#C4C8CD' },
+  radioActive: { borderWidth: 5, borderColor: palette.accent, backgroundColor: palette.surface },
+  optionTitle: { color: palette.ink, fontSize: 15, fontWeight: '500' },
+  optionText: { color: palette.muted, fontSize: 13, marginTop: 1 },
   goalList: { flexDirection: 'row', gap: spacing.xs },
-  goal: { flex: 1, minHeight: 86, borderWidth: 1, borderColor: palette.line, backgroundColor: palette.surface, borderRadius: radii.md, padding: spacing.sm, justifyContent: 'center' },
-  goalActive: { borderColor: palette.tomato, backgroundColor: palette.tomatoSoft },
-  goalTitle: { color: palette.ink, fontSize: 14, fontWeight: '900' },
+  goal: { flex: 1, minHeight: 86, backgroundColor: palette.surface, borderRadius: radii.md, padding: spacing.sm, justifyContent: 'center', ...shadow },
+  goalActive: { backgroundColor: palette.accentSoft },
+  goalTitle: { color: palette.ink, fontSize: 15, fontWeight: '500' },
   goalTitleActive: { color: palette.tomato },
-  goalText: { color: palette.muted, fontSize: 10, marginTop: 5, lineHeight: 14 },
-  optionalHeader: { backgroundColor: palette.surfaceWarm, borderRadius: radii.md, padding: spacing.md, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  optionalTitle: { fontWeight: '800', color: palette.ink },
+  goalText: { color: palette.muted, fontSize: 12, marginTop: 4, lineHeight: 16 },
+  optionalHeader: { borderRadius: radii.md, padding: spacing.md, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: palette.surface, ...shadow },
+  optionalTitle: { fontWeight: '500', color: palette.ink },
   optionalText: { ...font.caption, color: palette.muted, marginTop: 3 },
-  optionalAction: { color: palette.tomato, fontSize: 12, fontWeight: '800' },
+  optionalAction: { color: palette.ink, fontSize: 12, fontWeight: '500' },
   inbody: { gap: spacing.md },
 });

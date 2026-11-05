@@ -3,7 +3,7 @@ import { router } from 'expo-router';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { Header, IconButton, Screen } from '@/components/ui';
-import { font, palette, radii, spacing } from '@/constants/design';
+import { font, palette, radii, shadow, spacing } from '@/constants/design';
 
 const sections = [
   ['서비스 이용', '밥 먹자!는 식단 기록과 영양 정보 관리를 돕는 서비스입니다. 표시되는 분석과 추천은 참고 정보이며 의료 진단이나 전문 영양 상담을 대신하지 않습니다.'],
@@ -53,20 +53,19 @@ const styles = StyleSheet.create({
     backgroundColor: palette.surfaceWarm,
     borderRadius: radii.pill,
     paddingHorizontal: 12,
-    paddingVertical: 7,
+    paddingVertical: 7
   },
   versionText: {
     ...font.caption,
     color: palette.muted,
-    fontWeight: '700',
+    fontWeight: '500',
   },
   section: {
     backgroundColor: palette.surface,
-    borderWidth: 1,
-    borderColor: palette.line,
     borderRadius: radii.lg,
     padding: spacing.md,
     gap: spacing.xs,
+    ...shadow,
   },
   title: {
     ...font.subheading,
@@ -79,7 +78,7 @@ const styles = StyleSheet.create({
   },
   note: {
     ...font.caption,
-    color: palette.danger,
+    color: palette.muted,
     lineHeight: 18,
     padding: spacing.sm,
   },

@@ -1,9 +1,9 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, StyleSheet, Text, View } from 'react-native';
 
-import { Field, Header, IconButton, Screen } from '@/components/ui';
-import { font, palette, radii, spacing } from '@/constants/design';
+import { Field, Header, IconButton, Screen, Pressable } from '@/components/ui';
+import { font, palette, radii, shadow, spacing } from '@/constants/design';
 import { useApp } from '@/context/app-context';
 import { getErrorMessage, isMockMode, simulateRequest } from '@/services/api';
 import { userApi } from '@/services/bapmeokja-api';
@@ -61,7 +61,7 @@ export default function AccountSettingsScreen() {
       <Field label="현재 비밀번호" value={currentPassword} onChangeText={setCurrentPassword} secureTextEntry autoCapitalize="none" autoComplete="current-password" placeholder="본인 확인을 위해 입력" />
       <Field label={`확인을 위해 '${CONFIRM_TEXT}' 입력`} value={confirmation} onChangeText={setConfirmation} autoCapitalize="none" placeholder={CONFIRM_TEXT} error={confirmation && confirmation !== CONFIRM_TEXT ? `'${CONFIRM_TEXT}'를 정확히 입력해 주세요.` : ''} />
       <Pressable disabled={!canDelete || deleting} onPress={confirmDelete} style={({ pressed }) => [styles.deleteButton, (!canDelete || pressed) && styles.disabled]}>
-        {deleting ? <ActivityIndicator color="#fff" /> : <Text style={styles.deleteText}>계정과 데이터 영구 삭제</Text>}
+        {deleting ? <ActivityIndicator color={palette.onAccent} /> : <Text style={styles.deleteText}>계정과 데이터 영구 삭제</Text>}
       </Pressable>
       <Text style={styles.cancelText} onPress={() => router.back()}>탈퇴하지 않고 돌아가기</Text>
     </Screen>
@@ -70,15 +70,15 @@ export default function AccountSettingsScreen() {
 
 const styles = StyleSheet.create({
   warning: { flexDirection: 'row', gap: spacing.sm, backgroundColor: palette.tomatoSoft, borderRadius: radii.lg, padding: spacing.md },
-  warningIcon: { width: 34, height: 34, borderRadius: 17, overflow: 'hidden', backgroundColor: palette.tomato, color: '#fff', textAlign: 'center', lineHeight: 34, fontWeight: '900' },
+  warningIcon: { width: 34, height: 34, overflow: 'hidden', textAlign: 'center', lineHeight: 34, fontWeight: '600', backgroundColor: palette.danger, color: palette.onAccent, borderRadius: 12 },
   warningCopy: { flex: 1 },
-  warningTitle: { ...font.subheading, color: palette.tomatoDark },
-  warningText: { ...font.caption, color: palette.tomatoDark, lineHeight: 18, marginTop: 4 },
-  list: { backgroundColor: palette.surface, borderWidth: 1, borderColor: palette.line, borderRadius: radii.lg, padding: spacing.md, gap: spacing.xs },
-  listTitle: { color: palette.ink, fontSize: 13, fontWeight: '900', marginBottom: 3 },
+  warningTitle: { ...font.subheading, color: palette.danger },
+  warningText: { ...font.caption, color: palette.danger, lineHeight: 18, marginTop: 4 },
+  list: { backgroundColor: palette.surface, borderRadius: radii.lg, padding: spacing.md, gap: spacing.xs, ...shadow },
+  listTitle: { color: palette.ink, fontSize: 13, fontWeight: '600', marginBottom: 3 },
   listItem: { ...font.caption, color: palette.muted, lineHeight: 19 },
   deleteButton: { minHeight: 54, borderRadius: radii.md, backgroundColor: palette.danger, alignItems: 'center', justifyContent: 'center' },
-  deleteText: { color: '#fff', fontSize: 15, fontWeight: '900' },
+  deleteText: { fontSize: 15, fontWeight: '600', color: palette.onAccent },
   disabled: { opacity: 0.45 },
-  cancelText: { color: palette.muted, fontSize: 12, fontWeight: '700', textAlign: 'center', paddingVertical: spacing.sm },
+  cancelText: { color: palette.muted, fontSize: 12, fontWeight: '500', textAlign: 'center', paddingVertical: spacing.sm },
 });

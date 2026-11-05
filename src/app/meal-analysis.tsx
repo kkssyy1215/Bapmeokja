@@ -4,7 +4,6 @@ import {
   ActivityIndicator,
   Alert,
   Image,
-  Pressable,
   StyleSheet,
   Text,
   View,
@@ -20,9 +19,11 @@ import {
   PrimaryButton,
   Screen,
   SectionTitle,
+  Pressable,
+  Icon,
 } from '@/components/ui';
 
-import { font, palette, radii, spacing } from '@/constants/design';
+import { font, palette, radii, shadow, shadowSm, spacing } from '@/constants/design';
 import { useApp } from '@/context/app-context';
 import {
   getErrorMessage,
@@ -689,7 +690,7 @@ export default function MealAnalysisScreen() {
       />
 
       {/* 음식 사진 표시 */}
-      <View style={styles.imageWrap}>
+      {previewUri || imageError || !savedMeal ? <View style={[styles.imageWrap, !previewUri && styles.imageWrapEmpty]}>
         {previewUri ? (
           <Image
             key={`${mealImage?.id}-${previewIndex}`}
@@ -710,9 +711,7 @@ export default function MealAnalysisScreen() {
             }}
           />
         ) : (
-          <Text style={styles.foodHero}>
-            {savedMeal?.emoji ?? '🍱'}
-          </Text>
+          <Icon name="image" size={36} color={palette.muted} />
         )}
 
         {imageError && (
@@ -741,7 +740,7 @@ export default function MealAnalysisScreen() {
                 : '사진 분석 완료'}
           </Text>
         </View>
-      </View>
+      </View> : null}
 
       {/* 식사 시간 선택 */}
       <View style={styles.typeRow}>
@@ -807,7 +806,7 @@ export default function MealAnalysisScreen() {
             label="탄수화물"
             value={total.carbs}
             goal={100}
-            color={palette.leaf}
+            color={palette.leafFill}
           />
 
           <MacroBar
@@ -821,7 +820,7 @@ export default function MealAnalysisScreen() {
             label="지방"
             value={total.fat}
             goal={30}
-            color={palette.tomato}
+            color={palette.tomatoFill}
           />
         </View>
       </Card>
@@ -1172,14 +1171,14 @@ const styles = StyleSheet.create({
   errorIcon: {
     width: 48,
     height: 48,
-    borderRadius: 24,
     overflow: 'hidden',
     textAlign: 'center',
     lineHeight: 45,
     backgroundColor: palette.tomatoSoft,
-    color: palette.tomato,
+    color: palette.ink,
     fontSize: 24,
-    fontWeight: '900',
+    fontWeight: '600',
+    borderRadius: 12,
   },
 
   errorButtons: {
@@ -1192,11 +1191,15 @@ const styles = StyleSheet.create({
     height: 250,
     width: '100%',
     borderRadius: radii.xl,
-    backgroundColor: '#EDE2D0',
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
     position: 'relative',
+    backgroundColor: palette.sunken
+  },
+
+  imageWrapEmpty: {
+    height: 96,
   },
 
   image: {
@@ -1208,14 +1211,14 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFill,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#EDE2D0',
     padding: spacing.md,
+    backgroundColor: palette.background,
   },
 
   imageMessageTitle: {
     color: palette.ink,
     fontSize: 15,
-    fontWeight: '800',
+    fontWeight: '500',
     textAlign: 'center',
   },
 
@@ -1234,17 +1237,17 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 13,
     left: 13,
-    backgroundColor:
-      'rgba(36,35,31,.85)',
     borderRadius: radii.pill,
     paddingHorizontal: 11,
     paddingVertical: 7,
+    backgroundColor: palette.surface,
+    ...shadowSm,
   },
 
   resultBadgeText: {
-    color: '#fff',
-    fontSize: 10,
-    fontWeight: '800',
+    fontSize: 12,
+    fontWeight: '500',
+    color: palette.ink,
   },
 
   typeRow: {
@@ -1257,19 +1260,17 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     paddingVertical: 10,
     borderRadius: radii.pill,
-    color: palette.muted,
+    color: palette.ink,
     backgroundColor: palette.surface,
-    borderWidth: 1,
-    borderColor: palette.line,
     overflow: 'hidden',
     fontSize: 12,
-    fontWeight: '700',
+    fontWeight: '500',
+    ...shadow,
   },
 
   typeActive: {
-    color: '#fff',
-    backgroundColor: palette.ink,
-    borderColor: palette.ink,
+    color: palette.onAccent,
+    backgroundColor: palette.accent,
   },
 
   totalTop: {
@@ -1280,13 +1281,13 @@ const styles = StyleSheet.create({
 
   totalLabel: {
     color: palette.muted,
-    fontSize: 11,
+    fontSize: 12,
   },
 
   total: {
     color: palette.ink,
     fontSize: 30,
-    fontWeight: '900',
+    fontWeight: '600',
     marginTop: 3,
   },
 
@@ -1301,17 +1302,17 @@ const styles = StyleSheet.create({
       palette.leafSoft,
     borderRadius: radii.md,
     padding: 10,
-    minWidth: 60,
+    minWidth: 60
   },
 
   itemCountValue: {
     color: palette.leaf,
-    fontWeight: '900',
+    fontWeight: '600',
   },
 
   itemCountLabel: {
     color: palette.muted,
-    fontSize: 8,
+    fontSize: 12,
   },
 
   macroList: {
@@ -1331,8 +1332,6 @@ const styles = StyleSheet.create({
   },
 
   foodBorder: {
-    borderTopWidth: 1,
-    borderTopColor: palette.line,
   },
 
   foodInitial: {
@@ -1342,13 +1341,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor:
       palette.surfaceWarm,
-    borderRadius: radii.md,
+    borderRadius: radii.md
   },
 
   foodInitialText: {
-    color: palette.tomatoDark,
+    color: palette.ink,
     fontSize: 17,
-    fontWeight: '900',
+    fontWeight: '600',
   },
 
   foodInfo: {
@@ -1358,24 +1357,24 @@ const styles = StyleSheet.create({
 
   foodName: {
     color: palette.ink,
-    fontWeight: '800',
+    fontWeight: '500',
     fontSize: 13,
   },
 
   foodAmount: {
     color: palette.muted,
-    fontSize: 10,
+    fontSize: 12,
   },
 
   foodKcal: {
     color: palette.ink,
     textAlign: 'right',
-    fontWeight: '900',
+    fontWeight: '600',
   },
 
   foodUnit: {
     color: palette.muted,
-    fontSize: 9,
+    fontSize: 12,
   },
 
   editWrap: {
@@ -1386,10 +1385,9 @@ const styles = StyleSheet.create({
     backgroundColor:
       palette.surface,
     borderRadius: radii.lg,
-    borderWidth: 1,
-    borderColor: palette.line,
     padding: spacing.md,
     gap: spacing.sm,
+    ...shadow,
   },
 
   editItemHeader: {
@@ -1401,13 +1399,13 @@ const styles = StyleSheet.create({
   editItemTitle: {
     color: palette.ink,
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '600',
   },
 
   removeItem: {
-    color: palette.tomato,
-    fontSize: 11,
-    fontWeight: '800',
+    color: palette.ink,
+    fontSize: 12,
+    fontWeight: '500',
     padding: spacing.xs,
   },
 
@@ -1432,18 +1430,18 @@ const styles = StyleSheet.create({
     borderRadius: radii.md,
     padding: spacing.md,
     gap: spacing.sm,
-    alignItems: 'center',
+    alignItems: 'center'
   },
 
   noticeMark: {
-    color: '#6E5B34',
-    fontSize: 10,
-    fontWeight: '900',
+    fontSize: 12,
+    fontWeight: '600',
+    color: palette.amber,
   },
 
   noticeText: {
     ...font.caption,
-    color: '#6E5B34',
     flex: 1,
+    color: palette.amber,
   },
 });

@@ -2,7 +2,7 @@ import { router } from 'expo-router';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { Header, IconButton, Screen } from '@/components/ui';
-import { font, palette, radii, spacing } from '@/constants/design';
+import { font, palette, radii, shadow, spacing } from '@/constants/design';
 
 const faqs = [
   ['사진 분석값이 정확한가요?', '사진 속 음식과 양을 바탕으로 계산한 참고용 추정값입니다. 저장 전에 음식명, 중량, 칼로리와 영양소를 직접 확인·수정해 주세요.'],
@@ -18,4 +18,4 @@ export default function HelpScreen() {
   </Screen>;
 }
 
-const styles = StyleSheet.create({ card: { backgroundColor: palette.surface, borderWidth: 1, borderColor: palette.line, borderRadius: radii.lg, padding: spacing.md, gap: spacing.xs }, question: { ...font.subheading, color: palette.ink }, answer: { ...font.body, color: palette.muted, lineHeight: 21 }, notice: { backgroundColor: palette.leafSoft, borderRadius: radii.md, padding: spacing.md }, noticeTitle: { color: palette.leaf, fontWeight: '900' }, noticeText: { ...font.caption, color: palette.leaf, lineHeight: 18, marginTop: 4 } });
+const styles = StyleSheet.create({ card: { backgroundColor: palette.surface, borderRadius: radii.lg, padding: spacing.md, gap: spacing.xs, ...shadow }, question: { ...font.subheading, color: palette.ink }, answer: { ...font.body, color: palette.muted, lineHeight: 21 }, notice: { backgroundColor: palette.leafSoft, borderRadius: radii.md, padding: spacing.md }, noticeTitle: { color: palette.leaf, fontWeight: '600' }, noticeText: { ...font.caption, color: palette.leaf, lineHeight: 18, marginTop: 4 } });

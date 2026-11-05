@@ -1,3 +1,4 @@
+import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Alert, StyleSheet, Text, View } from 'react-native';
@@ -8,6 +9,8 @@ import { useApp } from '@/context/app-context';
 import { getErrorMessage, isMockMode } from '@/services/api';
 import { userApi } from '@/services/bapmeokja-api';
 import { UserProfile } from '@/types';
+
+const character = require('../../../assets/characters/tomato-balanced.png');
 
 export default function ProfileSettingsScreen() {
   const { profile, updateProfile } = useApp();
@@ -23,7 +26,7 @@ export default function ProfileSettingsScreen() {
     } catch (error) { Alert.alert('저장하지 못했어요', getErrorMessage(error)); setSaving(false); }
   };
   return <Screen><Header title="내 정보 관리" subtitle="변경 즉시 목표를 다시 계산해요" left={<IconButton label="←" onPress={() => router.back()} />} />
-    <View style={styles.avatar}><Text style={styles.avatarEmoji}>🍅</Text><Text style={styles.nickname}>{draft.nickname}</Text><Text style={styles.change}>기본 토마토 프로필</Text></View>
+    <View style={styles.avatar}><Image source={character} style={styles.avatarImage} contentFit="contain" accessibilityLabel="토마토 프로필" /><Text style={styles.nickname}>{draft.nickname}</Text></View>
     <Field label="닉네임" value={draft.nickname} onChangeText={(value) => set('nickname', value)} />
     <Field label="이메일" value={draft.email} editable={false} />
     <SectionTitle title="신체 정보" /><View style={styles.two}><View style={styles.flex}><Field label="나이" value={String(draft.age)} onChangeText={(value) => set('age', Number(value))} keyboardType="number-pad" /></View><View style={styles.flex}><Field label="키 (cm)" value={String(draft.height)} onChangeText={(value) => set('height', Number(value))} keyboardType="decimal-pad" /></View></View><Field label="몸무게 (kg)" value={String(draft.weight)} onChangeText={(value) => set('weight', Number(value))} keyboardType="decimal-pad" />
@@ -34,4 +37,4 @@ export default function ProfileSettingsScreen() {
   </Screen>;
 }
 
-const styles = StyleSheet.create({ avatar: { alignItems: 'center', paddingVertical: spacing.md }, avatarEmoji: { width: 90, height: 90, borderRadius: 45, backgroundColor: palette.tomatoSoft, overflow: 'hidden', textAlign: 'center', paddingTop: 18, fontSize: 48 }, nickname: { ...font.heading, color: palette.ink, marginTop: 8 }, change: { color: palette.tomato, fontSize: 11, fontWeight: '800', marginTop: 4 }, two: { flexDirection: 'row', gap: spacing.sm }, three: { flexDirection: 'row', gap: spacing.xs }, flex: { flex: 1 }, section: { gap: spacing.sm }, label: { ...font.subheading, color: palette.ink }, pills: { flexDirection: 'row', gap: spacing.sm }, optional: { backgroundColor: palette.leafSoft, borderRadius: radii.md, padding: spacing.md }, optionalTitle: { color: palette.leaf, fontWeight: '800', fontSize: 12 }, optionalText: { color: palette.muted, fontSize: 10, marginTop: 4, lineHeight: 15 } });
+const styles = StyleSheet.create({ avatar: { alignItems: 'center', paddingVertical: spacing.md }, avatarImage: { width: 88, height: 96 }, nickname: { ...font.heading, color: palette.ink, marginTop: 8 }, change: { color: palette.ink, fontSize: 12, fontWeight: '500', marginTop: 4 }, two: { flexDirection: 'row', gap: spacing.sm }, three: { flexDirection: 'row', gap: spacing.xs }, flex: { flex: 1 }, section: { gap: spacing.sm }, label: { color: palette.muted, fontSize: 13, marginLeft: 4 }, pills: { flexDirection: 'row', gap: spacing.sm }, optional: { backgroundColor: palette.leafSoft, borderRadius: radii.md, padding: spacing.md }, optionalTitle: { color: palette.leaf, fontWeight: '500', fontSize: 12 }, optionalText: { color: palette.muted, fontSize: 12, marginTop: 4, lineHeight: 15 } });

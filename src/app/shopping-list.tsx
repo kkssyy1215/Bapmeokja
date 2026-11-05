@@ -1,8 +1,8 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Linking, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Linking, StyleSheet, Text, View } from 'react-native';
 
-import { Card, Header, IconButton, Screen } from '@/components/ui';
+import { Card, Header, IconButton, Screen, Pressable } from '@/components/ui';
 import { font, palette, radii, spacing } from '@/constants/design';
 import { getErrorMessage, isMockMode, simulateRequest } from '@/services/api';
 import { menuApi } from '@/services/bapmeokja-api';
@@ -42,19 +42,19 @@ export default function ShoppingListScreen() {
 }
 
 const styles = StyleSheet.create({
-  estimateLabel: { color: palette.muted, fontSize: 11 },
+  estimateLabel: { color: palette.muted, fontSize: 12 },
   estimate: { ...font.title, color: palette.ink, marginTop: 4 },
   itemHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  itemName: { color: palette.ink, fontSize: 15, fontWeight: '900' },
-  amount: { color: palette.muted, fontSize: 10, marginTop: 3 },
-  status: { color: palette.tomato, backgroundColor: palette.tomatoSoft, overflow: 'hidden', borderRadius: radii.pill, paddingHorizontal: 9, paddingVertical: 5, fontSize: 9, fontWeight: '900' },
+  itemName: { color: palette.ink, fontSize: 15, fontWeight: '600' },
+  amount: { color: palette.muted, fontSize: 12, marginTop: 3 },
+  status: { color: palette.tomato, backgroundColor: palette.tomatoSoft, overflow: 'hidden', borderRadius: radii.pill, paddingHorizontal: 9, paddingVertical: 5, fontSize: 12, fontWeight: '600' },
   have: { color: palette.leaf, backgroundColor: palette.leafSoft },
-  product: { marginTop: spacing.md, borderTopWidth: 1, borderTopColor: palette.line, paddingTop: spacing.md, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  mall: { color: palette.leaf, fontSize: 9, fontWeight: '900' },
-  productName: { color: palette.ink, fontSize: 12, fontWeight: '700', marginTop: 3 },
+  product: { marginTop: spacing.md, paddingTop: spacing.md, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  mall: { color: palette.leaf, fontSize: 12, fontWeight: '600' },
+  productName: { color: palette.ink, fontSize: 12, fontWeight: '500', marginTop: 3 },
   productRight: { alignItems: 'flex-end' },
-  price: { color: palette.ink, fontSize: 12, fontWeight: '900' },
-  open: { color: palette.muted, fontSize: 9, marginTop: 3 },
+  price: { color: palette.ink, fontSize: 12, fontWeight: '600' },
+  open: { color: palette.muted, fontSize: 12, marginTop: 3 },
   notice: { backgroundColor: palette.surfaceWarm, borderRadius: radii.md, padding: spacing.md },
   noticeText: { ...font.caption, color: palette.muted },
   empty: { minHeight: 300, alignItems: 'center', justifyContent: 'center' },

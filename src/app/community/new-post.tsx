@@ -2,10 +2,10 @@ import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, StyleSheet, Text, View } from 'react-native';
 
-import { Field, Header, IconButton, NutrientChips, PrimaryButton, Screen } from '@/components/ui';
-import { font, palette, radii, spacing } from '@/constants/design';
+import { Field, Header, IconButton, NutrientChips, PrimaryButton, Screen, Pressable } from '@/components/ui';
+import { font, palette, radii, shadow, spacing } from '@/constants/design';
 import { useApp } from '@/context/app-context';
 import { getErrorMessage, isMockMode, simulateRequest } from '@/services/api';
 import { communityApi } from '@/services/bapmeokja-api';
@@ -80,26 +80,26 @@ export default function NewPostScreen() {
 }
 
 const styles = StyleSheet.create({
-  photo: { height: 230, borderRadius: radii.xl, borderWidth: 1.5, borderStyle: 'dashed', borderColor: '#CFC8BC', backgroundColor: palette.surface, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
-  photoSelected: { borderStyle: 'solid' },
+  photo: { height: 180, borderRadius: radii.lg, alignItems: 'center', justifyContent: 'center', overflow: 'hidden', backgroundColor: palette.surface, ...shadow },
+  photoSelected: {},
   image: { width: '100%', height: '100%' },
   addMark: { color: palette.muted, fontSize: 44, fontWeight: '300' },
-  photoTitle: { color: palette.ink, fontWeight: '800', marginTop: spacing.sm },
-  photoSub: { color: palette.muted, fontSize: 10, marginTop: 3 },
+  photoTitle: { color: palette.ink, fontWeight: '500', marginTop: spacing.sm },
+  photoSub: { color: palette.muted, fontSize: 12, marginTop: 3 },
   analysisStatus: { backgroundColor: palette.blueSoft, borderRadius: radii.md, padding: spacing.md },
-  analysisStatusText: { color: palette.blue, fontSize: 11, fontWeight: '700' },
+  analysisStatusText: { color: palette.blue, fontSize: 12, fontWeight: '500' },
   analysisCard: { backgroundColor: palette.leafSoft, borderRadius: radii.lg, padding: spacing.md, gap: spacing.sm },
   analysisTop: { flexDirection: 'row', justifyContent: 'space-between' },
-  analysisLabel: { color: palette.leaf, fontSize: 10, fontWeight: '900' },
+  analysisLabel: { color: palette.leaf, fontSize: 12, fontWeight: '600' },
   analysisValue: { alignItems: 'flex-end', gap: 4 },
-  editAnalysis: { color: palette.tomato, fontSize: 11, fontWeight: '900' },
-  foodName: { color: palette.ink, fontSize: 14, fontWeight: '900', marginTop: 3 },
-  calorie: { color: palette.ink, fontSize: 14, fontWeight: '900' },
+  editAnalysis: { color: palette.ink, fontSize: 12, fontWeight: '600' },
+  foodName: { color: palette.ink, fontSize: 14, fontWeight: '600', marginTop: 3 },
+  calorie: { color: palette.ink, fontSize: 14, fontWeight: '600' },
   estimateNotice: { ...font.caption, color: palette.muted, lineHeight: 17 },
-  editCard: { backgroundColor: palette.surface, borderWidth: 1, borderColor: palette.line, borderRadius: radii.lg, padding: spacing.md, gap: spacing.sm },
+  editCard: { backgroundColor: palette.surface, borderRadius: radii.lg, padding: spacing.md, gap: spacing.sm, ...shadow },
   editRow: { flexDirection: 'row', gap: spacing.sm },
   editFlex: { flex: 1 },
   notice: { backgroundColor: palette.surfaceWarm, borderRadius: radii.md, padding: spacing.md },
-  noticeTitle: { color: palette.ink, fontSize: 11, fontWeight: '900' },
+  noticeTitle: { color: palette.ink, fontSize: 12, fontWeight: '600' },
   noticeText: { ...font.caption, color: palette.muted, marginTop: 3 },
 });

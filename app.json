@@ -20,7 +20,7 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#FFF8EE",
+          "backgroundColor": "#F6F4F1",
           "image": "./assets/brand/app-icon.png",
           "imageWidth": 118
         }
@@ -41,7 +41,7 @@
       [
         "expo-notifications",
         {
-          "color": "#E6532F",
+          "color": "#B05C48",
           "defaultChannel": "bapmeokja-reminders"
         }
       ],

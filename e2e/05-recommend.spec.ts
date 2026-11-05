@@ -7,7 +7,7 @@ test('외식 추천에서 메뉴 상세와 주변 식당을 볼 수 있다', asy
   await expect(visible(page, '추천 외식 종류')).toBeVisible();
 
   page.on('dialog', (dialog) => dialog.accept());
-  await press(page, '주변 식당 확인');
+  await press(page, '주변 식당 보기');
   await expect(page).toHaveURL(/\/nearby/);
 });
 

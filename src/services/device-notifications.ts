@@ -107,7 +107,7 @@ export async function syncLocalNotifications(
       name: '식사와 건강 리마인더',
       importance: Notifications.AndroidImportance.DEFAULT,
       vibrationPattern: [0, 180, 120, 180],
-      lightColor: '#E6532F',
+      lightColor: '#B05C48',
     });
   }
 
@@ -158,7 +158,7 @@ export async function syncLocalNotifications(
       await Notifications.scheduleNotificationAsync({
         content: {
           title: '물 한 잔 어떠세요?',
-          body: '잠깐 쉬면서 수분을 채워 주세요. 💧',
+          body: '잠깐 쉬면서 수분을 채워 주세요.',
         },
         trigger: {
           type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,

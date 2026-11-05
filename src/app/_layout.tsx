@@ -24,7 +24,7 @@ function RootNavigator() {
   }
 
   return (
-      <Stack screenOptions={{ headerShown: false, animation: 'slide_from_right' }}>
+      <Stack screenOptions={{ headerShown: false, title: '밥 먹자!', animation: 'slide_from_right' }}>
         <Stack.Protected guard={!isAuthenticated}>
           <Stack.Screen name="index" options={{ animation: 'fade' }} />
           <Stack.Screen name="signup" />
