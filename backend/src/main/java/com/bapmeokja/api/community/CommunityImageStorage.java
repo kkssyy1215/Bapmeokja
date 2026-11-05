@@ -5,11 +5,11 @@ import com.bapmeokja.api.common.exception.ErrorCode;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
@@ -24,9 +24,15 @@ public class CommunityImageStorage {
             "image/heif", ".heic"
     );
 
+    private final CommunityImageRepository repository;
+    // 예전에 디스크에 저장한 사진을 읽을 때만 쓴다.
     private final Path directory;
 
-    public CommunityImageStorage(@Value("${app.upload.directory:./uploads}") String uploadDirectory) {
+    public CommunityImageStorage(
+            CommunityImageRepository repository,
+            @Value("${app.upload.directory:./uploads}") String uploadDirectory
+    ) {
+        this.repository = repository;
         this.directory = Path.of(uploadDirectory).toAbsolutePath().normalize().resolve("community");
     }
 
@@ -35,9 +41,7 @@ public class CommunityImageStorage {
         String contentType = file.getContentType().toLowerCase(Locale.ROOT);
         String fileName = UUID.randomUUID().toString().replace("-", "") + EXTENSIONS.get(contentType);
         try {
-            Files.createDirectories(directory);
-            Path target = directory.resolve(fileName).normalize();
-            Files.copy(file.getInputStream(), target, StandardCopyOption.REPLACE_EXISTING);
+            repository.save(new CommunityImage(fileName, contentType, file.getBytes()));
             return "/v1/uploads/community/" + fileName;
         } catch (IOException exception) {
             throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR, "이미지를 저장하지 못했습니다.");
@@ -48,6 +52,12 @@ public class CommunityImageStorage {
         if (!fileName.matches("[a-f0-9]{32}\\.(jpg|png|heic)")) {
             throw new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "이미지를 찾을 수 없습니다.");
         }
+        return repository.findById(fileName)
+                .<Resource>map(image -> new ByteArrayResource(image.getData()))
+                .orElseGet(() -> loadFromDisk(fileName));
+    }
+
+    private Resource loadFromDisk(String fileName) {
         Path file = directory.resolve(fileName).normalize();
         if (!file.startsWith(directory) || !Files.isRegularFile(file)) {
             throw new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "이미지를 찾을 수 없습니다.");
@@ -64,6 +74,7 @@ public class CommunityImageStorage {
         if (!fileName.matches("[a-f0-9]{32}\\.(jpg|png|heic)")) {
             return;
         }
+        repository.deleteById(fileName);
         try {
             Files.deleteIfExists(directory.resolve(fileName).normalize());
         } catch (IOException ignored) {

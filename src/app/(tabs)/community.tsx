@@ -11,6 +11,13 @@ import { communityApi } from '@/services/bapmeokja-api';
 import { formatRelativeTime } from '@/services/mappers';
 import { CommunityPostSummary } from '@/types/api';
 
+/** 사진을 불러오지 못하면 빈 칸을 남기지 않는다. */
+function PostPhoto({ uri }: { uri?: string }) {
+  const [failed, setFailed] = useState(false);
+  if (failed) return null;
+  return <Image source={{ uri }} style={styles.photo} contentFit="cover" onError={() => setFailed(true)} />;
+}
+
 export default function CommunityScreen() {
   const { posts } = useApp();
   const [items, setItems] = useState<CommunityPostSummary[]>([]);
@@ -39,7 +46,7 @@ export default function CommunityScreen() {
               <Text style={styles.author}>{post.authorNickname}</Text>
               <Text style={styles.time}>{formatRelativeTime(post.createdAt)}</Text>
             </View>
-            {post.thumbnailUrl ? <Image source={{ uri: resolveApiAssetUrl(post.thumbnailUrl) }} style={styles.photo} contentFit="cover" /> : null}
+            {post.thumbnailUrl ? <PostPhoto uri={resolveApiAssetUrl(post.thumbnailUrl)} /> : null}
             <Text style={styles.title}>{post.title}</Text>
             <View style={styles.actions}>
               <View style={styles.action}><Icon name="heart" size={15} color={palette.tomato} /><Text style={styles.actionText}>{post.likeCount}</Text></View>
