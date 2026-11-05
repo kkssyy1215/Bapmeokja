@@ -1,4 +1,3 @@
-import { getMealImagePreview } from '@/services/meal-image-store';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -31,6 +30,10 @@ import {
   simulateRequest,
 } from '@/services/api';
 import { dietApi } from '@/services/bapmeokja-api';
+import {
+  getMealImage,
+  getMealImagePreviewUris,
+} from '@/services/meal-image-store';
 import { Meal, MealType } from '@/types';
 import { AnalyzeDietResponse } from '@/types/api';
 
@@ -83,7 +86,7 @@ type EditableDietItem = {
 };
 
 type MealAnalysisParams = {
-  uri?: string;
+  imageId?: string;
   saved?: string;
   id?: string;
   type?: string;
@@ -153,15 +156,34 @@ export default function MealAnalysisScreen() {
 
   const { saveAnalyzedMeal, meals } = useApp();
 
-  const [imageError, setImageError] = useState(false);
-  const [, setImageLoaded] = useState(false);
-  const previewData = getMealImagePreview(params.uri);
-  const imageUri = previewData || params.uri || null;
-
-  console.log(
-    '[MealAnalysis] 메모리 사진 데이터:',
-    previewData ? `있음 (${previewData.length}자)` : '없음'
+  // 라우터에는 id만 넘어오고, 원본 URI와 미리보기 데이터는 메모리 저장소에서 찾는다.
+  const mealImage = useMemo(
+    () => getMealImage(params.imageId),
+    [params.imageId]
   );
+
+  const imageFileUri = mealImage?.fileUri ?? null;
+
+  // 미리보기 후보: data URI → 원본 파일 URI 순서로 시도한다. 빈 문자열은 넣지 않는다.
+  const previewCandidates = useMemo(
+    () => getMealImagePreviewUris(mealImage),
+    [mealImage]
+  );
+
+  // 로딩에 실패한 후보 수를 사진 id와 함께 기억한다.
+  // 다른 사진으로 바뀌면 effect 없이 자연스럽게 0부터 다시 시도한다.
+  const [previewFailure, setPreviewFailure] = useState<{
+    imageId?: string;
+    count: number;
+  }>({ imageId: params.imageId, count: 0 });
+
+  const previewIndex =
+    previewFailure.imageId === params.imageId
+      ? previewFailure.count
+      : 0;
+  const previewUri = previewCandidates[previewIndex] ?? null;
+  const imageError =
+    previewCandidates.length > 0 && !previewUri;
 
   const savingRef = useRef(false);
 
@@ -211,20 +233,34 @@ export default function MealAnalysisScreen() {
     params.fat,
   ]);
 
-  const [mealType, setMealType] = useState<MealType>(
-    savedMeal?.type ?? '저녁'
-  );
+  // 저장된 식단을 보는 화면이면 사진 분석을 하지 않는다.
+  const isSavedView = Boolean(params.saved);
 
-  const [analysis, setAnalysis] =
-    useState<AnalyzeDietResponse | null>(
+  const [selectedMealType, setMealType] =
+    useState<MealType>('저녁');
+
+  // 저장된 식단은 식사 시간을 바꿀 수 없으므로 식단 값을 그대로 쓴다.
+  const mealType = savedMeal?.type ?? selectedMealType;
+
+  const [analyzedResult, setAnalysis] =
+    useState<AnalyzeDietResponse | null>(null);
+
+  // 저장된 식단 정보는 meals가 늦게 불러와져도 바로 반영되도록 계산값으로 둔다.
+  const savedAnalysis = useMemo(
+    () =>
       savedMeal
         ? savedMealToAnalysis(savedMeal)
-        : null
-    );
-
-  const [analyzing, setAnalyzing] = useState(
-    !savedMeal
+        : null,
+    [savedMeal]
   );
+
+  const analysis = isSavedView
+    ? savedAnalysis
+    : analyzedResult;
+
+  const [analyzingState, setAnalyzing] =
+    useState(!isSavedView);
+  const analyzing = !isSavedView && analyzingState;
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -234,46 +270,32 @@ export default function MealAnalysisScreen() {
   const [editItems, setEditItems] =
     useState<EditableDietItem[]>([]);
 
- useEffect(() => {
-  console.log(
-    '[MealAnalysis] 선택한 사진 URI:',
-    params.uri
-  );
-  console.log(
-    '[MealAnalysis] Mock Mode:',
-    isMockMode
-  );
-}, [params.uri]);
-
   useEffect(() => {
-  if (!savedMeal) return;
-
-  const timer = setTimeout(() => {
-    setMealType(savedMeal.type);
-    setAnalysis(savedMealToAnalysis(savedMeal));
-    setAnalyzing(false);
-  }, 0);
-
-  return () => clearTimeout(timer);
-}, [savedMeal]);
+    if (params.imageId && !mealImage) {
+      console.log(
+        '[MealAnalysis] 메모리에서 사진을 찾지 못했어요:',
+        params.imageId
+      );
+    }
+  }, [params.imageId, mealImage]);
 
   const analyze = useCallback(async () => {
-    if (savedMeal) return;
+    if (isSavedView) return;
 
     setAnalyzing(true);
     setError('');
     setAnalysis(null);
 
     try {
-      if (!params.uri) {
+      if (!imageFileUri) {
         throw new Error(
-          '선택한 음식 사진이 없습니다.'
+          '선택한 음식 사진을 찾지 못했어요. 사진을 다시 선택해 주세요.'
         );
       }
 
       const result = isMockMode
         ? await simulateRequest(demoAnalysis, 900)
-        : await dietApi.analyzeImage(params.uri);
+        : await dietApi.analyzeImage(imageFileUri);
 
       setAnalysis(result);
     } catch (requestError) {
@@ -290,17 +312,17 @@ export default function MealAnalysisScreen() {
     } finally {
       setAnalyzing(false);
     }
-  }, [params.uri, savedMeal]);
+  }, [imageFileUri, isSavedView]);
 
   useEffect(() => {
-    if (savedMeal) return;
+    if (isSavedView) return;
 
     const timer = setTimeout(() => {
       void analyze();
     }, 0);
 
     return () => clearTimeout(timer);
-  }, [analyze, savedMeal]);
+  }, [analyze, isSavedView]);
 
   const total = useMemo(() => {
     if (!analysis) return null;
@@ -547,6 +569,47 @@ export default function MealAnalysisScreen() {
     );
   }
 
+  if (isSavedView && (!analysis || !total)) {
+    return (
+      <Screen>
+        <Header
+          title="식단 상세"
+          left={
+            <IconButton
+              label="←"
+              onPress={() => router.back()}
+            />
+          }
+        />
+
+        <View style={styles.loading}>
+          <Text style={styles.errorIcon}>
+            !
+          </Text>
+
+          <Text style={styles.loadingTitle}>
+            식단 정보를 찾지 못했어요
+          </Text>
+
+          <Text style={styles.loadingText}>
+            삭제되었거나 아직 불러오는 중일 수
+            있어요. 식단 목록에서 다시 확인해
+            주세요.
+          </Text>
+
+          <View style={styles.errorButtons}>
+            <PrimaryButton
+              title="식단 목록으로"
+              onPress={() =>
+                router.replace('/history')
+              }
+            />
+          </View>
+        </View>
+      </Screen>
+    );
+  }
+
   if (!analysis || !total) {
     return (
       <Screen>
@@ -575,10 +638,19 @@ export default function MealAnalysisScreen() {
           </Text>
 
           <View style={styles.errorButtons}>
-            <PrimaryButton
-              title="다시 분석"
-              onPress={analyze}
-            />
+            {imageFileUri ? (
+              <PrimaryButton
+                title="다시 분석"
+                onPress={analyze}
+              />
+            ) : (
+              <PrimaryButton
+                title="사진 다시 선택"
+                onPress={() =>
+                  router.replace('/(tabs)/records')
+                }
+              />
+            )}
 
             <PrimaryButton
               title="직접 입력"
@@ -618,33 +690,23 @@ export default function MealAnalysisScreen() {
 
       {/* 음식 사진 표시 */}
       <View style={styles.imageWrap}>
-        {imageUri ? (
+        {previewUri ? (
           <Image
-            key={imageUri}
-            source={{ uri: imageUri }}
+            key={`${mealImage?.id}-${previewIndex}`}
+            source={{ uri: previewUri }}
             style={styles.image}
             resizeMode="cover"
-            onLoad={() => {
-              console.log(
-                '[MealAnalysis] RN 이미지 로딩 성공'
-              );
-
-              setImageLoaded(true);
-              setImageError(false);
-            }}
             onError={(event) => {
               console.log(
-                '[MealAnalysis] RN 이미지 로딩 실패:',
+                '[MealAnalysis] 이미지 로딩 실패:',
                 event.nativeEvent.error
               );
 
-              console.log(
-                '[MealAnalysis] 실패한 URI:',
-                imageUri
-              );
-
-              setImageError(true);
-              setImageLoaded(false);
+              // 다음 후보 URI로 다시 시도하고, 더 없으면 안내 문구를 보여 준다.
+              setPreviewFailure({
+                imageId: params.imageId,
+                count: previewIndex + 1,
+              });
             }}
           />
         ) : (
@@ -664,8 +726,8 @@ export default function MealAnalysisScreen() {
             <Text
               style={styles.imageMessageText}
             >
-              터미널에 표시된 이미지
-              로딩 오류를 확인해 주세요.
+              분석 결과는 그대로 확인하고
+              저장할 수 있어요.
             </Text>
           </View>
         )}
