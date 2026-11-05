@@ -7,6 +7,7 @@ import { Header, Icon, IconButton, ListGroup, ListRow, Pressable, Screen, Sectio
 import { font, palette } from '@/constants/design';
 import { useApp } from '@/context/app-context';
 import { getErrorMessage, isMockMode } from '@/services/api';
+import { goBack } from '@/services/navigation';
 import { userApi } from '@/services/bapmeokja-api';
 import { syncLocalNotifications } from '@/services/device-notifications';
 import { NotificationSettings } from '@/types';
@@ -59,7 +60,7 @@ export default function SettingsScreen() {
   };
 
   const logout = () => Alert.alert('로그아웃할까요?', '이 기기의 로그인 정보가 삭제됩니다.', [{ text: '취소', style: 'cancel' }, { text: '로그아웃', style: 'destructive', onPress: async () => { await signOut(); router.replace('/'); } }]);
-  return <Screen><Header title="설정" left={<IconButton label="←" onPress={() => router.back()} />} />
+  return <Screen><Header title="설정" left={<IconButton label="←" onPress={() => goBack()} />} />
     <ListGroup>
       <Pressable accessibilityRole="button" style={styles.profile} onPress={() => router.push('/settings/profile')}>
         <Image source={character} style={styles.avatar} contentFit="contain" accessibilityLabel="토마토 프로필" />
@@ -75,7 +76,6 @@ export default function SettingsScreen() {
     <ListGroup>
       <ListRow icon="user" title="내 정보 관리" subtitle="키, 몸무게, 목표 설정" onPress={() => router.push('/settings/profile')} />
       <ListRow icon="target" title="영양 목표" subtitle={`탄 ${profile.carbGoal}g · 단 ${profile.proteinGoal}g · 지 ${profile.fatGoal}g`} onPress={() => router.push('/settings/profile')} />
-      <ListRow icon="credit-card" title="기본 예산" subtitle={`외식 ${(profile.defaultDiningBudget ?? 10000).toLocaleString()}원 · 집밥 ${(profile.defaultHomeBudget ?? 8000).toLocaleString()}원`} onPress={() => router.push('/settings/budget' as Href)} />
     </ListGroup>
     <SectionTitle small title="알림" />
     <ListGroup>

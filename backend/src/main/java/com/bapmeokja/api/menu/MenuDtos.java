@@ -35,7 +35,9 @@ public final class MenuDtos {
             String categoryId,
             String categoryName,
             String iconUrl,
-            String reason
+            String reason,
+            int estimatedCost,
+            boolean isWithinBudget
     ) {
     }
 

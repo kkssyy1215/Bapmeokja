@@ -5,6 +5,7 @@ import { Alert, StyleSheet, Text, View } from 'react-native';
 import { Field, Header, IconButton, PrimaryButton, Screen, Pressable } from '@/components/ui';
 import { font, palette, radii, shadow, spacing } from '@/constants/design';
 import { useApp } from '@/context/app-context';
+import { goBack } from '@/services/navigation';
 
 type CheckState = 'idle' | 'checking' | 'available' | 'duplicate';
 
@@ -65,7 +66,7 @@ export default function SignupScreen() {
 
   return (
     <Screen>
-      <Header title="회원가입" left={<IconButton label="←" onPress={() => router.back()} accessibilityLabel="뒤로 가기" />} />
+      <Header title="회원가입" left={<IconButton label="←" onPress={() => goBack()} accessibilityLabel="뒤로 가기" />} />
       <View style={styles.intro}><Text style={styles.title}>계정을 만들고{`\n`}식단 기록을 시작해요</Text><Text style={styles.description}>중복 확인이 필요한 항목은 입력 후 확인해 주세요.</Text></View>
       <View style={styles.form}>
         <Field label="이름" value={name} onChangeText={setName} placeholder="이름" maxLength={30} autoComplete="name" textContentType="name" />

@@ -13,6 +13,7 @@ export type Meal = Nutrients & {
   name: string;
   emoji: string;
   eatenAt: string;
+  weightGram?: number;
   confidence?: number;
 };
 
@@ -59,7 +60,7 @@ export type FridgeItem = {
   isExpiringSoon?: boolean;
 };
 
-export type Comment = { id: string; author: string; content: string; createdAt: string };
+export type Comment = { id: string; author: string; content: string; createdAt: string; parentId?: string };
 
 export type CommunityPost = {
   id: string;

@@ -37,6 +37,7 @@ import {
 } from '@/services/meal-image-store';
 import { Meal, MealType } from '@/types';
 import { AnalyzeDietResponse } from '@/types/api';
+import { goBack } from '@/services/navigation';
 
 const demoAnalysis: AnalyzeDietResponse = {
   analyzeId: 'anl_demo_001',
@@ -155,7 +156,7 @@ export default function MealAnalysisScreen() {
   const params =
     useLocalSearchParams<MealAnalysisParams>();
 
-  const { saveAnalyzedMeal, meals } = useApp();
+  const { saveAnalyzedMeal, deleteMeal, meals } = useApp();
 
   // 라우터에는 id만 넘어오고, 원본 URI와 미리보기 데이터는 메모리 저장소에서 찾는다.
   const mealImage = useMemo(
@@ -187,6 +188,26 @@ export default function MealAnalysisScreen() {
     previewCandidates.length > 0 && !previewUri;
 
   const savingRef = useRef(false);
+
+  const confirmDelete = () => {
+    if (!params.id) return;
+    const mealId = String(params.id);
+    Alert.alert('식단을 삭제할까요?', '삭제한 식단은 복구할 수 없어요.', [
+      { text: '취소', style: 'cancel' },
+      {
+        text: '삭제',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await deleteMeal(mealId);
+            router.replace('/(tabs)/home');
+          } catch (error) {
+            Alert.alert('식단을 삭제하지 못했어요', error instanceof Error ? error.message : '잠시 후 다시 시도해 주세요.');
+          }
+        },
+      },
+    ]);
+  };
 
   const savedMeal = useMemo<Meal | undefined>(() => {
     if (!params.saved) return undefined;
@@ -545,7 +566,7 @@ export default function MealAnalysisScreen() {
           left={
             <IconButton
               label="←"
-              onPress={() => router.back()}
+              onPress={() => goBack()}
             />
           }
         />
@@ -578,7 +599,7 @@ export default function MealAnalysisScreen() {
           left={
             <IconButton
               label="←"
-              onPress={() => router.back()}
+              onPress={() => goBack()}
             />
           }
         />
@@ -619,7 +640,7 @@ export default function MealAnalysisScreen() {
           left={
             <IconButton
               label="←"
-              onPress={() => router.back()}
+              onPress={() => goBack()}
             />
           }
         />
@@ -684,7 +705,7 @@ export default function MealAnalysisScreen() {
         left={
           <IconButton
             label="←"
-            onPress={() => router.back()}
+            onPress={() => goBack()}
           />
         }
       />
@@ -1126,13 +1147,39 @@ export default function MealAnalysisScreen() {
 
       {/* 식단 저장 */}
       {savedMeal ? (
-        <PrimaryButton
-          title="식단 목록으로"
-          variant="secondary"
-          onPress={() =>
-            router.push('/history')
-          }
-        />
+        <View style={styles.savedActions}>
+          <View style={styles.savedAction}>
+            <PrimaryButton
+              title="식단 수정"
+              icon="edit-3"
+              variant="secondary"
+              onPress={() =>
+                router.push({
+                  pathname: '/manual-entry',
+                  params: {
+                    id: savedMeal.id,
+                    name: savedMeal.name,
+                    type: savedMeal.type,
+                    eatenAt: savedMeal.eatenAt,
+                    weightGram: String(savedMeal.weightGram ?? 100),
+                    calories: String(savedMeal.calories),
+                    carbs: String(savedMeal.carbs),
+                    protein: String(savedMeal.protein),
+                    fat: String(savedMeal.fat),
+                  },
+                })
+              }
+            />
+          </View>
+          <View style={styles.savedAction}>
+            <PrimaryButton
+              title="식단 삭제"
+              icon="trash-2"
+              variant="danger"
+              onPress={confirmDelete}
+            />
+          </View>
+        </View>
       ) : (
         <PrimaryButton
           title="이 내용으로 저장"
@@ -1266,6 +1313,15 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '500',
     ...shadow,
+  },
+
+  savedActions: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+
+  savedAction: {
+    flex: 1,
   },
 
   typeActive: {

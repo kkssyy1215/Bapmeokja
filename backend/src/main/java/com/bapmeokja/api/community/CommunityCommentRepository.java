@@ -12,5 +12,7 @@ public interface CommunityCommentRepository extends JpaRepository<CommunityComme
     @EntityGraph(attributePaths = {"user", "post"})
     Optional<CommunityComment> findByIdAndPost_Id(String id, String postId);
 
+    List<CommunityComment> findAllByPost_IdAndParentId(String postId, String parentId);
+
     void deleteAllByPost_Id(String postId);
 }

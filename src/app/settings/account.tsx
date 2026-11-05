@@ -6,6 +6,7 @@ import { Field, Header, IconButton, Screen, Pressable } from '@/components/ui';
 import { font, palette, radii, shadow, spacing } from '@/constants/design';
 import { useApp } from '@/context/app-context';
 import { getErrorMessage, isMockMode, simulateRequest } from '@/services/api';
+import { goBack } from '@/services/navigation';
 import { userApi } from '@/services/bapmeokja-api';
 
 const CONFIRM_TEXT = '회원탈퇴';
@@ -44,7 +45,7 @@ export default function AccountSettingsScreen() {
 
   return (
     <Screen>
-      <Header title="회원 탈퇴" subtitle="삭제할 내용을 꼭 확인해 주세요" left={<IconButton label="←" onPress={() => router.back()} />} />
+      <Header title="회원 탈퇴" subtitle="삭제할 내용을 꼭 확인해 주세요" left={<IconButton label="←" onPress={() => goBack()} />} />
       <View style={styles.warning}>
         <Text style={styles.warningIcon}>!</Text>
         <View style={styles.warningCopy}>
@@ -63,7 +64,7 @@ export default function AccountSettingsScreen() {
       <Pressable disabled={!canDelete || deleting} onPress={confirmDelete} style={({ pressed }) => [styles.deleteButton, (!canDelete || pressed) && styles.disabled]}>
         {deleting ? <ActivityIndicator color={palette.onAccent} /> : <Text style={styles.deleteText}>계정과 데이터 영구 삭제</Text>}
       </Pressable>
-      <Text style={styles.cancelText} onPress={() => router.back()}>탈퇴하지 않고 돌아가기</Text>
+      <Text style={styles.cancelText} onPress={() => goBack()}>탈퇴하지 않고 돌아가기</Text>
     </Screen>
   );
 }

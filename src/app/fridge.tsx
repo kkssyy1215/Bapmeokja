@@ -5,6 +5,7 @@ import { Alert, StyleSheet, Text, View } from 'react-native';
 import { Card, EmptyState, Field, Header, IconButton, ListGroup, ListRow, Note, PrimaryButton, Pressable, Screen, SectionTitle } from '@/components/ui';
 import { palette, radii, spacing } from '@/constants/design';
 import { useApp } from '@/context/app-context';
+import { goBack } from '@/services/navigation';
 
 export default function FridgeScreen() {
   const { fridgeItems, addFridgeItem, removeFridgeItem, refreshFridge } = useApp();
@@ -34,10 +35,10 @@ export default function FridgeScreen() {
 
   const expiring = fridgeItems.filter((item) => item.isExpiringSoon || ['D-0', 'D-1', 'D-2', 'D-3'].includes(item.expiry));
 
-  return <Screen><Header title="내 냉장고" subtitle={`${fridgeItems.length}개 재료를 보관 중`} left={<IconButton label="←" onPress={() => router.back()} />} />
+  return <Screen><Header title="내 냉장고" subtitle={`${fridgeItems.length}개 재료를 보관 중`} left={<IconButton label="←" onPress={() => goBack()} />} />
     {expiring.length ? <Note icon="alert-circle">유통기한이 임박했어요. {expiring.map((item) => item.name).join(', ')}을 먼저 사용해 보세요.</Note> : null}
     <SectionTitle title="보관 중인 재료" />
-    {fridgeItems.length ? <ListGroup>{fridgeItems.map((item) => <ListRow key={item.id} icon="package" tone="accent" title={item.name} subtitle={`${item.quantity}${item.expiryDate ? ` · ${item.expiryDate}` : ''}`} right={<View style={styles.itemRight}>{item.expiry ? <Text style={[styles.expiry, item.isExpiringSoon && styles.expirySoon]}>{item.expiry}</Text> : null}<Pressable accessibilityRole="button" onPress={() => remove(item.id, item.name)} hitSlop={10}><Text style={styles.remove}>삭제</Text></Pressable></View>} />)}</ListGroup> : <Card><EmptyState icon="package" title="등록된 재료가 없어요" description="자주 쓰는 재료부터 하나씩 추가해 보세요." /></Card>}
+    {fridgeItems.length ? <ListGroup flush>{fridgeItems.map((item) => <ListRow key={item.id} title={item.name} subtitle={`${item.quantity}${item.expiryDate ? ` · ${item.expiryDate}` : ''}`} right={<View style={styles.itemRight}>{item.expiry ? <Text style={[styles.expiry, item.isExpiringSoon && styles.expirySoon]}>{item.expiry}</Text> : null}<Pressable accessibilityRole="button" onPress={() => remove(item.id, item.name)} hitSlop={10}><Text style={styles.remove}>삭제</Text></Pressable></View>} />)}</ListGroup> : <Card><EmptyState icon="package" title="등록된 재료가 없어요" description="자주 쓰는 재료부터 하나씩 추가해 보세요." /></Card>}
     {fridgeItems.length ? <PrimaryButton title="이 재료로 집밥 추천" onPress={() => router.replace('/(tabs)/recommend')} /> : null}
     <SectionTitle title="재료 추가" />
     <Card style={styles.form}>

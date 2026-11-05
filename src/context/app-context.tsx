@@ -60,7 +60,13 @@ type AppContextValue = PersistedState & {
   saveAnalyzedMeal: (analysis: AnalyzeDietResponse, type: MealType) => Promise<void>;
   addMeal: (meal: Meal) => void;
   toggleLike: (postId: string) => void;
-  addComment: (postId: string, content: string) => void;
+  addComment: (postId: string, content: string, parentId?: string) => void;
+  updateComment: (postId: string, commentId: string, content: string) => void;
+  removeComment: (postId: string, commentId: string) => void;
+  updatePost: (postId: string, content: string) => void;
+  removePost: (postId: string) => void;
+  updateMeal: (mealId: string, meal: ManualMealInput) => Promise<void>;
+  deleteMeal: (mealId: string) => Promise<void>;
   createPost: (content: string, mealName: string) => void;
   refreshFridge: () => Promise<void>;
   addFridgeItem: (item: Omit<FridgeItem, 'id'>) => Promise<void>;
@@ -367,6 +373,22 @@ export function AppProvider({ children }: PropsWithChildren) {
     setState((prev) => ({ ...prev, meals: [{ id: result.recordId, name: meal.name, type: meal.type, emoji: '🍽️', eatenAt: meal.eatenAt, calories: meal.calories, carbs: meal.carbs, protein: meal.protein, fat: meal.fat }, ...prev.meals] }));
   }, []);
 
+  const updateMeal = useCallback(async (mealId: string, meal: ManualMealInput) => {
+    if (!isMockMode) {
+      await dietApi.updateRecord(mealId, {
+        mealType: mealTypeCode[meal.type],
+        eatenAt: meal.eatenAt,
+        items: [{ name: meal.name, weightGram: meal.weightGram, calorie: meal.calories, carb: meal.carbs, protein: meal.protein, fat: meal.fat }],
+      });
+    }
+    setState((prev) => ({ ...prev, meals: prev.meals.map((item) => item.id === mealId ? { ...item, name: meal.name, type: meal.type, eatenAt: meal.eatenAt, weightGram: meal.weightGram, calories: meal.calories, carbs: meal.carbs, protein: meal.protein, fat: meal.fat } : item) }));
+  }, []);
+
+  const deleteMeal = useCallback(async (mealId: string) => {
+    if (!isMockMode) await dietApi.deleteRecord(mealId);
+    setState((prev) => ({ ...prev, meals: prev.meals.filter((item) => item.id !== mealId) }));
+  }, []);
+
   const saveAnalyzedMeal = useCallback(async (analysis: AnalyzeDietResponse, type: MealType) => {
     const eatenAt = new Date().toISOString();
     const revision = sessionRevision.current;
@@ -426,13 +448,19 @@ export function AppProvider({ children }: PropsWithChildren) {
     saveAnalyzedMeal,
     addMeal: (meal) => setState((prev) => ({ ...prev, meals: [meal, ...prev.meals] })),
     toggleLike: (postId) => setState((prev) => ({ ...prev, posts: prev.posts.map((post) => post.id === postId ? { ...post, liked: !post.liked, likes: post.likes + (post.liked ? -1 : 1) } : post) })),
-    addComment: (postId, content) => setState((prev) => ({ ...prev, posts: prev.posts.map((post) => post.id === postId ? { ...post, comments: [...post.comments, { id: `cmt_${Date.now()}`, author: prev.profile.nickname, content, createdAt: '방금 전' }] } : post) })),
+    addComment: (postId, content, parentId) => setState((prev) => ({ ...prev, posts: prev.posts.map((post) => post.id === postId ? { ...post, comments: [...post.comments, { id: `cmt_${Date.now()}`, author: prev.profile.nickname, content, createdAt: '방금 전', parentId }] } : post) })),
+    updateComment: (postId, commentId, content) => setState((prev) => ({ ...prev, posts: prev.posts.map((post) => post.id === postId ? { ...post, comments: post.comments.map((item) => item.id === commentId ? { ...item, content } : item) } : post) })),
+    removeComment: (postId, commentId) => setState((prev) => ({ ...prev, posts: prev.posts.map((post) => post.id === postId ? { ...post, comments: post.comments.filter((item) => item.id !== commentId && item.parentId !== commentId) } : post) })),
+    updatePost: (postId, content) => setState((prev) => ({ ...prev, posts: prev.posts.map((post) => post.id === postId ? { ...post, content } : post) })),
+    removePost: (postId) => setState((prev) => ({ ...prev, posts: prev.posts.filter((post) => post.id !== postId) })),
+    updateMeal,
+    deleteMeal,
     createPost: (content, mealName) => setState((prev) => ({ ...prev, posts: [{ id: `post_${Date.now()}`, author: prev.profile.nickname, avatar: '🍅', content, mealName, emoji: '🍽️', nutrients: { calories: 0, carbs: 0, protein: 0, fat: 0 }, likes: 0, liked: false, createdAt: '방금 전', comments: [] }, ...prev.posts] })),
     refreshFridge,
     addFridgeItem,
     removeFridgeItem,
     updateNotifications: (settings) => setState((prev) => ({ ...prev, notifications: { ...prev.notifications, ...settings } })),
-  }), [state, hydrated, effectiveDashboard, lastError, login, registerAccount, checkDuplicate, signOut, completeInitialProfile, refreshDashboard, saveManualMeal, saveAnalyzedMeal, refreshFridge, addFridgeItem, removeFridgeItem]);
+  }), [state, hydrated, effectiveDashboard, lastError, login, registerAccount, checkDuplicate, signOut, completeInitialProfile, refreshDashboard, saveManualMeal, saveAnalyzedMeal, refreshFridge, addFridgeItem, removeFridgeItem, updateMeal, deleteMeal]);
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 }

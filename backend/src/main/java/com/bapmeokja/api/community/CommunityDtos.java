@@ -75,14 +75,23 @@ public final class CommunityDtos {
             String commentId,
             String authorNickname,
             String content,
-            Instant createdAt
+            Instant createdAt,
+            String parentCommentId
+    ) {
+    }
+
+    public record UpdateCommentRequest(
+            @NotBlank(message = "댓글 내용을 입력해주세요.")
+            @Size(max = 1000, message = "댓글은 1000자 이내로 입력해주세요.")
+            String content
     ) {
     }
 
     public record CreateCommentRequest(
             @NotBlank(message = "댓글 내용을 입력해주세요.")
             @Size(max = 1000, message = "댓글은 1000자 이내로 입력해주세요.")
-            String content
+            String content,
+            @Size(max = 40) String parentCommentId
     ) {
     }
 

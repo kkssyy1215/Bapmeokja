@@ -4,6 +4,7 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { Header, IconButton, Screen } from '@/components/ui';
 import { font, palette, radii, shadow, spacing } from '@/constants/design';
+import { goBack } from '@/services/navigation';
 
 const sections = [
   ['서비스 이용', '밥 먹자!는 식단 기록과 영양 정보 관리를 돕는 서비스입니다. 표시되는 분석과 추천은 참고 정보이며 의료 진단이나 전문 영양 상담을 대신하지 않습니다.'],
@@ -16,7 +17,7 @@ const sections = [
 export default function LegalScreen() {
   const handleBack = () => {
     if (router.canGoBack()) {
-      router.back();
+      goBack();
     } else {
       router.replace('/(tabs)/home');
     }

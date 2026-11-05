@@ -6,6 +6,7 @@ import { Field, Header, IconButton, Pill, PrimaryButton, Screen, Pressable } fro
 import { font, palette, radii, shadow, spacing } from '@/constants/design';
 import { useApp } from '@/context/app-context';
 import { ActivityLevelCode, GenderCode, GoalCode } from '@/types/api';
+import { goBack } from '@/services/navigation';
 
 const activities: { code: ActivityLevelCode; label: string; description: string }[] = [
   { code: 'SEDENTARY', label: '거의 안 함', description: '주로 앉아서 생활' },
@@ -68,7 +69,7 @@ export default function OnboardingScreen() {
 
   return (
     <Screen>
-      <Header title="기본 정보 설정" subtitle="권장 섭취량 계산에 사용해요" left={<IconButton label="←" onPress={() => router.back()} />} />
+      <Header title="기본 정보 설정" subtitle="권장 섭취량 계산에 사용해요" left={<IconButton label="←" onPress={() => goBack()} />} />
       <View style={styles.intro}><Text style={styles.title}>나에게 맞는 하루 목표를{`\n`}계산해 볼게요</Text><Text style={styles.description}>입력한 정보는 식단 분석과 목표 계산에만 사용됩니다.</Text></View>
 
       <View style={styles.section}><Text style={styles.label}>성별</Text><View style={styles.pills}><Pill label="여성" active={gender === 'F'} onPress={() => setGender('F')} /><Pill label="남성" active={gender === 'M'} onPress={() => setGender('M')} /></View></View>

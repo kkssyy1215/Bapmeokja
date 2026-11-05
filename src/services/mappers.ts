@@ -107,6 +107,7 @@ export function mealFromApi(record: DietRecordSummary): Meal {
     name: record.foodName,
     emoji: record.mealType === 'BREAKFAST' ? '🥣' : record.mealType === 'SNACK' ? '🍎' : '🍽️',
     eatenAt: record.eatenAt,
+    weightGram: record.totalWeightGram,
     calories: record.totalCalorie,
     carbs: record.carb,
     protein: record.protein,

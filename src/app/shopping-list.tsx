@@ -1,10 +1,11 @@
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Linking, StyleSheet, Text, View } from 'react-native';
 
 import { Card, Header, IconButton, Screen, Pressable } from '@/components/ui';
 import { font, palette, radii, spacing } from '@/constants/design';
 import { getErrorMessage, isMockMode, simulateRequest } from '@/services/api';
+import { goBack } from '@/services/navigation';
 import { menuApi } from '@/services/bapmeokja-api';
 import { ShoppingList } from '@/types/api';
 
@@ -32,7 +33,7 @@ export default function ShoppingListScreen() {
       .finally(() => setLoading(false));
   }, [recipeId]);
 
-  return <Screen><Header title="장보기 목록" subtitle={list?.recipeName} left={<IconButton label="←" onPress={() => router.back()} />} />
+  return <Screen><Header title="장보기 목록" subtitle={list?.recipeName} left={<IconButton label="←" onPress={() => goBack()} />} />
     {loading ? <ActivityIndicator color={palette.tomato} /> : list ? <>
       <Card><Text style={styles.estimateLabel}>부족한 재료 예상 금액</Text><Text style={styles.estimate}>{list.estimatedTotalCost.toLocaleString()}원</Text></Card>
       {list.shoppingItems.map((item) => <Card key={item.name}><View style={styles.itemHeader}><View><Text style={styles.itemName}>{item.name}</Text><Text style={styles.amount}>필요량 {item.requiredAmount}</Text></View><Text style={[styles.status, item.inFridge && styles.have]}>{item.inFridge ? '냉장고에 있음' : '구매 필요'}</Text></View>{item.products.map((product) => <Pressable key={product.productUrl} style={styles.product} onPress={() => Linking.openURL(product.productUrl)}><View><Text style={styles.mall}>{product.mallName}</Text><Text style={styles.productName}>{product.productName}</Text></View><View style={styles.productRight}><Text style={styles.price}>{product.price.toLocaleString()}원</Text><Text style={styles.open}>판매처 보기 ›</Text></View></Pressable>)}</Card>)}

@@ -122,7 +122,8 @@ public class CommunityService {
                         comment.getId(),
                         comment.getUser().getNickname(),
                         comment.getContent(),
-                        comment.getCreatedAt()
+                        comment.getCreatedAt(),
+                        comment.getParentId()
                 ))
                 .toList();
         CommunityDtos.NutritionInfo nutritionInfo = post.getFoodName() == null
@@ -176,7 +177,8 @@ public class CommunityService {
                 nextId("cmt_"),
                 post,
                 user,
-                request.content().trim()
+                request.content().trim(),
+                resolveParentId(postId, request.parentCommentId())
         );
         commentRepository.save(comment);
         post.increaseCommentCount();
@@ -184,12 +186,37 @@ public class CommunityService {
     }
 
     @Transactional
+    public void updateComment(String postId, String commentId, CommunityDtos.UpdateCommentRequest request) {
+        CommunityComment comment = commentRepository.findByIdAndPost_Id(commentId, postId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "존재하지 않는 댓글입니다."));
+        requireOwner(comment.getUser().getId(), "본인의 댓글만 수정할 수 있습니다.");
+        comment.updateContent(request.content().trim());
+    }
+
+    @Transactional
     public void deleteComment(String postId, String commentId) {
         CommunityComment comment = commentRepository.findByIdAndPost_Id(commentId, postId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "존재하지 않는 댓글입니다."));
         requireOwner(comment.getUser().getId(), "본인의 댓글만 삭제할 수 있습니다.");
-        findLockedPost(postId).decreaseCommentCount();
+        CommunityPost post = findLockedPost(postId);
+        // 댓글을 지우면 달린 답글도 함께 지운다.
+        if (comment.getParentId() == null) {
+            List<CommunityComment> replies = commentRepository.findAllByPost_IdAndParentId(postId, commentId);
+            commentRepository.deleteAll(replies);
+            replies.forEach(reply -> post.decreaseCommentCount());
+        }
+        post.decreaseCommentCount();
         commentRepository.delete(comment);
+    }
+
+    /** 답글은 한 단계만 둔다. 답글에 답글을 달면 원래 댓글 아래에 붙인다. */
+    private String resolveParentId(String postId, String parentCommentId) {
+        if (parentCommentId == null || parentCommentId.isBlank()) {
+            return null;
+        }
+        CommunityComment parent = commentRepository.findByIdAndPost_Id(parentCommentId, postId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "존재하지 않는 댓글입니다."));
+        return parent.getParentId() == null ? parent.getId() : parent.getParentId();
     }
 
     @Transactional

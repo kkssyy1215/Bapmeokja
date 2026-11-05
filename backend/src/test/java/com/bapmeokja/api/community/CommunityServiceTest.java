@@ -3,6 +3,7 @@ package com.bapmeokja.api.community;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -18,6 +19,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
+import org.mockito.ArgumentCaptor;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockMultipartFile;
 
@@ -128,6 +130,72 @@ class CommunityServiceTest {
 
         assertFailsWith(ErrorCode.FORBIDDEN, () -> service.deleteComment("post", "cmt"));
         verify(commentRepository, never()).delete(any());
+    }
+
+    @Test
+    void aReplyToAReplyIsAttachedToTheOriginalComment() {
+        CommunityPost post = post(user(2L));
+        when(postRepository.findLockedById("post")).thenReturn(Optional.of(post));
+        CommunityComment reply = mock(CommunityComment.class);
+        when(reply.getParentId()).thenReturn("root");
+        when(commentRepository.findByIdAndPost_Id("reply", "post")).thenReturn(Optional.of(reply));
+        ArgumentCaptor<CommunityComment> saved = ArgumentCaptor.forClass(CommunityComment.class);
+
+        service.createComment("post", new CommunityDtos.CreateCommentRequest("답글", "reply"));
+
+        verify(commentRepository).save(saved.capture());
+        assertThat(saved.getValue().getParentId()).isEqualTo("root");
+    }
+
+    @Test
+    void replyingToACommentOfAnotherPostFails() {
+        CommunityPost post = post(user(2L));
+        when(postRepository.findLockedById("post")).thenReturn(Optional.of(post));
+        when(commentRepository.findByIdAndPost_Id("other", "post")).thenReturn(Optional.empty());
+
+        assertFailsWith(ErrorCode.RESOURCE_NOT_FOUND, () -> service.createComment("post", new CommunityDtos.CreateCommentRequest("답글", "other")));
+        verify(commentRepository, never()).save(any());
+    }
+
+    @Test
+    void deletingACommentAlsoRemovesItsReplies() {
+        CommunityPost post = post(user(2L));
+        when(postRepository.findLockedById("post")).thenReturn(Optional.of(post));
+        CommunityComment comment = mock(CommunityComment.class);
+        when(comment.getUser()).thenReturn(me);
+        when(commentRepository.findByIdAndPost_Id("cmt", "post")).thenReturn(Optional.of(comment));
+        CommunityComment first = mock(CommunityComment.class);
+        CommunityComment second = mock(CommunityComment.class);
+        List<CommunityComment> replies = List.of(first, second);
+        when(commentRepository.findAllByPost_IdAndParentId("post", "cmt")).thenReturn(replies);
+
+        service.deleteComment("post", "cmt");
+
+        verify(commentRepository).deleteAll(replies);
+        verify(commentRepository).delete(comment);
+        verify(post, times(3)).decreaseCommentCount();
+    }
+
+    @Test
+    void onlyTheAuthorCanEditAComment() {
+        CommunityComment comment = mock(CommunityComment.class);
+        User other = user(2L);
+        when(comment.getUser()).thenReturn(other);
+        when(commentRepository.findByIdAndPost_Id("cmt", "post")).thenReturn(Optional.of(comment));
+
+        assertFailsWith(ErrorCode.FORBIDDEN, () -> service.updateComment("post", "cmt", new CommunityDtos.UpdateCommentRequest("수정")));
+        verify(comment, never()).updateContent(any());
+    }
+
+    @Test
+    void theAuthorCanEditACommentWithTrimmedContent() {
+        CommunityComment comment = mock(CommunityComment.class);
+        when(comment.getUser()).thenReturn(me);
+        when(commentRepository.findByIdAndPost_Id("cmt", "post")).thenReturn(Optional.of(comment));
+
+        service.updateComment("post", "cmt", new CommunityDtos.UpdateCommentRequest("  수정한 댓글  "));
+
+        verify(comment).updateContent("수정한 댓글");
     }
 
     @Test

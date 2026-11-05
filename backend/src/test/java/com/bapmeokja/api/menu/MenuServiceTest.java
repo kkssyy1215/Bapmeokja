@@ -1,52 +1,76 @@
 package com.bapmeokja.api.menu;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.bapmeokja.api.diet.service.DailyNutritionQueryService;
 import com.bapmeokja.api.diet.service.NutritionCalculator.DailyNutritionSummary;
 import com.bapmeokja.api.user.domain.User;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class MenuServiceTest {
-    private DailyNutritionQueryService nutritionQueryService;
-    private CurrentUserProvider currentUserProvider;
     private MenuService service;
-    private User user;
 
     @BeforeEach
     void setUp() {
-        nutritionQueryService = mock(DailyNutritionQueryService.class);
-        currentUserProvider = mock(CurrentUserProvider.class);
-        user = mock(User.class);
-        when(currentUserProvider.get()).thenReturn(user);
-        when(user.getDailyCalorieGoal()).thenReturn(2000);
-        when(user.getCarbGoalGram()).thenReturn(250);
-        when(user.getProteinGoalGram()).thenReturn(125);
-        when(user.getFatGoalGram()).thenReturn(55);
-        when(user.getDefaultBudgetDiningOut()).thenReturn(10000);
-        when(user.getDefaultBudgetHomeCooking()).thenReturn(8000);
-        service = new MenuService(
-                mock(MenuCategoryRepository.class),
-                mock(MenuItemRepository.class),
-                mock(MenuItemIngredientRepository.class),
-                nutritionQueryService,
-                currentUserProvider
-        );
+        MenuCategoryRepository categories = mock(MenuCategoryRepository.class);
+        MenuItemRepository items = mock(MenuItemRepository.class);
+        DailyNutritionQueryService nutrition = mock(DailyNutritionQueryService.class);
+        CurrentUserProvider currentUser = mock(CurrentUserProvider.class);
+        User user = mock(User.class);
+        when(user.getProteinGoalGram()).thenReturn(100);
+        when(user.getCarbGoalGram()).thenReturn(100);
+        when(user.getFatGoalGram()).thenReturn(100);
+        when(currentUser.get()).thenReturn(user);
+        DailyNutritionSummary consumed = mock(DailyNutritionSummary.class);
+        when(nutrition.summarizeToday(any())).thenReturn(consumed);
+
+        MenuCategory poke = category("poke", "포케");
+        MenuCategory snack = category("snack", "간편식");
+        when(categories.findAll()).thenReturn(List.of(poke, snack));
+        List<MenuItem> pokeItems = List.of(item(10900), item(12900));
+        List<MenuItem> snackItems = List.of(item(3800), item(4900));
+        when(items.findByCategoryIdOrderByAvgPriceAsc("poke")).thenReturn(pokeItems);
+        when(items.findByCategoryIdOrderByAvgPriceAsc("snack")).thenReturn(snackItems);
+        service = new MenuService(categories, items, mock(MenuItemIngredientRepository.class), nutrition, currentUser);
     }
 
     @Test
-    void summaryUsesTodayNutritionAndPreservesOverOneHundredPercent() {
-        when(nutritionQueryService.summarizeToday(user))
-                .thenReturn(new DailyNutritionSummary(1500, 300, 62.5, 44, 3));
+    void budgetChangesWhichCategoriesAreRecommended() {
+        assertThat(names(5000)).containsExactly("간편식");
+        assertThat(names(11000)).containsExactly("간편식", "포케");
+        assertThat(names(3000)).isEmpty();
+    }
 
-        MenuDtos.RecommendationSummary result = service.getSummary();
+    @Test
+    void reportsCheapestPriceWithinBudget() {
+        MenuDtos.RecommendedCategory category = service.recommendDiningOut(11000).recommendedCategories().get(1);
 
-        assertThat(result.calorieRemaining()).isEqualTo(500);
-        assertThat(result.carb().percentage()).isEqualTo(120);
-        assertThat(result.protein().percentage()).isEqualTo(50);
-        assertThat(result.defaultBudget().homeCooking()).isEqualTo(8000);
+        assertThat(category.estimatedCost()).isEqualTo(10900);
+        assertThat(category.isWithinBudget()).isTrue();
+        assertThat(category.reason()).contains("예산 안 메뉴 1개");
+    }
+
+    private List<String> names(int budget) {
+        return service.recommendDiningOut(budget).recommendedCategories().stream()
+                .map(MenuDtos.RecommendedCategory::categoryName)
+                .toList();
+    }
+
+    private MenuCategory category(String id, String name) {
+        MenuCategory category = mock(MenuCategory.class);
+        when(category.getId()).thenReturn(id);
+        when(category.getName()).thenReturn(name);
+        return category;
+    }
+
+    private MenuItem item(int price) {
+        MenuItem item = mock(MenuItem.class);
+        when(item.getAvgPrice()).thenReturn(price);
+        return item;
     }
 }

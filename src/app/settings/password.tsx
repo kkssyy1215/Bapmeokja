@@ -1,10 +1,10 @@
-import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Alert, StyleSheet, Text, View } from 'react-native';
 
 import { Field, Header, IconButton, PrimaryButton, Screen } from '@/components/ui';
 import { font, palette, radii, spacing } from '@/constants/design';
 import { getErrorMessage, isMockMode, simulateRequest } from '@/services/api';
+import { goBack } from '@/services/navigation';
 import { userApi } from '@/services/bapmeokja-api';
 
 const PASSWORD_PATTERN = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/;
@@ -33,7 +33,7 @@ export default function PasswordSettingsScreen() {
     try {
       if (isMockMode) await simulateRequest(null, 500);
       else await userApi.changePassword({ currentPassword, newPassword, newPasswordConfirm });
-      Alert.alert('비밀번호를 변경했어요', '다음 로그인부터 새 비밀번호를 사용해 주세요.', [{ text: '확인', onPress: () => router.back() }]);
+      Alert.alert('비밀번호를 변경했어요', '다음 로그인부터 새 비밀번호를 사용해 주세요.', [{ text: '확인', onPress: () => goBack() }]);
     } catch (error) {
       Alert.alert('비밀번호를 변경하지 못했어요', getErrorMessage(error));
     } finally {
@@ -43,7 +43,7 @@ export default function PasswordSettingsScreen() {
 
   return (
     <Screen>
-      <Header title="비밀번호 변경" subtitle="본인 확인 후 안전하게 변경해요" left={<IconButton label="←" onPress={() => router.back()} />} />
+      <Header title="비밀번호 변경" subtitle="본인 확인 후 안전하게 변경해요" left={<IconButton label="←" onPress={() => goBack()} />} />
       <View style={styles.guide}>
         <Text style={styles.guideTitle}>안전한 비밀번호를 사용해 주세요</Text>
         <Text style={styles.guideText}>영문, 숫자, 특수문자를 모두 포함한 8자 이상의 비밀번호가 필요해요.</Text>

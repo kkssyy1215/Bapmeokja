@@ -41,13 +41,22 @@ public class CommunityComment {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
+    /** 답글이면 원래 댓글의 id. 일반 댓글은 null이다. */
+    @Column(name = "parent_id", length = 40)
+    private String parentId;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
-    public CommunityComment(String id, CommunityPost post, User user, String content) {
+    public CommunityComment(String id, CommunityPost post, User user, String content, String parentId) {
         this.id = id;
         this.post = post;
         this.user = user;
+        this.content = content;
+        this.parentId = parentId;
+    }
+
+    public void updateContent(String content) {
         this.content = content;
     }
 

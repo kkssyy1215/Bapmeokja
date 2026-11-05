@@ -312,7 +312,7 @@ export type CommunityPostDetail = {
     protein: number;
     fat: number;
   };
-  comments: { commentId: string; authorNickname: string; content: string; createdAt: string }[];
+  comments: { commentId: string; authorNickname: string; content: string; createdAt: string; parentCommentId?: string | null }[];
 };
 
 export type NotificationSettingsRequest = {

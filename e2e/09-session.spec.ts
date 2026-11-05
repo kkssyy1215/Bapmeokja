@@ -24,3 +24,11 @@ test('로그인하지 않으면 홈 주소로 들어가도 로그인 화면으�
   await page.goto('/home');
   await expect(page.getByPlaceholder('아이디를 입력하세요')).toBeVisible();
 });
+
+test('주소로 바로 들어와도 뒤로 가기를 누르면 홈으로 간다', async ({ page }) => {
+  await loginToHome(page, await createUserByApi());
+  await page.goto('/fridge');
+  await expect(visible(page, '내 냉장고')).toBeVisible();
+  await page.getByRole('button', { name: '뒤로' }).locator('visible=true').first().click();
+  await expect(page).toHaveURL(/\/home/);
+});

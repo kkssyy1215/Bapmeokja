@@ -98,6 +98,16 @@ public class CommunityController {
                 ));
     }
 
+    @PutMapping("/posts/{postId}/comments/{commentId}")
+    public ApiResponse<Void> updateComment(
+            @PathVariable String postId,
+            @PathVariable String commentId,
+            @Valid @RequestBody CommunityDtos.UpdateCommentRequest request
+    ) {
+        communityService.updateComment(postId, commentId, request);
+        return ApiResponse.success(null, "댓글이 수정되었습니다.");
+    }
+
     @DeleteMapping("/posts/{postId}/comments/{commentId}")
     public ApiResponse<Void> deleteComment(
             @PathVariable String postId,

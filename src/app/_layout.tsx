@@ -1,5 +1,6 @@
 import '@/services/web-alert';
 
+import { Jua_400Regular, useFonts } from '@expo-google-fonts/jua';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
@@ -8,6 +9,8 @@ import { palette } from '@/constants/design';
 import { AppProvider, useApp } from '@/context/app-context';
 
 export default function RootLayout() {
+  // 로그인 로고의 둥근 글씨체. 불러오는 동안에는 기본 글씨체로 보인다.
+  useFonts({ Jua: Jua_400Regular });
   return (
     <AppProvider>
       <StatusBar style="dark" />
@@ -46,7 +49,6 @@ function RootNavigator() {
           <Stack.Screen name="settings/index" />
           <Stack.Screen name="settings/profile" />
           <Stack.Screen name="settings/notifications" />
-          <Stack.Screen name="settings/budget" />
           <Stack.Screen name="settings/password" />
           <Stack.Screen name="settings/account" />
           <Stack.Screen name="settings/help" />

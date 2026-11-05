@@ -2,7 +2,7 @@ import { router } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
-import { Card, Header, IconButton, ListGroup, ListRow, MacroBar, Screen, Segmented } from '@/components/ui';
+import { Card, Header, IconButton, MacroBar, PrimaryButton, Screen, Segmented } from '@/components/ui';
 import { palette, radii, spacing } from '@/constants/design';
 import { useApp } from '@/context/app-context';
 import { isMockMode, simulateRequest } from '@/services/api';
@@ -85,9 +85,7 @@ export default function StatsScreen() {
           ) : null}
         </Card>
       ) : null}
-      <ListGroup>
-        <ListRow icon="zap" tone="accent" title={`${period === 'daily' ? '오늘' : period === 'weekly' ? '이번 주' : '이번 달'} 식단 피드백`} subtitle="기록을 바탕으로 개선점을 알려 드려요" onPress={() => router.push({ pathname: '/ai-feedback', params: { period } })} />
-      </ListGroup>
+      <PrimaryButton title={`${period === 'daily' ? '오늘' : period === 'weekly' ? '이번 주' : '이번 달'} 식단 피드백 보기`} icon="zap" variant="soft" onPress={() => router.push({ pathname: '/ai-feedback', params: { period } })} />
     </Screen>
   );
 }

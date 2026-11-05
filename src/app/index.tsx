@@ -59,7 +59,7 @@ const styles = StyleSheet.create({
   hero: { alignItems: 'center', paddingTop: spacing.lg },
   characterWrap: { width: 150, height: 150, borderRadius: 75, backgroundColor: palette.accentSoft, alignItems: 'center', justifyContent: 'center' },
   character: { width: 108, height: 118 },
-  logo: { fontSize: 30, fontWeight: '600', color: palette.ink, letterSpacing: -0.8, marginTop: spacing.md },
+  logo: { fontFamily: 'Jua', fontSize: 38, lineHeight: 46, color: palette.tomato, marginTop: spacing.md },
   tagline: { ...font.body, color: palette.muted, marginTop: 4 },
   form: { gap: spacing.md },
   mode: { color: palette.muted, fontSize: 12, textAlign: 'center' },

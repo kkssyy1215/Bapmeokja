@@ -3,7 +3,7 @@ import { router, useFocusEffect } from 'expo-router';
 import { useCallback } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
-import { Card, EmptyState, IconButton, ListGroup, ListRow, MacroBar, MealRow, PrimaryButton, Ring, Screen, SectionTitle } from '@/components/ui';
+import { Card, EmptyState, IconButton, ListGroup, MacroBar, MealRow, PrimaryButton, Ring, Screen, SectionTitle, TomatoIcon } from '@/components/ui';
 import { palette, radii, spacing } from '@/constants/design';
 import { useApp } from '@/context/app-context';
 
@@ -29,14 +29,13 @@ export default function HomeScreen() {
   const hour = new Date().getHours();
   const greeting = hour < 12 ? '좋은 아침이에요' : hour < 18 ? '좋은 오후예요' : '좋은 저녁이에요';
   const dateLabel = new Date().toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'long' });
-  const proteinLeft = Math.max(0, dashboard.protein.goalGram - dashboard.protein.consumedGram);
 
   return (
     <Screen>
       <View style={styles.top}>
         <View style={styles.flex}>
           <Text style={styles.hello}>{greeting}{apiMode === 'mock' ? ' · 시연 데이터' : ''}</Text>
-          <Text style={styles.name} numberOfLines={1}>{profile.nickname}</Text>
+          <View style={styles.nameRow}><Text style={styles.name} numberOfLines={1}>{profile.nickname}</Text><TomatoIcon size={22} /></View>
         </View>
         <IconButton label="⚙" onPress={() => router.push('/settings')} accessibilityLabel="설정" />
       </View>
@@ -71,11 +70,7 @@ export default function HomeScreen() {
         </View>
       </Card>
 
-      <PrimaryButton title="식단 기록하기" icon="camera" onPress={() => router.push('/(tabs)/records')} />
-
-      <ListGroup>
-        <ListRow icon="zap" tone="accent" title="오늘의 식단 피드백 보기" subtitle={today.length ? `단백질 ${proteinLeft}g을 더 채우면 좋아요` : '식사를 기록하면 분석해 드려요'} onPress={() => router.push('/ai-feedback')} />
-      </ListGroup>
+      <PrimaryButton title="오늘의 식단 피드백 보기" icon="zap" variant="soft" onPress={() => router.push('/ai-feedback')} />
 
       <SectionTitle title="오늘의 식사" action="전체 보기" onAction={() => router.push('/history')} />
       {today.length ? (
@@ -91,8 +86,9 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   flex: { flex: 1 },
   top: { flexDirection: 'row', alignItems: 'center', paddingTop: spacing.md, paddingBottom: 6, paddingHorizontal: 4 },
+  nameRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   hello: { color: palette.muted, fontSize: 14 },
-  name: { color: palette.ink, fontSize: 28, lineHeight: 35, fontWeight: '600', letterSpacing: -0.6, marginTop: 1 },
+  name: { flexShrink: 1, color: palette.ink, fontSize: 28, lineHeight: 35, fontWeight: '700', letterSpacing: -0.6, marginTop: 1 },
   statusCard: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: palette.accentSoft, borderRadius: radii.lg, paddingVertical: 14, paddingLeft: 18, paddingRight: 12 },
   date: { color: palette.tomato, fontSize: 12, fontWeight: '500' },
   statusTitle: { color: palette.ink, fontSize: 17, lineHeight: 23, fontWeight: '600', letterSpacing: -0.3, marginTop: 6 },

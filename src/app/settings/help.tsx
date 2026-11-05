@@ -1,8 +1,8 @@
-import { router } from 'expo-router';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { Header, IconButton, Screen } from '@/components/ui';
 import { font, palette, radii, shadow, spacing } from '@/constants/design';
+import { goBack } from '@/services/navigation';
 
 const faqs = [
   ['사진 분석값이 정확한가요?', '사진 속 음식과 양을 바탕으로 계산한 참고용 추정값입니다. 저장 전에 음식명, 중량, 칼로리와 영양소를 직접 확인·수정해 주세요.'],
@@ -12,7 +12,7 @@ const faqs = [
 ];
 
 export default function HelpScreen() {
-  return <Screen><Header title="도움말" subtitle="자주 묻는 내용을 모았어요" left={<IconButton label="←" onPress={() => router.back()} />} />
+  return <Screen><Header title="도움말" subtitle="자주 묻는 내용을 모았어요" left={<IconButton label="←" onPress={() => goBack()} />} />
     {faqs.map(([question, answer]) => <View key={question} style={styles.card}><Text style={styles.question}>{question}</Text><Text style={styles.answer}>{answer}</Text></View>)}
     <View style={styles.notice}><Text style={styles.noticeTitle}>오류가 계속되나요?</Text><Text style={styles.noticeText}>인터넷 연결과 서버 상태를 확인하고 앱을 다시 실행해 주세요. 개발 중에는 Swagger와 API health 주소를 README에서 확인할 수 있습니다.</Text></View>
   </Screen>;

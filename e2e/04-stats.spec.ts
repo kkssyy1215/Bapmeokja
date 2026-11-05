@@ -14,7 +14,7 @@ test('기록이 일간·주간·월간 통계와 AI 피드백에 반영된다', 
   await press(page, '월간');
   await expect(page.getByText('통계를 불러오고 있어요')).toHaveCount(0);
 
-  await press(page, '이번 달 식단 피드백');
+  await press(page, '이번 달 식단 피드백 보기');
   await expect(page).toHaveURL(/\/ai-feedback/);
   // 실제 서버 응답으로 분석 결과와 다음 행동이 보이는지 기간별로 확인한다.
   await expect(visible(page, '제안에 맞는 메뉴 보기')).toBeVisible();

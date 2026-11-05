@@ -9,6 +9,7 @@ import { useApp } from '@/context/app-context';
 import { ApiError, getErrorMessage, isMockMode, simulateRequest } from '@/services/api';
 import { feedbackApi } from '@/services/bapmeokja-api';
 import { AiFeedback } from '@/types/api';
+import { goBack } from '@/services/navigation';
 
 type PeriodParam = 'daily' | 'weekly' | 'monthly';
 
@@ -55,15 +56,15 @@ export default function AiFeedbackScreen() {
 
   const changePeriod = (next: PeriodParam) => { if (next === period) return; setLoading(true); setError(''); setNoRecords(false); router.setParams({ period: next }); };
 
-  if (loading) return <Screen><Header title="식단 피드백" left={<IconButton label="←" onPress={() => router.back()} />} /><View style={styles.center}><ActivityIndicator color={palette.tomato} /><Text style={styles.centerText}>식단 기록을 분석하고 있어요</Text></View></Screen>;
+  if (loading) return <Screen><Header title="식단 피드백" left={<IconButton label="←" onPress={() => goBack()} />} /><View style={styles.center}><ActivityIndicator color={palette.tomato} /><Text style={styles.centerText}>식단 기록을 분석하고 있어요</Text></View></Screen>;
   const periodTabs = <Segmented value={period} onChange={changePeriod} options={[{ value: 'daily', label: '일간' }, { value: 'weekly', label: '주간' }, { value: 'monthly', label: '월간' }]} />;
   const emptyLabel = period === 'daily' ? '오늘' : period === 'weekly' ? '이번 주' : '이번 달';
-  if (!feedback && noRecords) return <Screen><Header title="식단 피드백" left={<IconButton label="←" onPress={() => router.back()} />} />
+  if (!feedback && noRecords) return <Screen><Header title="식단 피드백" left={<IconButton label="←" onPress={() => goBack()} />} />
     {periodTabs}
     <Card><EmptyState icon="edit-3" title={`${emptyLabel} 기록이 아직 없어요`} description="식사를 기록하면 칼로리와 영양 균형을 분석해 드려요." /></Card>
     <PrimaryButton title="식단 기록하기" onPress={() => router.push('/(tabs)/records')} />
   </Screen>;
-  if (!feedback) return <Screen><Header title="식단 피드백" left={<IconButton label="←" onPress={() => router.back()} />} /><View style={styles.center}><Icon name="alert-circle" size={32} color={palette.muted} /><Text style={styles.centerTitle}>피드백을 만들 수 없어요</Text><Text style={styles.centerText}>{error}</Text><PrimaryButton title="다시 시도" onPress={() => { setLoading(true); setError(''); load(); }} /></View></Screen>;
+  if (!feedback) return <Screen><Header title="식단 피드백" left={<IconButton label="←" onPress={() => goBack()} />} /><View style={styles.center}><Icon name="alert-circle" size={32} color={palette.muted} /><Text style={styles.centerTitle}>피드백을 만들 수 없어요</Text><Text style={styles.centerText}>{error}</Text><PrimaryButton title="다시 시도" onPress={() => { setLoading(true); setError(''); load(); }} /></View></Screen>;
 
   const periodLabel = feedback.periodType === 'DAILY' ? '오늘' : feedback.periodType === 'WEEKLY' ? '이번 주' : '이번 달';
   const calorieEntries = Object.entries(feedback.calorieAnalysis).filter(([key]) => key !== 'comment');
@@ -75,7 +76,7 @@ export default function AiFeedbackScreen() {
     .map(([, value], index) => ({ label: ['탄수화물', '단백질', '지방'][index], percent: Number(value), color: [palette.leafFill, palette.yellow, palette.tomatoFill][index] }));
   const noRecord = consumed === 0;
 
-  return <Screen><Header title="식단 피드백" subtitle={feedback.period} left={<IconButton label="←" onPress={() => router.back()} />} />
+  return <Screen><Header title="식단 피드백" subtitle={feedback.period} left={<IconButton label="←" onPress={() => goBack()} />} />
     {periodTabs}
     {noRecord ? <>
       <Card><EmptyState icon="edit-3" title={`${periodLabel} 기록이 아직 없어요`} description="식사를 기록하면 칼로리와 영양 균형을 분석해 드려요." /></Card>

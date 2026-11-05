@@ -39,7 +39,7 @@ export const shadow = { boxShadow: '0px 4px 18px rgba(70, 50, 40, 0.06)' };
 export const shadowSm = { boxShadow: '0px 2px 8px rgba(70, 50, 40, 0.08)' };
 
 export const font = {
-  title: { fontSize: 28, lineHeight: 35, fontWeight: '600' as const, letterSpacing: -0.6 },
+  title: { fontSize: 28, lineHeight: 35, fontWeight: '700' as const, letterSpacing: -0.6 },
   heading: { fontSize: 18, lineHeight: 24, fontWeight: '600' as const, letterSpacing: -0.3 },
   subheading: { fontSize: 15, fontWeight: '500' as const, letterSpacing: -0.2 },
   body: { fontSize: 15, lineHeight: 22 },

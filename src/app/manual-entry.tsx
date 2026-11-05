@@ -1,4 +1,4 @@
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Alert, StyleSheet, Text, View } from 'react-native';
 
@@ -6,16 +6,19 @@ import { Field, Header, IconButton, Pill, PrimaryButton, Screen } from '@/compon
 import { font, palette, radii, spacing } from '@/constants/design';
 import { useApp } from '@/context/app-context';
 import { MealType } from '@/types';
+import { goBack } from '@/services/navigation';
 
 export default function ManualEntryScreen() {
-  const { saveManualMeal } = useApp();
-  const [name, setName] = useState('');
-  const [type, setType] = useState<MealType>('점심');
-  const [weightGram, setWeightGram] = useState('100');
-  const [calories, setCalories] = useState('');
-  const [carbs, setCarbs] = useState('');
-  const [protein, setProtein] = useState('');
-  const [fat, setFat] = useState('');
+  const { saveManualMeal, updateMeal } = useApp();
+  // id가 있으면 저장된 식단을 수정한다.
+  const editing = useLocalSearchParams<{ id?: string; name?: string; type?: MealType; eatenAt?: string; weightGram?: string; calories?: string; carbs?: string; protein?: string; fat?: string }>();
+  const [name, setName] = useState(editing.name ?? '');
+  const [type, setType] = useState<MealType>(editing.type ?? '점심');
+  const [weightGram, setWeightGram] = useState(editing.weightGram ?? '100');
+  const [calories, setCalories] = useState(editing.calories ?? '');
+  const [carbs, setCarbs] = useState(editing.carbs ?? '');
+  const [protein, setProtein] = useState(editing.protein ?? '');
+  const [fat, setFat] = useState(editing.fat ?? '');
   const [saving, setSaving] = useState(false);
 
   const save = async () => {
@@ -26,21 +29,23 @@ export default function ManualEntryScreen() {
     }
     setSaving(true);
     try {
-      await saveManualMeal({ name: name.trim(), type, eatenAt: new Date().toISOString(), weightGram: values[0], calories: values[1], carbs: values[2], protein: values[3], fat: values[4] });
+      const meal = { name: name.trim(), type, eatenAt: editing.eatenAt ?? new Date().toISOString(), weightGram: values[0], calories: values[1], carbs: values[2], protein: values[3], fat: values[4] };
+      if (editing.id) await updateMeal(editing.id, meal);
+      else await saveManualMeal(meal);
       router.replace('/(tabs)/home');
     } catch (error) {
-      Alert.alert('식단을 저장하지 못했어요', error instanceof Error ? error.message : '잠시 후 다시 시도해 주세요.');
+      Alert.alert(editing.id ? '식단을 수정하지 못했어요' : '식단을 저장하지 못했어요', error instanceof Error ? error.message : '잠시 후 다시 시도해 주세요.');
       setSaving(false);
     }
   };
 
-  return <Screen><Header title="직접 입력" subtitle="알고 있는 만큼만 적어도 돼요" left={<IconButton label="←" onPress={() => router.back()} />} />
+  return <Screen><Header title={editing.id ? '식단 수정' : '직접 입력'} subtitle={editing.id ? '바꿀 내용을 고쳐 주세요' : '알고 있는 만큼만 적어도 돼요'} left={<IconButton label="←" onPress={() => goBack()} />} />
     <View style={styles.section}><Text style={styles.label}>식사 구분</Text><View style={styles.pills}>{(['아침','점심','저녁','간식'] as MealType[]).map((value) => <Pill key={value} label={value} active={type === value} onPress={() => setType(value)} />)}</View></View>
     <Field label="음식명" value={name} onChangeText={setName} placeholder="예: 닭가슴살 샐러드" maxLength={100} />
     <Field label="섭취 중량 (g)" value={weightGram} onChangeText={setWeightGram} keyboardType="decimal-pad" />
     <Field label="칼로리 (kcal)" value={calories} onChangeText={setCalories} keyboardType="number-pad" placeholder="필수" />
     <View style={styles.three}><View style={styles.flex}><Field label="탄수화물 (g)" value={carbs} onChangeText={setCarbs} keyboardType="decimal-pad" /></View><View style={styles.flex}><Field label="단백질 (g)" value={protein} onChangeText={setProtein} keyboardType="decimal-pad" /></View><View style={styles.flex}><Field label="지방 (g)" value={fat} onChangeText={setFat} keyboardType="decimal-pad" /></View></View>
-    <PrimaryButton title="식단에 저장" onPress={save} loading={saving} />
+    <PrimaryButton title={editing.id ? '수정 내용 저장' : '식단에 저장'} onPress={save} loading={saving} />
   </Screen>;
 }
 

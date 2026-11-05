@@ -1,5 +1,4 @@
 import { Image } from 'expo-image';
-import { router } from 'expo-router';
 import { useState } from 'react';
 import { Alert, StyleSheet, Text, View } from 'react-native';
 
@@ -7,6 +6,7 @@ import { Field, Header, IconButton, Pill, PrimaryButton, Screen, SectionTitle } 
 import { font, palette, radii, spacing } from '@/constants/design';
 import { useApp } from '@/context/app-context';
 import { getErrorMessage, isMockMode } from '@/services/api';
+import { goBack } from '@/services/navigation';
 import { userApi } from '@/services/bapmeokja-api';
 import { UserProfile } from '@/types';
 
@@ -22,10 +22,10 @@ export default function ProfileSettingsScreen() {
     try {
       const goals = isMockMode ? { dailyCalorieGoal: draft.dailyCalories, carbGoalGram: draft.carbGoal, proteinGoalGram: draft.proteinGoal, fatGoalGram: draft.fatGoal } : await userApi.updateProfile({ nickname: draft.nickname, gender: draft.gender === '남성' ? 'M' : 'F', age: draft.age, height: draft.height, weight: draft.weight, activityLevel: draft.activity === '낮음' ? 'LIGHT' : draft.activity === '높음' ? 'ACTIVE' : 'MODERATE', goal: draft.goal === '감량' ? 'LOSE' : draft.goal === '증량' ? 'GAIN' : 'MAINTAIN', skeletalMuscleMass: draft.skeletalMuscleMass, bodyFatMass: draft.bodyFatMass, bodyFatPercentage: draft.bodyFatPercentage });
       updateProfile({ ...draft, dailyCalories: goals.dailyCalorieGoal, carbGoal: goals.carbGoalGram, proteinGoal: goals.proteinGoalGram, fatGoal: goals.fatGoalGram });
-      Alert.alert('저장했어요', '변경된 목표를 대시보드에 반영했습니다.', [{ text: '확인', onPress: () => router.back() }]);
+      Alert.alert('저장했어요', '변경된 목표를 대시보드에 반영했습니다.', [{ text: '확인', onPress: () => goBack() }]);
     } catch (error) { Alert.alert('저장하지 못했어요', getErrorMessage(error)); setSaving(false); }
   };
-  return <Screen><Header title="내 정보 관리" subtitle="변경 즉시 목표를 다시 계산해요" left={<IconButton label="←" onPress={() => router.back()} />} />
+  return <Screen><Header title="내 정보 관리" subtitle="변경 즉시 목표를 다시 계산해요" left={<IconButton label="←" onPress={() => goBack()} />} />
     <View style={styles.avatar}><Image source={character} style={styles.avatarImage} contentFit="contain" accessibilityLabel="토마토 프로필" /><Text style={styles.nickname}>{draft.nickname}</Text></View>
     <Field label="닉네임" value={draft.nickname} onChangeText={(value) => set('nickname', value)} />
     <Field label="이메일" value={draft.email} editable={false} />

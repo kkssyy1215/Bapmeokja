@@ -6,6 +6,7 @@ import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { Card, Header, IconButton, MacroBar, PrimaryButton, Screen, SectionTitle } from '@/components/ui';
 import { font, palette, radii, shadow, spacing } from '@/constants/design';
 import { getErrorMessage, isMockMode, simulateRequest } from '@/services/api';
+import { goBack } from '@/services/navigation';
 import { menuApi } from '@/services/bapmeokja-api';
 
 type Detail = {
@@ -53,12 +54,12 @@ export default function RecommendationDetailScreen() {
     return () => { mounted = false; };
   }, [id, mode]);
 
-  if (loading) return <Screen><Header title={mode === 'home' ? '집밥 레시피' : '메뉴 상세'} left={<IconButton label="←" onPress={() => router.back()} />} /><View style={styles.center}><ActivityIndicator color={palette.tomato} /><Text style={styles.centerText}>추천 정보를 불러오고 있어요</Text></View></Screen>;
-  if (!detail) return <Screen><Header title="추천 상세" left={<IconButton label="←" onPress={() => router.back()} />} /><View style={styles.center}><Text style={styles.centerTitle}>정보를 불러오지 못했어요</Text><Text style={styles.centerText}>{error}</Text><PrimaryButton title="돌아가기" onPress={() => router.back()} /></View></Screen>;
+  if (loading) return <Screen><Header title={mode === 'home' ? '집밥 레시피' : '메뉴 상세'} left={<IconButton label="←" onPress={() => goBack()} />} /><View style={styles.center}><ActivityIndicator color={palette.tomato} /><Text style={styles.centerText}>추천 정보를 불러오고 있어요</Text></View></Screen>;
+  if (!detail) return <Screen><Header title="추천 상세" left={<IconButton label="←" onPress={() => goBack()} />} /><View style={styles.center}><Text style={styles.centerTitle}>정보를 불러오지 못했어요</Text><Text style={styles.centerText}>{error}</Text><PrimaryButton title="돌아가기" onPress={() => goBack()} /></View></Screen>;
 
   const isHome = mode === 'home';
   const difficulty = detail.difficulty === 'EASY' ? '쉬움' : detail.difficulty === 'MEDIUM' ? '보통' : detail.difficulty === 'HARD' ? '어려움' : '';
-  return <Screen><Header title={isHome ? '집밥 레시피' : '메뉴 상세'} left={<IconButton label="←" onPress={() => router.back()} />} />
+  return <Screen><Header title={isHome ? '집밥 레시피' : '메뉴 상세'} left={<IconButton label="←" onPress={() => goBack()} />} />
     {detail.imageUrl ? <View style={styles.hero}><Image source={{ uri: detail.imageUrl }} style={styles.image} contentFit="cover" /></View> : null}
     <View style={styles.titleWrap}><Text style={styles.kind}>{isHome ? `${detail.cookingTime ?? 0}분 · ${difficulty}` : '외식 추천 메뉴'}</Text><Text style={styles.title}>{detail.name}</Text></View>
     <Card><View style={styles.calorieTop}><View><Text style={styles.cardLabel}>영양 정보</Text><Text style={styles.calories}>{detail.calorie} <Text style={styles.unit}>kcal</Text></Text></View>{detail.price ? <View style={styles.price}><Text style={styles.priceLabel}>{isHome ? '예상 재료비' : '평균 가격'}</Text><Text style={styles.priceValue}>{detail.price.toLocaleString()}원</Text></View> : null}</View><View style={styles.macros}><MacroBar label="탄수화물" value={detail.carb} goal={100} color={palette.leafFill} /><MacroBar label="단백질" value={detail.protein} goal={60} color={palette.yellow} /><MacroBar label="지방" value={detail.fat} goal={30} color={palette.tomatoFill} /></View></Card>

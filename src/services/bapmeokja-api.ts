@@ -150,7 +150,8 @@ export const communityApi = {
   },
   update: (postId: string, content: string) => requestData<null>({ method: 'PUT', url: `/community/posts/${postId}`, data: { content } }),
   remove: (postId: string) => requestData<null>({ method: 'DELETE', url: `/community/posts/${postId}` }),
-  addComment: (postId: string, content: string) => requestData<{ commentId: string }>({ method: 'POST', url: `/community/posts/${postId}/comments`, data: { content } }),
+  addComment: (postId: string, content: string, parentCommentId?: string) => requestData<{ commentId: string }>({ method: 'POST', url: `/community/posts/${postId}/comments`, data: { content, parentCommentId } }),
+  updateComment: (postId: string, commentId: string, content: string) => requestData<null>({ method: 'PUT', url: `/community/posts/${postId}/comments/${commentId}`, data: { content } }),
   removeComment: (postId: string, commentId: string) => requestData<null>({ method: 'DELETE', url: `/community/posts/${postId}/comments/${commentId}` }),
   toggleLike: (postId: string) => requestData<{ isLiked: boolean; likeCount: number }>({ method: 'POST', url: `/community/posts/${postId}/likes` }),
 };

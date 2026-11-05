@@ -1,5 +1,4 @@
 import { Image } from 'expo-image';
-import { router } from 'expo-router';
 import { useState } from 'react';
 import { Alert, StyleSheet, Text, View } from 'react-native';
 
@@ -7,6 +6,7 @@ import { Field, Header, IconButton, PrimaryButton, Screen, SectionTitle, Switch,
 import { font, palette, radii, shadow, spacing } from '@/constants/design';
 import { useApp } from '@/context/app-context';
 import { getErrorMessage, isMockMode } from '@/services/api';
+import { goBack } from '@/services/navigation';
 import { userApi } from '@/services/bapmeokja-api';
 import { syncLocalNotifications } from '@/services/device-notifications';
 import { NotificationSettings } from '@/types';
@@ -39,11 +39,11 @@ export default function NotificationSettingsScreen() {
         : result.status === 'unsupported'
           ? '설정은 저장했어요. 실제 알림 예약은 iOS 또는 Android 앱에서 적용됩니다.'
           : '알림을 끄고 예약된 알림을 정리했어요.';
-      Alert.alert('알림 설정을 저장했어요', message, [{ text: '확인', onPress: () => router.back() }]);
+      Alert.alert('알림 설정을 저장했어요', message, [{ text: '확인', onPress: () => goBack() }]);
     } catch (error) { Alert.alert('저장하지 못했어요', getErrorMessage(error)); }
     finally { setSaving(false); }
   };
-  return <Screen><Header title="푸시 알림 설정" subtitle="필요한 알림만 골라 받아요" left={<IconButton label="←" onPress={() => router.back()} />} />
+  return <Screen><Header title="푸시 알림 설정" subtitle="필요한 알림만 골라 받아요" left={<IconButton label="←" onPress={() => goBack()} />} />
     <Note>기기 알림 권한이 켜져 있어야 받을 수 있어요.</Note>
     <SectionTitle title="알림 종류" /><ListGroup><SwitchRow icon="droplet" title="수분 섭취 알림" subtitle="2시간마다 물 마실 시간을 알려요" value={notifications.waterReminder} onChange={(value) => toggle('waterReminder', value)} /><SwitchRow icon="alert-circle" title="유통기한 임박 알림" subtitle="D-2 재료가 있으면 알려요" value={notifications.expiryAlert} onChange={(value) => toggle('expiryAlert', value)} last /></ListGroup>
     <SectionTitle title="식사 시간" /><View style={styles.scheduleNote}><Text style={styles.scheduleNoteTitle}>{notifications.pushEnabled ? '식사 시간 알림 사용 중' : '전체 푸시 알림이 꺼져 있어요'}</Text><Text style={styles.scheduleNoteText}>{notifications.pushEnabled ? '저장하면 이 기기에 아침·점심·저녁 알림을 매일 예약해요.' : '시간은 저장되지만 알림을 받으려면 설정 화면에서 전체 푸시를 켜 주세요.'}</Text></View><View style={styles.timeGrid}><View style={styles.flex}><Field label="아침" value={notifications.breakfastTime} onChangeText={(value) => updateNotifications({ breakfastTime: value })} autoCapitalize="none" placeholder="08:00" /></View><View style={styles.flex}><Field label="점심" value={notifications.lunchTime} onChangeText={(value) => updateNotifications({ lunchTime: value })} autoCapitalize="none" placeholder="12:00" /></View><View style={styles.flex}><Field label="저녁" value={notifications.dinnerTime} onChangeText={(value) => updateNotifications({ dinnerTime: value })} autoCapitalize="none" placeholder="18:30" /></View></View>

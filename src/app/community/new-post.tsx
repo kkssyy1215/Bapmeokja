@@ -1,3 +1,4 @@
+import * as ImageManipulator from 'expo-image-manipulator';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
@@ -9,6 +10,7 @@ import { font, palette, radii, shadow, spacing } from '@/constants/design';
 import { useApp } from '@/context/app-context';
 import { getErrorMessage, isMockMode, simulateRequest } from '@/services/api';
 import { communityApi } from '@/services/bapmeokja-api';
+import { goBack } from '@/services/navigation';
 
 type ImageAnalysis = { foodName: string; calorie: number; carb: number; protein: number; fat: number };
 type ImageAnalysisDraft = { foodName: string; calorie: string; carb: string; protein: string; fat: string };
@@ -28,7 +30,9 @@ export default function NewPostScreen() {
     if (!permission.granted) return Alert.alert('사진 권한이 필요해요', '게시물 사진을 선택하려면 사진 접근을 허용해 주세요.');
     const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 0.8 });
     if (result.canceled) return;
-    const uri = result.assets[0].uri;
+    // 큰 원본은 서버 용량 제한에 걸릴 수 있어 비율을 유지한 채 줄여서 올린다.
+    const resized = await ImageManipulator.manipulateAsync(result.assets[0].uri, [{ resize: { width: 1600 } }], { compress: 0.8, format: ImageManipulator.SaveFormat.JPEG }).catch(() => null);
+    const uri = resized?.uri ?? result.assets[0].uri;
     setImageUri(uri);
     setAnalysis(null);
     setAnalysisDraft(null);
@@ -69,7 +73,7 @@ export default function NewPostScreen() {
     } catch (error) { Alert.alert('게시하지 못했어요', getErrorMessage(error)); setPosting(false); }
   };
 
-  return <Screen><Header title="새 게시물" subtitle="오늘 먹은 한 끼를 기록해요" left={<IconButton label="←" onPress={() => router.back()} />} />
+  return <Screen><Header title="새 게시물" subtitle="오늘 먹은 한 끼를 기록해요" left={<IconButton label="←" onPress={() => goBack()} />} />
     <Pressable style={[styles.photo, imageUri && styles.photoSelected]} onPress={choose}>{imageUri ? <Image source={{ uri: imageUri }} style={styles.image} contentFit="cover" /> : <><Text style={styles.addMark}>＋</Text><Text style={styles.photoTitle}>식단 사진 추가</Text><Text style={styles.photoSub}>선택 사항 · 최대 10MB</Text></>}</Pressable>
     {analyzing ? <View style={styles.analysisStatus}><Text style={styles.analysisStatusText}>사진에 보이는 음식과 양을 바탕으로 영양 정보를 추정하고 있어요...</Text></View> : analysis ? <View style={styles.analysisCard}><View style={styles.analysisTop}><View><Text style={styles.analysisLabel}>사진 기반 영양 추정</Text><Text style={styles.foodName}>{analysis.foodName}</Text></View><View style={styles.analysisValue}><Text style={styles.calorie}>{analysis.calorie} kcal</Text>{!editingAnalysis ? <Pressable onPress={beginAnalysisEdit}><Text style={styles.editAnalysis}>수정</Text></Pressable> : null}</View></View><NutrientChips carbs={analysis.carb} protein={analysis.protein} fat={analysis.fat} /><Text style={styles.estimateNotice}>사진만으로 계산한 추정값이며 실제와 다를 수 있어요. 게시 전에 확인·수정해 주세요.</Text></View> : null}
     {editingAnalysis && analysisDraft ? <View style={styles.editCard}><Field label="음식 이름" value={analysisDraft.foodName} onChangeText={(value) => updateAnalysisDraft('foodName', value)} /><View style={styles.editRow}><View style={styles.editFlex}><Field label="열량 (kcal)" value={analysisDraft.calorie} onChangeText={(value) => updateAnalysisDraft('calorie', value)} keyboardType="decimal-pad" /></View><View style={styles.editFlex}><Field label="탄수화물 (g)" value={analysisDraft.carb} onChangeText={(value) => updateAnalysisDraft('carb', value)} keyboardType="decimal-pad" /></View></View><View style={styles.editRow}><View style={styles.editFlex}><Field label="단백질 (g)" value={analysisDraft.protein} onChangeText={(value) => updateAnalysisDraft('protein', value)} keyboardType="decimal-pad" /></View><View style={styles.editFlex}><Field label="지방 (g)" value={analysisDraft.fat} onChangeText={(value) => updateAnalysisDraft('fat', value)} keyboardType="decimal-pad" /></View></View><View style={styles.editRow}><View style={styles.editFlex}><PrimaryButton title="취소" variant="ghost" onPress={() => setEditingAnalysis(false)} /></View><View style={styles.editFlex}><PrimaryButton title="수정값 반영" onPress={applyAnalysisEdit} /></View></View></View> : null}
