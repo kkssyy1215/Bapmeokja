@@ -74,9 +74,22 @@ class CommunityServiceTest {
     }
 
     @Test
+    void analyzedFoodNameIsKeptWithTheNutrition() {
+        ArgumentCaptor<CommunityPost> saved = ArgumentCaptor.forClass(CommunityPost.class);
+
+        service.createPost(null, "점심", null, "  닭가슴살 포케 ", 521, 57.0, 31.0, 19.0);
+        service.createPost(null, "저녁", null, null, 400, null, null, null);
+        service.createPost(null, "간식", null, "사과", null, null, null, null);
+
+        verify(postRepository, times(3)).save(saved.capture());
+        assertThat(saved.getAllValues()).extracting(CommunityPost::getFoodName)
+                .containsExactly("닭가슴살 포케", "식사", null);
+    }
+
+    @Test
     void blankPostIsRejectedBeforeAnythingIsStored() {
         assertFailsWith(ErrorCode.REQUIRED_VALUE_MISSING,
-                () -> service.createPost(IMAGE, "   ", null, null, null, null, null));
+                () -> service.createPost(IMAGE, "   ", null, null, null, null, null, null));
         verify(imageStorage, never()).store(any());
         verify(postRepository, never()).save(any());
     }
@@ -84,15 +97,15 @@ class CommunityServiceTest {
     @Test
     void outOfRangeNutritionIsRejected() {
         assertFailsWith(ErrorCode.INVALID_PARAMETER,
-                () -> service.createPost(null, "점심", null, 10_001, null, null, null));
+                () -> service.createPost(null, "점심", null, null, 10_001, null, null, null));
         assertFailsWith(ErrorCode.INVALID_PARAMETER,
-                () -> service.createPost(null, "점심", null, null, -1.0, null, null));
+                () -> service.createPost(null, "점심", null, null, null, -1.0, null, null));
     }
 
     @Test
     void malformedMealTimeIsRejected() {
         assertFailsWith(ErrorCode.INVALID_PARAMETER,
-                () -> service.createPost(null, "점심", "어제", null, null, null, null));
+                () -> service.createPost(null, "점심", "어제", null, null, null, null, null));
     }
 
     @Test

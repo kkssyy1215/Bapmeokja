@@ -5,6 +5,7 @@ import { PropsWithChildren } from 'react';
 const css = `
 html, body { background-color: #F6F4F1; }
 body, input, textarea { -webkit-font-smoothing: antialiased; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', 'Segoe UI', Roboto, sans-serif; }
 [dir='auto'] { word-break: keep-all; overflow-wrap: anywhere; }
 :focus-visible:not(input):not(textarea) { outline: 2px solid #A04F3C !important; outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }

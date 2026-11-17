@@ -68,7 +68,7 @@ export default function NewPostScreen() {
     setPosting(true);
     try {
       if (isMockMode) createPost(content.trim(), analysis?.foodName || '오늘의 한 끼');
-      else await communityApi.create({ imageUri: imageUri || undefined, content: content.trim(), eatenAt: new Date().toISOString(), calorie: analysis?.calorie, carb: analysis?.carb, protein: analysis?.protein, fat: analysis?.fat });
+      else await communityApi.create({ imageUri: imageUri || undefined, content: content.trim(), eatenAt: new Date().toISOString(), foodName: analysis?.foodName, calorie: analysis?.calorie, carb: analysis?.carb, protein: analysis?.protein, fat: analysis?.fat });
       router.replace('/(tabs)/community');
     } catch (error) { Alert.alert('게시하지 못했어요', getErrorMessage(error)); setPosting(false); }
   };

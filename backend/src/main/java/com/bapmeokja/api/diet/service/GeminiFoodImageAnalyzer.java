@@ -35,6 +35,7 @@ public class GeminiFoodImageAnalyzer implements FoodImageAnalyzer {
     private static final double MAX_CALORIE = 10_000;
     private static final double MAX_NUTRIENT = 5_000;
     private static final double MAX_MILLIGRAM = 50_000;
+    static final int MAX_ATTEMPTS = 3;
 
     private static final String PROMPT = """
             사진 속 음식을 항목별로 인식하고 한 사람이 먹는 양 기준으로 영양 정보를 추정해 주세요.
@@ -74,6 +75,7 @@ public class GeminiFoodImageAnalyzer implements FoodImageAnalyzer {
     private final RestClient restClient;
     private final String model;
     private final ObjectMapper objectMapper;
+    private long retryDelayMillis = 700;
 
     public GeminiFoodImageAnalyzer(
             RestClient.Builder restClientBuilder,
@@ -86,6 +88,11 @@ public class GeminiFoodImageAnalyzer implements FoodImageAnalyzer {
                 .build();
         this.model = properties.getModel();
         this.objectMapper = objectMapper;
+    }
+
+    /** 테스트에서 재시도 대기 시간을 줄일 때 쓴다. */
+    void setRetryDelayMillis(long retryDelayMillis) {
+        this.retryDelayMillis = retryDelayMillis;
     }
 
     @Override
@@ -116,27 +123,45 @@ public class GeminiFoodImageAnalyzer implements FoodImageAnalyzer {
                         "temperature", 0.2
                 )
         );
+        byte[] payload = toJson(body);
+        // Gemini는 혼잡할 때 503/429를 자주 돌려준다. 이런 일시적 오류만 잠깐 쉬었다가 다시 요청한다.
+        for (int attempt = 1; ; attempt++) {
+            try {
+                JsonNode response = restClient.post()
+                        .uri("/models/{model}:generateContent", model)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(payload)
+                        .retrieve()
+                        .body(JsonNode.class);
+                if (response == null) {
+                    throw new BusinessException(ErrorCode.AI_ANALYSIS_FAILED);
+                }
+                return response;
+            } catch (ResourceAccessException exception) {
+                log.warn("Gemini request did not complete: {}", exception.getClass().getSimpleName());
+                throw new BusinessException(ErrorCode.AI_TIMEOUT);
+            } catch (RestClientResponseException exception) {
+                int status = exception.getStatusCode().value();
+                boolean temporary = exception.getStatusCode().is5xxServerError()
+                        || exception.getStatusCode().isSameCodeAs(HttpStatus.TOO_MANY_REQUESTS);
+                log.warn("Gemini responded with status {} (attempt {}/{})", status, attempt, MAX_ATTEMPTS);
+                if (!temporary) {
+                    throw new BusinessException(ErrorCode.AI_ANALYSIS_FAILED);
+                }
+                if (attempt >= MAX_ATTEMPTS) {
+                    throw new BusinessException(ErrorCode.EXTERNAL_SERVICE_UNAVAILABLE);
+                }
+                pauseBeforeRetry(attempt);
+            }
+        }
+    }
+
+    private void pauseBeforeRetry(int attempt) {
         try {
-            JsonNode response = restClient.post()
-                    .uri("/models/{model}:generateContent", model)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body(toJson(body))
-                    .retrieve()
-                    .body(JsonNode.class);
-            if (response == null) {
-                throw new BusinessException(ErrorCode.AI_ANALYSIS_FAILED);
-            }
-            return response;
-        } catch (ResourceAccessException exception) {
-            log.warn("Gemini request did not complete: {}", exception.getClass().getSimpleName());
-            throw new BusinessException(ErrorCode.AI_TIMEOUT);
-        } catch (RestClientResponseException exception) {
-            log.warn("Gemini responded with status {}", exception.getStatusCode().value());
-            if (exception.getStatusCode().is5xxServerError()
-                    || exception.getStatusCode().isSameCodeAs(HttpStatus.TOO_MANY_REQUESTS)) {
-                throw new BusinessException(ErrorCode.EXTERNAL_SERVICE_UNAVAILABLE);
-            }
-            throw new BusinessException(ErrorCode.AI_ANALYSIS_FAILED);
+            Thread.sleep(retryDelayMillis * attempt);
+        } catch (InterruptedException interrupted) {
+            Thread.currentThread().interrupt();
+            throw new BusinessException(ErrorCode.EXTERNAL_SERVICE_UNAVAILABLE);
         }
     }
 

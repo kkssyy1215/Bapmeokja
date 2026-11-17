@@ -23,8 +23,8 @@ test('글을 쓰면 다른 사용자가 좋아요와 댓글을 남길 수 있다
   await visible(other, text).click();
   await expect(other).toHaveURL(/\/community\/post_/);
 
-  await other.getByText('♡ 좋아요 0', { exact: true }).locator('visible=true').click();
-  await expect(other.getByText('♥ 좋아요 1', { exact: true }).locator('visible=true')).toBeVisible();
+  await other.getByText('좋아요 0', { exact: true }).locator('visible=true').click();
+  await expect(other.getByText('좋아요 1', { exact: true }).locator('visible=true')).toBeVisible();
   await other.getByPlaceholder('따뜻한 댓글을 남겨 주세요').fill('맛있어 보여요');
   await press(other, '등록');
   await expect(visible(other, '맛있어 보여요')).toBeVisible();

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, StyleSheet, Text, View } from 'react-native';
 
 import { Card, Field, Header, Icon, IconButton, Note, NutrientChips, PrimaryButton, Pressable, Screen } from '@/components/ui';
-import { font, palette, radii, shadow, spacing } from '@/constants/design';
+import { font, palette, radii, shadow, shadowSm, spacing } from '@/constants/design';
 import { useApp } from '@/context/app-context';
 import { getErrorMessage, isMockMode, resolveApiAssetUrl, simulateRequest } from '@/services/api';
 import { communityApi } from '@/services/bapmeokja-api';
@@ -201,11 +201,14 @@ export default function PostDetailScreen() {
     {post.imageUrl && photoFailed ? <Note icon="image">사진을 불러오지 못했어요. 글을 다시 올려 주세요.</Note> : null}
     {post.imageUrl && !photoFailed ? <Image source={{ uri: resolveApiAssetUrl(post.imageUrl) }} style={[styles.photo, { aspectRatio: photoRatio }]} contentFit="contain" accessibilityLabel="게시글 사진" onError={() => setPhotoFailed(true)} onLoad={(event) => { const { width, height } = event.source; if (width > 0 && height > 0) setPhotoRatio(width / height); }} /> : null}
     {post.nutritionInfo ? <Card style={styles.nutrition}><View style={styles.nutritionTop}><View><Text style={styles.analysisLabel}>사진 기반 영양 추정</Text><Text style={styles.mealName}>{post.nutritionInfo.foodName}</Text></View><Text style={styles.kcal}>{post.nutritionInfo.calorie} kcal</Text></View><NutrientChips carbs={post.nutritionInfo.carb} protein={post.nutritionInfo.protein} fat={post.nutritionInfo.fat} /><Text style={styles.estimateNotice}>사진을 바탕으로 계산한 참고용 추정값이며 실제 영양 정보와 다를 수 있어요.</Text></Card> : null}
-    <View style={styles.actions}><Pressable accessibilityRole="button" hitSlop={8} onPress={like}><Text style={[styles.action, post.isLiked && styles.liked]}>{post.isLiked ? '♥' : '♡'} 좋아요 {post.likeCount}</Text></Pressable></View>
+    <View style={styles.actions}><Pressable accessibilityRole="button" accessibilityLabel={post.isLiked ? '좋아요 취소' : '좋아요'} hitSlop={8} onPress={like} style={[styles.likeButton, post.isLiked && styles.likeButtonOn]}><Icon name="heart" size={15} color={post.isLiked ? palette.tomato : palette.muted} /><Text style={[styles.action, post.isLiked && styles.liked]}>좋아요 {post.likeCount}</Text></Pressable></View>
     <View style={styles.divider} /><Text style={styles.commentTitle}>댓글 {post.commentCount}</Text>
     {rootComments.length ? rootComments.map((item) => <View key={item.commentId} style={styles.thread}>
       {renderComment(item, item.commentId)}
-      {(repliesByParent.get(item.commentId) ?? []).map((reply) => <View key={reply.commentId} style={styles.reply}>{renderComment(reply, item.commentId)}</View>)}
+      {(repliesByParent.get(item.commentId) ?? []).map((reply) => <View key={reply.commentId} style={styles.reply}>
+        <View style={styles.replyMark} accessibilityLabel="답글"><Icon name="corner-down-right" size={16} color={palette.tomatoFill} /></View>
+        <View style={styles.replyContent}>{renderComment(reply, item.commentId)}</View>
+      </View>)}
     </View>) : <Text style={styles.empty}>첫 댓글을 남겨 보세요.</Text>}
   </Screen>;
 }
@@ -221,7 +224,9 @@ const styles = StyleSheet.create({
   commentEdit: { color: palette.tomato, fontSize: 13, fontWeight: '500' },
   composer: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   thread: { gap: spacing.sm },
-  reply: { marginLeft: 28 },
+  reply: { flexDirection: 'row', marginLeft: 12 },
+  replyMark: { width: 22, paddingTop: 8 },
+  replyContent: { flex: 1 },
   commentMuted: { color: palette.muted, fontSize: 13 },
   composerWrap: { gap: 8 },
   replyBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10, backgroundColor: palette.accentSoft, borderRadius: radii.sm, paddingHorizontal: 12, paddingVertical: 8 },
@@ -246,7 +251,9 @@ const styles = StyleSheet.create({
   kcal: { color: palette.ink, fontWeight: '600' },
   estimateNotice: { ...font.caption, color: palette.muted, lineHeight: 17, marginTop: spacing.sm },
   actions: { flexDirection: 'row', gap: spacing.lg, alignItems: 'center' },
-  action: { color: palette.muted, fontWeight: '500', fontSize: 12 },
+  action: { color: palette.muted, fontWeight: '500', fontSize: 13 },
+  likeButton: { flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 36, paddingHorizontal: 14, borderRadius: radii.pill, backgroundColor: palette.surface, ...shadowSm },
+  likeButtonOn: { backgroundColor: palette.accentSoft },
   liked: { color: palette.tomato },
   delete: { color: palette.danger, fontSize: 14 },
   divider: { height: 1, backgroundColor: palette.line },

@@ -145,7 +145,7 @@ export default function RecommendScreen() {
       <View style={styles.budgetRow}>
         <Text style={styles.budgetLabel}>한 끼 예산</Text>
         <View style={styles.budgetPills}>
-          {BUDGET_PRESETS.map((value) => <Pill key={value} label={value === 5000 ? '5천원' : '1만원'} active={budget === value} onPress={() => { setBudget(value); setCustomOpen(false); }} />)}
+          {BUDGET_PRESETS.map((value) => <Pill key={value} label={value === 5000 ? '5천원' : '1만원'} active={budget === value && !customOpen} onPress={() => { setBudget(value); setCustomOpen(false); }} />)}
           <Pill label={isCustomBudget ? `${budget.toLocaleString()}원` : '직접 설정'} active={isCustomBudget || customOpen} onPress={() => { setCustomText(isCustomBudget ? String(budget) : ''); setCustomOpen((open) => !open); }} />
         </View>
       </View>

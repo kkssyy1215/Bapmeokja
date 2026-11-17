@@ -21,6 +21,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.web.client.ExpectedCount;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestClient;
 
@@ -41,6 +42,7 @@ class GeminiFoodImageAnalyzerTest {
         RestClient.Builder builder = RestClient.builder();
         server = MockRestServiceServer.bindTo(builder).build();
         analyzer = new GeminiFoodImageAnalyzer(builder, properties, objectMapper);
+        analyzer.setRetryDelayMillis(0);
     }
 
     @Test
@@ -95,10 +97,25 @@ class GeminiFoodImageAnalyzerTest {
 
     @Test
     void quotaExhaustionAndServerErrorsAreReportedAsServiceUnavailable() {
-        server.expect(requestTo("https://gemini.test/v1beta/models/test-model:generateContent"))
+        server.expect(ExpectedCount.times(GeminiFoodImageAnalyzer.MAX_ATTEMPTS),
+                        requestTo("https://gemini.test/v1beta/models/test-model:generateContent"))
                 .andRespond(withStatus(HttpStatus.TOO_MANY_REQUESTS));
 
         assertFailsWith(ErrorCode.EXTERNAL_SERVICE_UNAVAILABLE);
+        server.verify();
+    }
+
+    @Test
+    void temporaryOverloadIsRetriedUntilTheModelAnswers() {
+        server.expect(requestTo("https://gemini.test/v1beta/models/test-model:generateContent"))
+                .andRespond(withStatus(HttpStatus.SERVICE_UNAVAILABLE));
+        server.expect(requestTo("https://gemini.test/v1beta/models/test-model:generateContent"))
+                .andRespond(modelReply("""
+                        {"foodName":"비빔밥","items":[{"name":"비빔밥","weightGram":400,"calorie":600,
+                        "carb":90,"protein":20,"fat":15,"sodium":1000,"cholesterol":50}]}"""));
+
+        assertThat(analyzer.analyze(IMAGE).foodName()).isEqualTo("비빔밥");
+        server.verify();
     }
 
     @Test

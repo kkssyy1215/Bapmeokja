@@ -58,7 +58,8 @@ function showDialog(title: string, message: string | undefined, buttons: AlertBu
   box.append(row);
   overlay.append(box);
   document.body.append(overlay);
-  primaryElement?.focus();
+  // 마우스로 연 확인창에 포커스 테두리가 겹쳐 보이지 않도록 한다. 키보드 탐색 시에는 그대로 표시된다.
+  primaryElement?.focus({ focusVisible: false } as FocusOptions);
 }
 
 if (Platform.OS === 'web') {

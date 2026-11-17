@@ -133,11 +133,11 @@ export default function RecordsScreen() {
         <View style={styles.side}>
           <Pressable accessibilityRole="button" style={styles.tile} onPress={() => pick(false)} disabled={picking}>
             <View style={styles.tileIcon}><Icon name="image" size={17} color={palette.tomato} /></View>
-            <Text style={styles.tileTitle}>앨범에서 선택</Text>
+            <Text style={styles.tileTitle} numberOfLines={1}>앨범 선택</Text>
           </Pressable>
           <Pressable accessibilityRole="button" style={styles.tile} onPress={() => router.push('/manual-entry')}>
             <View style={styles.tileIcon}><Icon name="edit-3" size={17} color={palette.tomato} /></View>
-            <Text style={styles.tileTitle}>직접 입력</Text>
+            <Text style={styles.tileTitle} numberOfLines={1}>직접 입력</Text>
           </Pressable>
         </View>
       </View>

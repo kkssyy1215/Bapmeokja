@@ -134,10 +134,11 @@ export const communityApi = {
     const data = await imageFormData(uri);
     return requestData<{ foodName: string; calorie: number; carb: number; protein: number; fat: number }>({ method: 'POST', url: '/community/analyze-image', data });
   },
-  async create(body: { imageUri?: string; content: string; eatenAt?: string; calorie?: number; carb?: number; protein?: number; fat?: number }) {
+  async create(body: { imageUri?: string; content: string; eatenAt?: string; foodName?: string; calorie?: number; carb?: number; protein?: number; fat?: number }) {
     const data = body.imageUri ? await imageFormData(body.imageUri) : new FormData();
     data.append('content', body.content);
     if (body.eatenAt) data.append('eatenAt', body.eatenAt);
+    if (body.foodName?.trim()) data.append('foodName', body.foodName.trim());
     for (const key of ['calorie', 'carb', 'protein', 'fat'] as const) {
       if (body[key] !== undefined) data.append(key, String(body[key]));
     }

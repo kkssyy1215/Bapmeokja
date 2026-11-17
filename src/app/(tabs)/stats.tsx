@@ -40,8 +40,10 @@ export default function StatsScreen() {
   }, [dashboard, period]);
 
   const chartValues = useMemo(() => {
-    if (period === 'weekly' && weekly) return weekly.daily.map((day) => Math.round((day.calorieConsumed / day.calorieGoal) * 100));
-    if (period === 'monthly' && monthly) return monthly.daily.slice(-10).map((day) => Math.round((day.calorieConsumed / day.calorieGoal) * 100));
+    const weekdays = ['월', '화', '수', '목', '금', '토', '일'];
+    if (period === 'weekly' && weekly) return weekly.daily.map((day, index) => ({ value: Math.round((day.calorieConsumed / day.calorieGoal) * 100), label: weekdays[index] }));
+    // 월간은 오늘까지의 최근 10일을 보여 주고, 막대 아래에는 실제 날짜를 적는다.
+    if (period === 'monthly' && monthly) return monthly.daily.filter((day) => day.date <= localDate()).slice(-10).map((day) => ({ value: Math.round((day.calorieConsumed / day.calorieGoal) * 100), label: String(Number(day.date.slice(8, 10)) || '') }));
     return [];
   }, [monthly, period, weekly]);
 
@@ -73,9 +75,9 @@ export default function StatsScreen() {
         <Card>
           <View style={styles.chartHeader}>
             <View><Text style={styles.cardLabel}>{period === 'weekly' ? '주간 평균 섭취' : '월간 평균 섭취'}</Text><Text style={styles.big}>{averageCalories?.toLocaleString()} <Text style={styles.bigUnit}>kcal</Text></Text></View>
-            <Text style={styles.status}>{period === 'weekly' ? '월요일 시작' : `${new Date().getMonth() + 1}월`}</Text>
+            <Text style={styles.status}>{period === 'weekly' ? '월요일 시작' : `${new Date().getMonth() + 1}월 · 최근 10일`}</Text>
           </View>
-          <View style={styles.barChart}>{chartValues.map((value, index) => <View key={index} style={styles.barItem}><View style={styles.barTrack}><View style={[styles.bar, { height: `${Math.min(100, value)}%`, backgroundColor: index === chartValues.length - 1 ? palette.accent : palette.leafFill }]} /></View><Text style={styles.day}>{period === 'weekly' ? ['월','화','수','목','금','토','일'][index] : index + 1}</Text></View>)}</View>
+          <View style={styles.barChart}>{chartValues.map(({ value, label }, index) => <View key={index} style={styles.barItem}><View style={styles.barTrack}><View style={[styles.bar, { height: `${Math.min(100, value)}%`, backgroundColor: index === chartValues.length - 1 ? palette.accent : palette.leafFill }]} /></View><Text style={styles.day}>{label}</Text></View>)}</View>
           {period === 'monthly' && monthly ? (
             <View style={styles.macroList}>
               <MacroBar label="탄수화물 달성률" value={monthly.monthlyAvgCarbPercentage} goal={100} unit="%" color={palette.leafFill} />

@@ -81,6 +81,7 @@ public class CommunityService {
             MultipartFile image,
             String content,
             String eatenAt,
+            String foodName,
             Integer calorie,
             Double carb,
             Double protein,
@@ -95,14 +96,16 @@ public class CommunityService {
         validateNutrition(calorie, carb, protein, fat);
         User user = currentUserProvider.get();
         String imageUrl = image == null || image.isEmpty() ? null : imageStorage.store(image);
-        String foodName = calorie == null && carb == null && protein == null && fat == null ? null : "식사";
+        // 영양 정보가 있을 때만 음식 이름을 저장한다. 이름이 없으면 "식사"로 둔다.
+        boolean hasNutrition = calorie != null || carb != null || protein != null || fat != null;
+        String mealName = hasNutrition ? normalizeFoodName(foodName) : null;
         CommunityPost post = new CommunityPost(
                 nextId("post_"),
                 user,
                 content.trim(),
                 imageUrl,
                 parseInstant(eatenAt),
-                foodName,
+                mealName,
                 calorie,
                 carb,
                 protein,
@@ -110,6 +113,17 @@ public class CommunityService {
         );
         postRepository.save(post);
         return new CommunityDtos.CreatePostResponse(post.getId());
+    }
+
+    private String normalizeFoodName(String foodName) {
+        if (foodName == null || foodName.isBlank()) {
+            return "식사";
+        }
+        String trimmed = foodName.trim();
+        if (trimmed.length() > 100) {
+            throw new BusinessException(ErrorCode.INVALID_PARAMETER, "음식 이름은 100자 이내로 입력해주세요.");
+        }
+        return trimmed;
     }
 
     public CommunityDtos.PostDetailResponse getPost(String postId) {

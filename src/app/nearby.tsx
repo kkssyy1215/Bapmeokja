@@ -1,14 +1,14 @@
 import * as Location from 'expo-location';
 import { useLocalSearchParams } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Linking, Platform, StyleSheet, Text, View } from 'react-native';
 
 import { StoreMap } from '@/components/store-map';
 import { Card, EmptyState, Header, Icon, IconButton, Note, PrimaryButton, Pressable, Screen } from '@/components/ui';
 import { font, palette, radii, shadow, spacing } from '@/constants/design';
-import { getErrorMessage, isMockMode, simulateRequest } from '@/services/api';
+import { ApiError, getErrorMessage, isMockMode, simulateRequest } from '@/services/api';
 import { goBack } from '@/services/navigation';
-import { menuApi } from '@/services/bapmeokja-api';
+import { menuApi, userApi } from '@/services/bapmeokja-api';
 import { directionsUrl, MapPoint, naverSearchAppUrl, naverSearchWebUrl, walkingMinutes } from '@/services/map-links';
 import { NearbyStore } from '@/types/api';
 
@@ -76,6 +76,44 @@ export default function NearbyScreen() {
   const [position, setPosition] = useState<MapPoint | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
+  const retryRef = useRef<() => void>(() => undefined);
+  const isConsentError = (error: unknown) => error instanceof ApiError && error.code === 'AUTH_020';
+  // 위치 정보 이용 동의 없이 이 화면에 들어오면 여기서 동의를 받고 다시 찾는다.
+  const askConsent = useCallback(() => {
+    setStores([]);
+    setLocationMode('error');
+    setMessage('주변 식당을 찾으려면 위치 정보 이용 동의가 필요해요.');
+    setLoading(false);
+    Alert.alert('위치 정보 사용', '현재 위치는 주변 식당을 찾는 동안에만 사용합니다.', [
+      { text: '취소', style: 'cancel' },
+      { text: '동의하고 계속', onPress: async () => {
+        try {
+          await userApi.setLocationConsent(true);
+          retryRef.current();
+        } catch (error) { Alert.alert('위치 설정 실패', getErrorMessage(error)); }
+      } },
+    ]);
+  }, []);
+
+  // 강남역 기준 시연 위치로 등록 매장을 찾는다. reason이 있으면 왜 시연 위치로 바꿨는지 함께 보여 준다.
+  const showDemoPosition = useCallback(async (reason?: string) => {
+    setLoading(true);
+    setPosition(DEMO_POSITION);
+    try {
+      const result = await menuApi.nearbyStores({ ...DEMO_POSITION, categoryId, radius: 1500 });
+      setStores(result.stores);
+      setLocationMode('demo');
+      setMessage(reason ?? '현재 위치 대신 강남역을 기준으로 검색한 시연 결과예요.');
+    } catch (error) {
+      if (isConsentError(error)) return askConsent();
+      setStores([]);
+      setLocationMode('error');
+      setMessage(getErrorMessage(error));
+    } finally {
+      setLoading(false);
+    }
+  }, [categoryId, askConsent]);
+
   const findFromDevice = useCallback(async () => {
     setLoading(true);
     setLocationMode('checking');
@@ -83,44 +121,30 @@ export default function NearbyScreen() {
     let current: MapPoint;
     try {
       current = await getDevicePosition();
-      setPosition(current);
-    } catch (error) {
-      setStores([]);
-      setLocationMode('unavailable');
-      setMessage(error instanceof Error ? error.message : '현재 위치를 확인하지 못했어요.');
-      setLoading(false);
+    } catch {
+      // 위치 권한이 없거나 확인에 실패하면 빈 화면 대신 시연 위치 결과를 바로 보여 준다.
+      await showDemoPosition('현재 위치를 확인할 수 없어 강남역 기준으로 보여 드려요.');
       return;
     }
     try {
       const result = await menuApi.nearbyStores({ ...current, categoryId, radius: 1500 });
+      if (!result.stores.length) {
+        await showDemoPosition('현재 위치 1.5km 안에 등록된 매장이 없어 강남역 기준으로 보여 드려요.');
+        return;
+      }
+      setPosition(current);
       setStores(result.stores);
       setLocationMode('device');
     } catch (error) {
+      if (isConsentError(error)) return askConsent();
       setStores([]);
       setLocationMode('error');
       setMessage(getErrorMessage(error));
     } finally {
       setLoading(false);
     }
-  }, [categoryId]);
-
-  const useDemoPosition = useCallback(async () => {
-    setLoading(true);
-    setMessage('');
-    setPosition(DEMO_POSITION);
-    try {
-      const result = await menuApi.nearbyStores({ ...DEMO_POSITION, categoryId, radius: 1500 });
-      setStores(result.stores);
-      setLocationMode('demo');
-      setMessage('현재 위치 대신 강남역을 기준으로 검색한 시연 결과예요.');
-    } catch (error) {
-      setStores([]);
-      setLocationMode('error');
-      setMessage(getErrorMessage(error));
-    } finally {
-      setLoading(false);
-    }
-  }, [categoryId]);
+  }, [categoryId, showDemoPosition, askConsent]);
+  useEffect(() => { retryRef.current = findFromDevice; }, [findFromDevice]);
 
   useEffect(() => {
     let cancelled = false;
@@ -154,9 +178,9 @@ export default function NearbyScreen() {
     {position && selectedStore ? <>
       <StoreMap origin={position} store={selectedStore} />
       <Text style={styles.mapCaption}>{mapLabel} 기준 · {selectedStore.name}까지 도보 약 {walkingMinutes(selectedStore.distance)}분</Text>
-    </> : !loading ? <View style={styles.mapPlaceholder}><Text style={styles.mapTitle}>{mapTitle}</Text><Text style={styles.mapText}>{message || (locationMode === 'device' ? '이 근처에는 등록된 매장이 아직 없어요.' : '위치 권한을 확인한 뒤 다시 시도해 주세요.')}</Text>{locationMode === 'device' ? <View style={styles.mapAction}><PrimaryButton title="강남역 기준으로 보기" variant="secondary" onPress={useDemoPosition} /></View> : null}</View> : null}
-    {(locationMode === 'unavailable' || locationMode === 'error') && !loading ? <View style={styles.locationHelp}><Text style={styles.locationHelpTitle}>{locationMode === 'unavailable' ? '위치 확인이 필요해요' : '매장 정보를 불러오지 못했어요'}</Text><Text style={styles.locationHelpText}>{message} 위치 권한을 확인해 다시 시도하거나, 강남역 기준 시연 위치를 직접 선택할 수 있어요.</Text><View style={styles.locationActions}><View style={styles.flex}><PrimaryButton title="다시 확인" variant="secondary" onPress={findFromDevice} /></View><View style={styles.flex}><PrimaryButton title="시연 위치 사용" onPress={useDemoPosition} /></View></View></View> : null}
-    {locationMode === 'demo' && !loading && !isMockMode ? <Text accessibilityRole="button" style={styles.useLocation} onPress={findFromDevice}>현재 위치 다시 확인</Text> : null}
+    </> : !loading ? <View style={styles.mapPlaceholder}><Text style={styles.mapTitle}>{mapTitle}</Text><Text style={styles.mapText}>{message || (locationMode === 'device' ? '이 근처에는 등록된 매장이 아직 없어요.' : '위치 권한을 확인한 뒤 다시 시도해 주세요.')}</Text>{locationMode === 'device' ? <View style={styles.mapAction}><PrimaryButton title="강남역 기준으로 보기" variant="secondary" onPress={() => showDemoPosition()} /></View> : null}</View> : null}
+    {(locationMode === 'unavailable' || locationMode === 'error') && !loading ? <View style={styles.locationHelp}><Text style={styles.locationHelpTitle}>{locationMode === 'unavailable' ? '위치 확인이 필요해요' : '매장 정보를 불러오지 못했어요'}</Text><Text style={styles.locationHelpText}>{message} 위치 권한을 확인해 다시 시도하거나, 강남역 기준 시연 위치를 직접 선택할 수 있어요.</Text><View style={styles.locationActions}><View style={styles.flex}><PrimaryButton title="다시 확인" variant="secondary" onPress={findFromDevice} /></View><View style={styles.flex}><PrimaryButton title="시연 위치 사용" onPress={() => showDemoPosition()} /></View></View></View> : null}
+    {locationMode === 'demo' && !loading && !isMockMode ? <><Note icon="map-pin">{message}</Note><Text accessibilityRole="button" style={styles.useLocation} onPress={findFromDevice}>현재 위치로 다시 찾기</Text></> : null}
     <View style={styles.sectionHeader}><Text style={styles.sectionTitle}>등록된 매장</Text><Text style={styles.count}>{stores.length}곳</Text></View>
     {loading ? <ActivityIndicator color={palette.tomato} /> : stores.length ? stores.map((store, index) => <Pressable key={store.storeId} accessibilityRole="button" accessibilityState={{ selected: store.storeId === selectedStore?.storeId }} onPress={() => setSelectedId(store.storeId)} style={[styles.store, store.storeId === selectedStore?.storeId && styles.storeSelected]}><View style={styles.storeHeader}><View style={[styles.rank, index === 0 && styles.rankFirst]}><Text style={[styles.rankText, index === 0 && styles.rankTextFirst]}>{index + 1}</Text></View><View style={styles.storeInfo}><Text style={styles.storeName}>{store.name}</Text><Text style={styles.address}>{store.address}</Text></View><Text style={styles.distance}>{store.distance < 1000 ? `${store.distance}m` : `${(store.distance / 1000).toFixed(1)}km`}</Text></View>{store.menus.map((menu) => <View key={menu.name} style={styles.menu}><View><Text style={styles.menuName}>{menu.name}</Text><Text style={styles.menuCalorie}>{menu.calorie} kcal</Text></View><Text style={styles.price}>{menu.price.toLocaleString()}원</Text></View>)}{position ? <Pressable accessibilityRole="link" onPress={() => openDirections(position, store)} style={styles.mapLink}><Icon name="navigation" size={15} color={palette.tomato} /><Text style={styles.mapLinkText}>내 위치에서 길찾기</Text></Pressable> : null}</Pressable>) : <Card><EmptyState icon="map-pin" title="주변에 적합한 식당이 없어요" description="검색 반경을 넓히거나 다른 메뉴를 선택해 보세요." /></Card>}
   </Screen>;

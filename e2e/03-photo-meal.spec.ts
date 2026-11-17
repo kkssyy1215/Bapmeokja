@@ -6,7 +6,7 @@ test('사진을 올려 분석하고 저장하면 홈으로 돌아가 반영된�
   await openTab(page, '식단');
 
   const chooser = page.waitForEvent('filechooser');
-  await press(page, '앨범에서 선택');
+  await press(page, '앨범 선택');
   await (await chooser).setFiles('e2e/fixtures/meal.png');
 
   await expect(page).toHaveURL(/\/meal-analysis/);
