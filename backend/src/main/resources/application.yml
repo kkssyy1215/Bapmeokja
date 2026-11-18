@@ -54,6 +54,9 @@ app:
     api-key: ${GEMINI_API_KEY:}
     model: ${GEMINI_MODEL:gemini-3.5-flash-lite}
     timeout-seconds: ${GEMINI_TIMEOUT_SECONDS:30}
+  kakao:
+    # 카카오 로컬 API REST 키. 비어 있으면 주변 식당은 DB에 등록된 매장만 보여 준다.
+    rest-api-key: ${KAKAO_REST_API_KEY:}
   rate-limit:
     enabled: ${RATE_LIMIT_ENABLED:true}
     auth-per-minute: ${RATE_LIMIT_AUTH_PER_MINUTE:30}

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # 백엔드와 웹 화면을 Vercel에 배포한다. 비밀값은 출력하지 않는다.
-# 준비: .env.vercel(AIVEN_SERVICE_URI), .env(GEMINI_API_KEY, 선택), `npx vercel login`
+# 준비: .env.vercel(AIVEN_SERVICE_URI), .env(GEMINI_API_KEY·KAKAO_REST_API_KEY, 선택), `npx vercel login`
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 
@@ -13,6 +13,7 @@ AIVEN_SERVICE_URI="$(value_of AIVEN_SERVICE_URI .env.vercel)"
 API_PROJECT="$(value_of VERCEL_API_PROJECT .env.vercel)"; API_PROJECT="${API_PROJECT:-bapmeokja-api}"
 WEB_PROJECT="$(value_of VERCEL_WEB_PROJECT .env.vercel)"; WEB_PROJECT="${WEB_PROJECT:-bapmeokja-web}"
 GEMINI_API_KEY="$(value_of GEMINI_API_KEY .env)"
+KAKAO_REST_API_KEY="$(value_of KAKAO_REST_API_KEY .env)"
 JWT_SECRET="$(value_of JWT_SECRET .env.vercel)"
 [ -n "$AIVEN_SERVICE_URI" ] || { echo "ERROR: .env.vercel에 AIVEN_SERVICE_URI를 넣어 주세요." >&2; exit 1; }
 
@@ -92,6 +93,7 @@ set_env backend DB_PASSWORD "$DB_PASSWORD"
 set_env backend JWT_SECRET "$JWT_SECRET"
 set_env backend SPRING_FLYWAY_ENABLED false
 [ -z "$GEMINI_API_KEY" ] || set_env backend GEMINI_API_KEY "$GEMINI_API_KEY"
+[ -z "$KAKAO_REST_API_KEY" ] || set_env backend KAKAO_REST_API_KEY "$KAKAO_REST_API_KEY"
 # 웹 주소를 알기 전 첫 배포에 필요한 임시 값. 4단계 뒤 실제 주소로 바꾼다.
 set_env backend CORS_ALLOWED_ORIGINS "https://$WEB_PROJECT.vercel.app"
 

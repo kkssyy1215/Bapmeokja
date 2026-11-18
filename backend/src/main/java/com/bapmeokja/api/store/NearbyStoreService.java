@@ -8,6 +8,8 @@ import com.bapmeokja.api.user.domain.User;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Stream;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,6 +25,7 @@ public class NearbyStoreService {
     private final StoreMenuRepository storeMenuRepository;
     private final MenuCategoryRepository menuCategoryRepository;
     private final CurrentUserProvider currentUserProvider;
+    private final KakaoLocalClient kakaoLocalClient;
 
     public StoreDtos.NearbyStoresResponse getNearby(
             double lat,
@@ -37,17 +40,42 @@ public class NearbyStoreService {
                     "위치 정보 동의가 필요한 기능입니다."
             );
         }
-        if (!menuCategoryRepository.existsById(categoryId)) {
-            throw new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "존재하지 않는 메뉴 카테고리입니다.");
-        }
+        String categoryName = menuCategoryRepository.findById(categoryId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "존재하지 않는 메뉴 카테고리입니다."))
+                .getName();
 
+        // 밥먹자에 등록된 매장(메뉴별 칼로리·가격 있음)과 카카오에서 찾은 실제 주변 음식점을 거리순으로 합친다.
+        List<StoreDtos.NearbyStore> registered = registeredStores(lat, lng, categoryId, radius);
+        Set<String> registeredNames = registered.stream().map(StoreDtos.NearbyStore::name).collect(Collectors.toSet());
+        List<StoreDtos.NearbyStore> kakaoStores = kakaoLocalClient.searchRestaurants(categoryName, lat, lng, radius).stream()
+                .filter(place -> place.distance() <= radius)
+                .filter(place -> !registeredNames.contains(place.name()))
+                .map(place -> new StoreDtos.NearbyStore(
+                        "kakao_" + place.id(),
+                        place.name(),
+                        place.address(),
+                        place.lat(),
+                        place.lng(),
+                        place.distance(),
+                        List.of(),
+                        place.placeUrl()
+                ))
+                .toList();
+
+        List<StoreDtos.NearbyStore> stores = Stream.concat(registered.stream(), kakaoStores.stream())
+                .sorted(Comparator.comparingInt(StoreDtos.NearbyStore::distance))
+                .toList();
+        return new StoreDtos.NearbyStoresResponse(stores);
+    }
+
+    private List<StoreDtos.NearbyStore> registeredStores(double lat, double lng, String categoryId, int radius) {
         List<StoreDistance> candidates = storeRepository.findAll().stream()
                 .map(store -> new StoreDistance(store, distanceMeters(lat, lng, store.getLat(), store.getLng())))
                 .filter(item -> item.distance() <= radius)
                 .sorted(Comparator.comparingDouble(StoreDistance::distance))
                 .toList();
         if (candidates.isEmpty()) {
-            return new StoreDtos.NearbyStoresResponse(List.of());
+            return List.of();
         }
 
         List<String> storeIds = candidates.stream().map(item -> item.store().getId()).toList();
@@ -56,11 +84,10 @@ public class NearbyStoreService {
                 .stream()
                 .collect(Collectors.groupingBy(menu -> menu.getStore().getId()));
 
-        List<StoreDtos.NearbyStore> stores = candidates.stream()
+        return candidates.stream()
                 .filter(candidate -> menusByStore.containsKey(candidate.store().getId()))
                 .map(candidate -> toResponse(candidate, menusByStore.get(candidate.store().getId())))
                 .toList();
-        return new StoreDtos.NearbyStoresResponse(stores);
     }
 
     private StoreDtos.NearbyStore toResponse(StoreDistance candidate, List<StoreMenu> menus) {
@@ -78,7 +105,8 @@ public class NearbyStoreService {
                                 menu.getCalorie(),
                                 menu.getPrice()
                         ))
-                        .toList()
+                        .toList(),
+                null
         );
     }
 

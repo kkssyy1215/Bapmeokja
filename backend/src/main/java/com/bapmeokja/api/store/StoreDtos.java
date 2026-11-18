@@ -16,7 +16,9 @@ public final class StoreDtos {
             double lat,
             double lng,
             int distance,
-            List<StoreMenuItem> menus
+            List<StoreMenuItem> menus,
+            // 카카오에서 찾은 음식점의 카카오맵 상세 주소. 밥먹자 등록 매장은 null이다.
+            String placeUrl
     ) {
     }
 
