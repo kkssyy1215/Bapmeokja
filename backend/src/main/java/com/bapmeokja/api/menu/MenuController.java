@@ -7,6 +7,7 @@ import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -53,10 +54,11 @@ public class MenuController {
             @RequestParam @DecimalMin("-90.0") @DecimalMax("90.0") double lat,
             @RequestParam @DecimalMin("-180.0") @DecimalMax("180.0") double lng,
             @RequestParam String categoryId,
-            @RequestParam(defaultValue = "500") @Min(1) @Max(5000) int radius
+            @RequestParam(defaultValue = "500") @Min(1) @Max(5000) int radius,
+            @RequestParam(required = false) @Size(max = 50) String keyword
     ) {
         return ApiResponse.success(
-                nearbyStoreService.getNearby(lat, lng, categoryId, radius),
+                nearbyStoreService.getNearby(lat, lng, categoryId, radius, keyword),
                 "조회 성공"
         );
     }

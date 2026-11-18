@@ -264,6 +264,10 @@ export type NearbyStore = {
   lng: number;
   distance: number;
   menus: { name: string; calorie: number; price: number }[];
+  /** partner: 밥먹자 제휴 매장, kakao·osm: 지도 서비스에서 찾은 실제 식당 */
+  source?: 'partner' | 'kakao' | 'osm';
+  category?: string | null;
+  placeUrl?: string | null;
 };
 
 export type FridgeIngredient = {
