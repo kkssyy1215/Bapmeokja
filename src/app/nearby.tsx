@@ -23,6 +23,23 @@ const DEMO_POSITION = { lat: 37.4979, lng: 127.0276 };
 const MOCK_POSITION = { lat: 37.5446, lng: 127.056 };
 type LocationMode = 'checking' | 'device' | 'demo' | 'unavailable' | 'error';
 
+// PC는 GPS 없이 Wi-Fi로 위치를 추정해 몇 초가 걸리기도 한다.
+const LOCATION_TIMEOUT_MS = 15_000;
+
+// 브라우저가 알려 주는 실패 이유를 사용자가 고칠 수 있는 안내로 바꾼다.
+function webLocationError(code: number) {
+  if (code === 1) return '위치 권한이 꺼져 있어요. 주소창 왼쪽 아이콘에서 위치를 허용해 주세요.';
+  if (code === 3) return '위치 확인 시간이 초과됐어요.';
+  return '기기의 위치 서비스가 꺼져 있거나 위치를 확인하지 못했어요.';
+}
+
+function withTimeout<T>(task: Promise<T>, message: string) {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error(message)), LOCATION_TIMEOUT_MS);
+    task.then(resolve, reject).finally(() => clearTimeout(timer));
+  });
+}
+
 async function getDevicePosition() {
   if (Platform.OS === 'web') {
     return new Promise<{ lat: number; lng: number }>((resolve, reject) => {
@@ -30,20 +47,30 @@ async function getDevicePosition() {
         reject(new Error('이 브라우저에서는 위치 기능을 사용할 수 없어요.'));
         return;
       }
+      // 브라우저는 https나 localhost가 아닌 주소에서 위치를 막는다.
+      if (typeof window !== 'undefined' && window.isSecureContext === false) {
+        reject(new Error('https 주소에서만 현재 위치를 쓸 수 있어요.'));
+        return;
+      }
       navigator.geolocation.getCurrentPosition(
         (result) => resolve({ lat: result.coords.latitude, lng: result.coords.longitude }),
-        (error) => reject(new Error(error.code === 1 ? '위치 권한이 허용되지 않았어요.' : '현재 위치를 확인하지 못했어요.')),
-        { enableHighAccuracy: false, timeout: 7000, maximumAge: 60_000 },
+        (error) => reject(new Error(webLocationError(error.code))),
+        { enableHighAccuracy: false, timeout: LOCATION_TIMEOUT_MS, maximumAge: 60_000 },
       );
     });
   }
 
+  if (!(await Location.hasServicesEnabledAsync())) throw new Error('기기의 위치 서비스가 꺼져 있어요.');
   let permission = await Location.getForegroundPermissionsAsync();
   if (!permission.granted) permission = await Location.requestForegroundPermissionsAsync();
   if (!permission.granted) throw new Error('위치 권한이 허용되지 않았어요.');
 
   const cached = await Location.getLastKnownPositionAsync({ maxAge: 60_000, requiredAccuracy: 1_000 });
-  const result = cached ?? await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+  // 위치를 끝내 못 잡으면 응답이 오지 않을 수 있어 시간 제한을 둔다.
+  const result = cached ?? await withTimeout(
+    Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced }),
+    '위치 확인 시간이 초과됐어요.',
+  );
   return { lat: result.coords.latitude, lng: result.coords.longitude };
 }
 
@@ -121,20 +148,19 @@ export default function NearbyScreen() {
     let current: MapPoint;
     try {
       current = await getDevicePosition();
-    } catch {
-      // 위치 권한이 없거나 확인에 실패하면 빈 화면 대신 시연 위치 결과를 바로 보여 준다.
-      await showDemoPosition('현재 위치를 확인할 수 없어 강남역 기준으로 보여 드려요.');
+    } catch (error) {
+      // 위치 권한이 없거나 확인에 실패하면 빈 화면 대신 시연 위치 결과를 보여 주되, 실패 이유를 함께 알린다.
+      const reason = error instanceof Error ? error.message : '현재 위치를 확인하지 못했어요.';
+      await showDemoPosition(`${reason} 지금은 강남역 기준으로 보여 드려요.`);
       return;
     }
     try {
       const result = await menuApi.nearbyStores({ ...current, categoryId, radius: 1500 });
-      if (!result.stores.length) {
-        await showDemoPosition('현재 위치 1.5km 안에 등록된 매장이 없어 강남역 기준으로 보여 드려요.');
-        return;
-      }
+      // 근처에 등록 매장이 없어도 확인한 내 위치는 그대로 보여 준다. 강남역 시연 매장은 버튼으로 연다.
       setPosition(current);
       setStores(result.stores);
       setLocationMode('device');
+      setMessage(result.stores.length ? '' : '내 위치 1.5km 안에는 밥먹자에 등록된 매장이 아직 없어요.');
     } catch (error) {
       if (isConsentError(error)) return askConsent();
       setStores([]);
@@ -178,6 +204,10 @@ export default function NearbyScreen() {
     {position && selectedStore ? <>
       <StoreMap origin={position} store={selectedStore} />
       <Text style={styles.mapCaption}>{mapLabel} 기준 · {selectedStore.name}까지 도보 약 {walkingMinutes(selectedStore.distance)}분</Text>
+    </> : position && locationMode === 'device' && !loading ? <>
+      <StoreMap origin={position} />
+      <Text style={styles.mapCaption}>현재 위치 · {message}</Text>
+      <PrimaryButton title="강남역 시연 매장 보기" variant="secondary" onPress={() => showDemoPosition()} />
     </> : !loading ? <View style={styles.mapPlaceholder}><Text style={styles.mapTitle}>{mapTitle}</Text><Text style={styles.mapText}>{message || (locationMode === 'device' ? '이 근처에는 등록된 매장이 아직 없어요.' : '위치 권한을 확인한 뒤 다시 시도해 주세요.')}</Text>{locationMode === 'device' ? <View style={styles.mapAction}><PrimaryButton title="강남역 기준으로 보기" variant="secondary" onPress={() => showDemoPosition()} /></View> : null}</View> : null}
     {(locationMode === 'unavailable' || locationMode === 'error') && !loading ? <View style={styles.locationHelp}><Text style={styles.locationHelpTitle}>{locationMode === 'unavailable' ? '위치 확인이 필요해요' : '매장 정보를 불러오지 못했어요'}</Text><Text style={styles.locationHelpText}>{message} 위치 권한을 확인해 다시 시도하거나, 강남역 기준 시연 위치를 직접 선택할 수 있어요.</Text><View style={styles.locationActions}><View style={styles.flex}><PrimaryButton title="다시 확인" variant="secondary" onPress={findFromDevice} /></View><View style={styles.flex}><PrimaryButton title="시연 위치 사용" onPress={() => showDemoPosition()} /></View></View></View> : null}
     {locationMode === 'demo' && !loading && !isMockMode ? <><Note icon="map-pin">{message}</Note><Text accessibilityRole="button" style={styles.useLocation} onPress={findFromDevice}>현재 위치로 다시 찾기</Text></> : null}

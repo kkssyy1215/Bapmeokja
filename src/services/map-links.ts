@@ -1,13 +1,17 @@
 export type MapPoint = { lat: number; lng: number };
 
-/** 내 위치와 식당이 함께 보이는 지도 주소. API 키가 필요 없는 OpenStreetMap을 쓴다. */
-export function mapEmbedUrl(origin: MapPoint, store: MapPoint) {
+/**
+ * 내 위치와 식당이 함께 보이는 지도 주소. API 키가 필요 없는 OpenStreetMap을 쓴다.
+ * 식당이 없으면 내 위치를 가운데 두고 표시한다. 이 지도는 표시를 하나만 찍을 수 있다.
+ */
+export function mapEmbedUrl(origin: MapPoint, store?: MapPoint) {
+  const target = store ?? origin;
   const pad = 0.002;
-  const west = Math.min(origin.lng, store.lng) - pad;
-  const east = Math.max(origin.lng, store.lng) + pad;
-  const south = Math.min(origin.lat, store.lat) - pad;
-  const north = Math.max(origin.lat, store.lat) + pad;
-  return `https://www.openstreetmap.org/export/embed.html?bbox=${west},${south},${east},${north}&layer=mapnik&marker=${store.lat},${store.lng}`;
+  const west = Math.min(origin.lng, target.lng) - pad;
+  const east = Math.max(origin.lng, target.lng) + pad;
+  const south = Math.min(origin.lat, target.lat) - pad;
+  const north = Math.max(origin.lat, target.lat) + pad;
+  return `https://www.openstreetmap.org/export/embed.html?bbox=${west},${south},${east},${north}&layer=mapnik&marker=${target.lat},${target.lng}`;
 }
 
 /** 내 위치에서 식당까지 도보 길찾기. 국내 경로가 정확한 카카오맵으로 연다. */

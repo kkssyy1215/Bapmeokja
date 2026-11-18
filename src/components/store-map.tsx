@@ -4,10 +4,10 @@ import { WebView } from 'react-native-webview';
 import { radii } from '@/constants/design';
 import { mapEmbedUrl, MapPoint } from '@/services/map-links';
 
-export function StoreMap({ origin, store }: { origin: MapPoint; store: MapPoint }) {
+export function StoreMap({ origin, store }: { origin: MapPoint; store?: MapPoint }) {
   return (
     <View style={styles.map}>
-      <WebView source={{ uri: mapEmbedUrl(origin, store) }} scrollEnabled={false} accessibilityLabel="식당 위치 지도" />
+      <WebView source={{ uri: mapEmbedUrl(origin, store) }} scrollEnabled={false} accessibilityLabel={store ? '식당 위치 지도' : '내 위치 지도'} />
     </View>
   );
 }
