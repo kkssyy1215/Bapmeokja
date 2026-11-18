@@ -44,7 +44,7 @@ set_env() { # 프로젝트 폴더, 이름, 값
   # EXPO_PUBLIC_ 값은 브라우저에 공개되므로 Vercel이 공개 설정(--type config)을 요구한다.
   local type_args=()
   case "$2" in EXPO_PUBLIC_*) type_args=(--type config) ;; esac
-  printf '%s' "$3" | $VERCEL env add "$2" --environment production "${type_args[@]}" --force --yes --cwd "$1" >/dev/null
+  printf '%s' "$3" | $VERCEL env add "$2" --environment production ${type_args[@]+"${type_args[@]}"} --force --yes --cwd "$1" >/dev/null
 }
 
 deployment_url() { grep -oE 'https://[a-zA-Z0-9.-]+\.vercel\.app' | tail -1; }
