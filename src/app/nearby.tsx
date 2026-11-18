@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Linking, Platform, StyleSheet, Text, View } from 'react-native';
 
 import { StoreMap } from '@/components/store-map';
-import { Card, EmptyState, Header, Icon, IconButton, Note, PrimaryButton, Pressable, Screen } from '@/components/ui';
+import { Header, Icon, IconButton, Note, PrimaryButton, Pressable, Screen } from '@/components/ui';
 import { font, palette, radii, shadow, spacing } from '@/constants/design';
 import { ApiError, getErrorMessage, isMockMode, simulateRequest } from '@/services/api';
 import { goBack } from '@/services/navigation';
@@ -18,10 +18,8 @@ const demoStores: NearbyStore[] = [
   { storeId: 'store_003', name: '샌드키친', address: '서울 성동구 성수이로 64', lat: 37.5439, lng: 127.0568, distance: 560, menus: [{ name: '에그 샌드위치', calorie: 455, price: 9500 }] },
 ];
 
-// 등록된 매장이 강남역 주변이라 위치를 쓸 수 없을 때 이곳을 기준으로 보여 준다.
-const DEMO_POSITION = { lat: 37.4979, lng: 127.0276 };
 const MOCK_POSITION = { lat: 37.5446, lng: 127.056 };
-type LocationMode = 'checking' | 'device' | 'demo' | 'unavailable' | 'error';
+type LocationMode = 'checking' | 'device' | 'network' | 'demo' | 'unavailable' | 'error';
 
 async function getDevicePosition() {
   if (Platform.OS === 'web') {
@@ -97,15 +95,36 @@ export default function NearbyScreen() {
     ]);
   }, []);
 
-  // 강남역 기준 시연 위치로 등록 매장을 찾는다. reason이 있으면 왜 시연 위치로 바꿨는지 함께 보여 준다.
-  const showDemoPosition = useCallback(async (reason?: string) => {
+  // 현재 위치 주변에서만 찾는다. 위치를 모르거나 결과가 없으면 다른 지역으로 바꾸지 않고 그대로 알려 준다.
+  const findFromDevice = useCallback(async () => {
     setLoading(true);
-    setPosition(DEMO_POSITION);
+    setLocationMode('checking');
+    setMessage('');
+    setSelectedId(null);
+    let current: MapPoint;
+    let networkNote = '';
     try {
-      const result = await menuApi.nearbyStores({ ...DEMO_POSITION, categoryId, radius: 1500, keyword });
+      current = await getDevicePosition();
+    } catch (error) {
+      // 기기 위치를 못 쓰면(권한 거부, 위치 기능 없음) 접속한 네트워크 기준 대략적인 위치로 찾는다.
+      const network = await menuApi.approximateLocation().catch(() => null);
+      if (!network) {
+        setStores([]);
+        setPosition(null);
+        setLocationMode('unavailable');
+        setMessage(error instanceof Error ? error.message : '현재 위치를 확인하지 못했어요.');
+        setLoading(false);
+        return;
+      }
+      current = { lat: network.lat, lng: network.lng };
+      networkNote = `기기 위치를 쓸 수 없어 접속한 네트워크 기준 대략적인 위치${network.city ? `(${network.city})` : ''}로 찾았어요. 위치 권한을 허용하면 더 정확해요.`;
+    }
+    try {
+      const result = await menuApi.nearbyStores({ ...current, categoryId, radius: 1500, keyword });
+      setPosition(current);
       setStores(result.stores);
-      setLocationMode('demo');
-      setMessage(reason ?? '현재 위치 대신 강남역을 기준으로 검색한 시연 결과예요.');
+      setLocationMode(networkNote ? 'network' : 'device');
+      setMessage(networkNote);
     } catch (error) {
       if (isConsentError(error)) return askConsent();
       setStores([]);
@@ -115,34 +134,6 @@ export default function NearbyScreen() {
       setLoading(false);
     }
   }, [categoryId, keyword, askConsent]);
-
-  const findFromDevice = useCallback(async () => {
-    setLoading(true);
-    setLocationMode('checking');
-    setMessage('');
-    let current: MapPoint;
-    try {
-      current = await getDevicePosition();
-    } catch {
-      // 위치 권한이 없거나 확인에 실패하면 빈 화면 대신 시연 위치 결과를 바로 보여 준다.
-      await showDemoPosition('현재 위치를 확인할 수 없어 강남역 기준으로 보여 드려요.');
-      return;
-    }
-    try {
-      const result = await menuApi.nearbyStores({ ...current, categoryId, radius: 1500, keyword });
-      setPosition(current);
-      if (!result.stores.length) setMessage(`현재 위치 1.5km 안에서 ${categoryName} 식당을 찾지 못했어요.`);
-      setStores(result.stores);
-      setLocationMode('device');
-    } catch (error) {
-      if (isConsentError(error)) return askConsent();
-      setStores([]);
-      setLocationMode('error');
-      setMessage(getErrorMessage(error));
-    } finally {
-      setLoading(false);
-    }
-  }, [categoryId, keyword, categoryName, showDemoPosition, askConsent]);
   useEffect(() => { retryRef.current = findFromDevice; }, [findFromDevice]);
 
   useEffect(() => {
@@ -168,20 +159,20 @@ export default function NearbyScreen() {
   }, [findFromDevice]);
 
   const selectedStore = stores.find((store) => store.storeId === selectedId) ?? stores[0];
-  const mapLabel = locationMode === 'device' ? '현재 위치' : locationMode === 'demo' ? '시연 위치' : '위치 미확인';
-  const mapTitle = locationMode === 'device' ? '내 위치를 확인했어요' : locationMode === 'demo' ? '기본 시연 위치로 보고 있어요' : '현재 위치를 확인할 수 없어요';
+  const mapLabel = locationMode === 'demo' ? '시연 위치' : locationMode === 'network' ? '대략적인 위치' : '현재 위치';
+  const emptyTitle = locationMode === 'unavailable' ? '현재 위치를 확인할 수 없어요' : locationMode === 'error' ? '식당 정보를 불러오지 못했어요' : `주변에 ${categoryName} 파는 식당이 없어요`;
+  const emptyText = locationMode === 'unavailable' ? `${message} 위치 권한을 허용한 뒤 다시 시도해 주세요.` : locationMode === 'error' ? message : `${locationMode === 'network' ? '대략적인 위치' : '현재 위치'} 1.5km 안에서 찾지 못했어요. 네이버 지도에서 더 넓게 찾아볼 수 있어요.`;
 
   return <Screen><Header title="주변 식당" subtitle={`${categoryName} 파는 식당`} left={<IconButton label="←" onPress={() => goBack()} />} />
     <PrimaryButton title={`네이버 지도에서 ${categoryName} 식당 보기`} icon="map" onPress={() => openNaverSearch(categoryName)} />
-    <Note>현재 위치 주변에서 이 메뉴를 파는 식당을 보여 드려요. 밥먹자 제휴 매장은 메뉴와 가격도 함께 보여 드려요.</Note>
+    <Note>현재 위치 주변에서 이 메뉴를 파는 식당을 카카오맵에서 찾아 보여 드려요.</Note>
+    {locationMode === 'network' && !loading ? <Note icon="map-pin">{message}</Note> : null}
     {position && selectedStore ? <>
       <StoreMap origin={position} store={selectedStore} />
       <Text style={styles.mapCaption}>{mapLabel} 기준 · {selectedStore.name}까지 도보 약 {walkingMinutes(selectedStore.distance)}분</Text>
-    </> : !loading ? <View style={styles.mapPlaceholder}><Text style={styles.mapTitle}>{mapTitle}</Text><Text style={styles.mapText}>{message || (locationMode === 'device' ? '이 근처에는 등록된 매장이 아직 없어요.' : '위치 권한을 확인한 뒤 다시 시도해 주세요.')}</Text>{locationMode === 'device' ? <View style={styles.mapAction}><PrimaryButton title="강남역 기준으로 보기" variant="secondary" onPress={() => showDemoPosition()} /></View> : null}</View> : null}
-    {(locationMode === 'unavailable' || locationMode === 'error') && !loading ? <View style={styles.locationHelp}><Text style={styles.locationHelpTitle}>{locationMode === 'unavailable' ? '위치 확인이 필요해요' : '매장 정보를 불러오지 못했어요'}</Text><Text style={styles.locationHelpText}>{message} 위치 권한을 확인해 다시 시도하거나, 강남역 기준 시연 위치를 직접 선택할 수 있어요.</Text><View style={styles.locationActions}><View style={styles.flex}><PrimaryButton title="다시 확인" variant="secondary" onPress={findFromDevice} /></View><View style={styles.flex}><PrimaryButton title="시연 위치 사용" onPress={() => showDemoPosition()} /></View></View></View> : null}
-    {locationMode === 'demo' && !loading && !isMockMode ? <><Note icon="map-pin">{message}</Note><Text accessibilityRole="button" style={styles.useLocation} onPress={findFromDevice}>현재 위치로 다시 찾기</Text></> : null}
-    <View style={styles.sectionHeader}><Text style={styles.sectionTitle}>주변 식당</Text><Text style={styles.count}>{stores.length}곳</Text></View>
-    {loading ? <ActivityIndicator color={palette.tomato} /> : stores.length ? stores.map((store, index) => <Pressable key={store.storeId} accessibilityRole="button" accessibilityState={{ selected: store.storeId === selectedStore?.storeId }} onPress={() => setSelectedId(store.storeId)} style={[styles.store, store.storeId === selectedStore?.storeId && styles.storeSelected]}><View style={styles.storeHeader}><View style={[styles.rank, index === 0 && styles.rankFirst]}><Text style={[styles.rankText, index === 0 && styles.rankTextFirst]}>{index + 1}</Text></View><View style={styles.storeInfo}><View style={styles.nameRow}><Text style={styles.storeName} numberOfLines={1}>{store.name}</Text>{store.source === 'partner' || !store.source ? <Text style={styles.partnerBadge}>밥먹자 제휴</Text> : store.category ? <Text style={styles.categoryBadge}>{store.category}</Text> : null}</View>{store.address ? <Text style={styles.address} numberOfLines={1}>{store.address}</Text> : null}</View><Text style={styles.distance}>{store.distance < 1000 ? `${store.distance}m` : `${(store.distance / 1000).toFixed(1)}km`}</Text></View>{store.menus.map((menu) => <View key={menu.name} style={styles.menu}><View><Text style={styles.menuName}>{menu.name}</Text><Text style={styles.menuCalorie}>{menu.calorie} kcal</Text></View><Text style={styles.price}>{menu.price.toLocaleString()}원</Text></View>)}<View style={styles.linkRow}>{position ? <Pressable accessibilityRole="link" onPress={() => openDirections(position, store)} style={[styles.mapLink, styles.flex]}><Icon name="navigation" size={15} color={palette.tomato} /><Text style={styles.mapLinkText}>길찾기</Text></Pressable> : null}<Pressable accessibilityRole="link" onPress={() => store.placeUrl ? Linking.openURL(store.placeUrl) : openNaverSearch(store.name)} style={[styles.mapLink, styles.flex]}><Icon name="info" size={15} color={palette.tomato} /><Text style={styles.mapLinkText}>가게 정보</Text></Pressable></View></Pressable>) : <Card><EmptyState icon="map-pin" title="주변에 적합한 식당이 없어요" description="검색 반경을 넓히거나 다른 메뉴를 선택해 보세요." /></Card>}
+    </> : !loading ? <View style={styles.mapPlaceholder}><Icon name="map-pin" size={22} color={palette.tomato} /><Text style={styles.mapTitle}>{emptyTitle}</Text><Text style={styles.mapText}>{emptyText}</Text>{locationMode !== 'device' ? <View style={styles.mapAction}><PrimaryButton title="다시 시도" variant="secondary" onPress={findFromDevice} /></View> : null}</View> : null}
+    {loading || stores.length ? <View style={styles.sectionHeader}><Text style={styles.sectionTitle}>주변 식당</Text><Text style={styles.count}>{stores.length}곳</Text></View> : null}
+    {loading ? <ActivityIndicator color={palette.tomato} /> : stores.length ? stores.map((store, index) => <Pressable key={store.storeId} accessibilityRole="button" accessibilityState={{ selected: store.storeId === selectedStore?.storeId }} onPress={() => setSelectedId(store.storeId)} style={[styles.store, store.storeId === selectedStore?.storeId && styles.storeSelected]}><View style={styles.storeHeader}><View style={[styles.rank, index === 0 && styles.rankFirst]}><Text style={[styles.rankText, index === 0 && styles.rankTextFirst]}>{index + 1}</Text></View><View style={styles.storeInfo}><View style={styles.nameRow}><Text style={styles.storeName} numberOfLines={1}>{store.name}</Text>{store.category ? <Text style={styles.categoryBadge}>{store.category}</Text> : null}</View>{store.address ? <Text style={styles.address} numberOfLines={1}>{store.address}</Text> : null}</View><Text style={styles.distance}>{store.distance < 1000 ? `${store.distance}m` : `${(store.distance / 1000).toFixed(1)}km`}</Text></View>{store.menus.map((menu) => <View key={menu.name} style={styles.menu}><View><Text style={styles.menuName}>{menu.name}</Text><Text style={styles.menuCalorie}>{menu.calorie} kcal</Text></View><Text style={styles.price}>{menu.price.toLocaleString()}원</Text></View>)}<View style={styles.linkRow}>{position ? <Pressable accessibilityRole="link" onPress={() => openDirections(position, store)} style={[styles.mapLink, styles.flex]}><Icon name="navigation" size={15} color={palette.tomato} /><Text style={styles.mapLinkText}>길찾기</Text></Pressable> : null}<Pressable accessibilityRole="link" onPress={() => store.placeUrl ? Linking.openURL(store.placeUrl) : openNaverSearch(store.name)} style={[styles.mapLink, styles.flex]}><Icon name="info" size={15} color={palette.tomato} /><Text style={styles.mapLinkText}>가게 정보</Text></Pressable></View></Pressable>) : null}
   </Screen>;
 }
 
@@ -193,12 +184,7 @@ const styles = StyleSheet.create({
   mapPlaceholder: { minHeight: 150, borderRadius: radii.lg, alignItems: 'center', justifyContent: 'center', padding: spacing.lg, backgroundColor: palette.accentSoft },
   mapTitle: { ...font.subheading, color: palette.ink, marginTop: spacing.md },
   mapText: { ...font.caption, color: palette.muted, textAlign: 'center', marginTop: 4 },
-  locationHelp: { backgroundColor: palette.surface, borderRadius: radii.lg, padding: spacing.md, gap: spacing.sm, ...shadow },
-  locationHelpTitle: { color: palette.ink, fontSize: 14, fontWeight: '600' },
-  locationHelpText: { ...font.caption, color: palette.muted, lineHeight: 18 },
-  locationActions: { flexDirection: 'row', gap: spacing.sm },
   flex: { flex: 1 },
-  useLocation: { color: palette.tomato, fontSize: 14, textAlign: 'center', paddingVertical: 6 },
   sectionHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   sectionTitle: { ...font.heading, color: palette.ink },
   count: { color: palette.muted, fontSize: 12 },
@@ -209,7 +195,6 @@ const styles = StyleSheet.create({
   rankTextFirst: { color: palette.onAccent },
   storeInfo: { flex: 1 },
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  partnerBadge: { color: palette.onAccent, backgroundColor: palette.accent, fontSize: 10, fontWeight: '600', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6, overflow: 'hidden' },
   categoryBadge: { color: palette.muted, backgroundColor: palette.sunken, fontSize: 10, fontWeight: '500', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6, overflow: 'hidden' },
   linkRow: { flexDirection: 'row', gap: spacing.sm },
   storeName: { color: palette.ink, fontWeight: '600', flexShrink: 1 },

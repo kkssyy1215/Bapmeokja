@@ -2,7 +2,6 @@ package com.bapmeokja.api.store;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -20,33 +19,25 @@ import com.bapmeokja.api.user.domain.User;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.transaction.support.TransactionCallback;
-import org.springframework.transaction.support.TransactionTemplate;
 
 class NearbyStoreSearchTest {
 
     private static final double LAT = 37.5665;
     private static final double LNG = 126.9780;
 
-    private final StoreRepository storeRepository = mock(StoreRepository.class);
     private final PlaceSearch placeSearch = mock(PlaceSearch.class);
     private final User user = mock(User.class);
     private NearbyStoreService service;
 
     @BeforeEach
-    @SuppressWarnings("unchecked")
     void setUp() {
         CurrentUserProvider currentUserProvider = mock(CurrentUserProvider.class);
         when(currentUserProvider.get()).thenReturn(user);
         when(user.isLocationConsentGranted()).thenReturn(true);
         MenuCategoryRepository categoryRepository = mock(MenuCategoryRepository.class);
         when(categoryRepository.existsById("cat_003")).thenReturn(true);
-        when(storeRepository.findAll()).thenReturn(List.of());
-        TransactionTemplate transactionTemplate = mock(TransactionTemplate.class);
-        when(transactionTemplate.execute(any())).thenAnswer(call -> ((TransactionCallback<Object>) call.getArgument(0)).doInTransaction(null));
         when(placeSearch.source()).thenReturn("kakao");
-        service = new NearbyStoreService(storeRepository, mock(StoreMenuRepository.class), categoryRepository,
-                currentUserProvider, placeSearch, transactionTemplate);
+        service = new NearbyStoreService(categoryRepository, currentUserProvider, placeSearch);
     }
 
     @Test

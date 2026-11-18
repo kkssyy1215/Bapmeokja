@@ -108,6 +108,8 @@ export const feedbackApi = {
 };
 
 export const menuApi = {
+  /** 기기 위치를 쓸 수 없을 때 접속한 네트워크 기준의 대략적인 위치. 알 수 없으면 null. */
+  approximateLocation: () => requestData<{ lat: number; lng: number; city: string } | null>({ method: 'GET', url: '/location/approximate' }),
   summary: () => requestData<MenuSummary>({ method: 'GET', url: '/menu/recommend/summary' }),
   diningOut: (budget?: number) => requestData<{ recommendedCategories: RecommendationCategory[]; appliedBudget: number }>({ method: 'GET', url: '/menu/recommend/dining-out', params: { budget } }),
   homeCooking: (budget?: number) => requestData<{ recommendedCategories: RecommendationCategory[]; appliedBudget: number }>({ method: 'GET', url: '/menu/recommend/home-cooking', params: { budget } }),

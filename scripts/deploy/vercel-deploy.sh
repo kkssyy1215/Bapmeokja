@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # 백엔드와 웹 화면을 Vercel에 배포한다. 비밀값은 출력하지 않는다.
-# 준비: .env.vercel(AIVEN_SERVICE_URI), .env(GEMINI_API_KEY·KAKAO_REST_API_KEY, 선택), `npx vercel login`
+# 준비: .env.vercel(AIVEN_SERVICE_URI), .env(GEMINI_API_KEY·KAKAO_REST_API_KEY·EXPO_PUBLIC_KAKAO_JS_KEY, 선택), `npx vercel login`
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 
@@ -14,6 +14,7 @@ API_PROJECT="$(value_of VERCEL_API_PROJECT .env.vercel)"; API_PROJECT="${API_PRO
 WEB_PROJECT="$(value_of VERCEL_WEB_PROJECT .env.vercel)"; WEB_PROJECT="${WEB_PROJECT:-bapmeokja-web}"
 GEMINI_API_KEY="$(value_of GEMINI_API_KEY .env)"
 KAKAO_REST_API_KEY="$(value_of KAKAO_REST_API_KEY .env)"
+KAKAO_JS_KEY="$(value_of EXPO_PUBLIC_KAKAO_JS_KEY .env)"
 JWT_SECRET="$(value_of JWT_SECRET .env.vercel)"
 [ -n "$AIVEN_SERVICE_URI" ] || { echo "ERROR: .env.vercel에 AIVEN_SERVICE_URI를 넣어 주세요." >&2; exit 1; }
 
@@ -106,6 +107,8 @@ echo "      서버: $API_URL"
 echo "[4/5] 웹 화면 배포"
 set_env . EXPO_PUBLIC_USE_MOCKS false
 set_env . EXPO_PUBLIC_API_URL "$API_URL/v1"
+# 카카오맵 JavaScript 키는 브라우저에 공개되는 키다. 카카오 콘솔에 웹 주소를 등록해야 지도가 뜬다.
+[ -z "$KAKAO_JS_KEY" ] || set_env . EXPO_PUBLIC_KAKAO_JS_KEY "$KAKAO_JS_KEY"
 WEB_DEPLOYMENT="$($VERCEL deploy --prod --yes --cwd . | deployment_url)"
 WEB_URL="$(production_url . "$WEB_DEPLOYMENT")"
 [ -n "$WEB_URL" ] || { echo "ERROR: 웹 주소를 찾지 못했습니다: $WEB_DEPLOYMENT" >&2; exit 1; }

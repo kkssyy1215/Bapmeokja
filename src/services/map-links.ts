@@ -1,15 +1,5 @@
 export type MapPoint = { lat: number; lng: number };
 
-/** 내 위치와 식당이 함께 보이는 지도 주소. API 키가 필요 없는 OpenStreetMap을 쓴다. */
-export function mapEmbedUrl(origin: MapPoint, store: MapPoint) {
-  const pad = 0.002;
-  const west = Math.min(origin.lng, store.lng) - pad;
-  const east = Math.max(origin.lng, store.lng) + pad;
-  const south = Math.min(origin.lat, store.lat) - pad;
-  const north = Math.max(origin.lat, store.lat) + pad;
-  return `https://www.openstreetmap.org/export/embed.html?bbox=${west},${south},${east},${north}&layer=mapnik&marker=${store.lat},${store.lng}`;
-}
-
 /** 내 위치에서 식당까지 도보 길찾기. 국내 경로가 정확한 카카오맵으로 연다. */
 export function directionsUrl(origin: MapPoint, store: MapPoint & { name: string }) {
   const label = (text: string) => encodeURIComponent(text.replaceAll(',', ' '));
