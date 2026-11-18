@@ -87,6 +87,24 @@ class CommunityServiceTest {
     }
 
     @Test
+    void listMarksThePostsTheUserHasLiked() {
+        CommunityPost liked = post(me);
+        when(liked.getId()).thenReturn("post_liked");
+        when(liked.getContent()).thenReturn("좋아요 누른 글");
+        CommunityPost other = post(me);
+        when(other.getId()).thenReturn("post_other");
+        when(other.getContent()).thenReturn("다른 글");
+        when(postRepository.findAllByOrderByCreatedAtDesc(any()))
+                .thenReturn(new org.springframework.data.domain.PageImpl<>(List.of(liked, other)));
+        when(likeRepository.findLikedPostIds(1L, List.of("post_liked", "post_other"))).thenReturn(List.of("post_liked"));
+
+        List<CommunityDtos.PostSummary> posts = service.getPosts(0, 20).posts();
+
+        assertThat(posts).extracting(CommunityDtos.PostSummary::postId, CommunityDtos.PostSummary::isLiked)
+                .containsExactly(org.assertj.core.groups.Tuple.tuple("post_liked", true), org.assertj.core.groups.Tuple.tuple("post_other", false));
+    }
+
+    @Test
     void blankPostIsRejectedBeforeAnythingIsStored() {
         assertFailsWith(ErrorCode.REQUIRED_VALUE_MISSING,
                 () -> service.createPost(IMAGE, "   ", null, null, null, null, null, null));

@@ -9,7 +9,9 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Instant;
 import java.time.format.DateTimeParseException;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +35,11 @@ public class CommunityService {
 
     public CommunityDtos.PostListResponse getPosts(int page, int size) {
         Page<CommunityPost> result = postRepository.findAllByOrderByCreatedAtDesc(PageRequest.of(page, size));
+        User user = currentUserProvider.get();
+        List<String> postIds = result.getContent().stream().map(CommunityPost::getId).toList();
+        Set<String> likedIds = postIds.isEmpty()
+                ? Set.of()
+                : new HashSet<>(postLikeRepository.findLikedPostIds(user.getId(), postIds));
         List<CommunityDtos.PostSummary> posts = result.getContent().stream()
                 .map(post -> new CommunityDtos.PostSummary(
                         post.getId(),
@@ -41,7 +48,8 @@ public class CommunityService {
                         post.getCreatedAt(),
                         post.getImageUrl(),
                         post.getLikeCount(),
-                        post.getCommentCount()
+                        post.getCommentCount(),
+                        likedIds.contains(post.getId())
                 ))
                 .toList();
         return new CommunityDtos.PostListResponse(

@@ -1,4 +1,5 @@
 import Feather from '@expo/vector-icons/Feather';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { Children, ComponentProps, Fragment, PropsWithChildren, ReactNode, useState } from 'react';
 import {
   ActivityIndicator,
@@ -22,6 +23,11 @@ import { font, palette, radii, shadow, shadowSm, spacing } from '@/constants/des
 import { Meal } from '@/types';
 
 export type IconName = ComponentProps<typeof Feather>['name'];
+
+/** 좋아요 하트. 누른 상태는 채운 하트, 아니면 빈 하트로 그린다. */
+export function HeartIcon({ filled, size = 16, color = palette.tomato }: { filled: boolean; size?: number; color?: string }) {
+  return <Ionicons name={filled ? 'heart' : 'heart-outline'} size={size} color={color} />;
+}
 
 export function Icon({ name, size = 20, color = palette.ink }: { name: IconName; size?: number; color?: string }) {
   return <Feather name={name} size={size} color={color} />;

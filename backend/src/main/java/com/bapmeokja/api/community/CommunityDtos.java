@@ -25,7 +25,8 @@ public final class CommunityDtos {
             Instant createdAt,
             String thumbnailUrl,
             int likeCount,
-            int commentCount
+            int commentCount,
+            boolean isLiked
     ) {
     }
 

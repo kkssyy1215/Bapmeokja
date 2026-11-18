@@ -3,7 +3,7 @@ import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
-import { Card, EmptyState, Header, Icon, IconButton, Pressable, Screen, SectionTitle } from '@/components/ui';
+import { Card, EmptyState, Header, HeartIcon, Icon, IconButton, Pressable, Screen, SectionTitle } from '@/components/ui';
 import { palette, radii, shadow, spacing } from '@/constants/design';
 import { useApp } from '@/context/app-context';
 import { isMockMode, resolveApiAssetUrl, simulateRequest } from '@/services/api';
@@ -27,7 +27,7 @@ export default function CommunityScreen() {
     setLoading(true);
     try {
       const result = isMockMode
-        ? await simulateRequest({ posts: posts.map((post) => ({ postId: post.id, title: post.mealName || post.content.slice(0, 24), authorNickname: post.author, createdAt: post.createdAt, likeCount: post.likes, commentCount: post.comments.length })), totalCount: posts.length, page: 0, size: 20, hasNext: false }, 350)
+        ? await simulateRequest({ posts: posts.map((post) => ({ postId: post.id, title: post.mealName || post.content.slice(0, 24), authorNickname: post.author, createdAt: post.createdAt, likeCount: post.likes, commentCount: post.comments.length, isLiked: post.liked })), totalCount: posts.length, page: 0, size: 20, hasNext: false }, 350)
         : await communityApi.list(0, 20);
       setItems(result.posts);
     } finally { setLoading(false); }
@@ -49,7 +49,7 @@ export default function CommunityScreen() {
             {post.thumbnailUrl ? <PostPhoto uri={resolveApiAssetUrl(post.thumbnailUrl)} /> : null}
             <Text style={styles.title}>{post.title}</Text>
             <View style={styles.actions}>
-              <View style={styles.action}><Icon name="heart" size={15} color={palette.tomato} /><Text style={styles.actionText}>{post.likeCount}</Text></View>
+              <View style={styles.action} accessibilityLabel={post.isLiked ? `좋아요 ${post.likeCount}, 내가 누름` : `좋아요 ${post.likeCount}`}><HeartIcon filled={!!post.isLiked} size={16} color={post.isLiked ? palette.tomato : palette.muted} /><Text style={[styles.actionText, post.isLiked && styles.actionTextLiked]}>{post.likeCount}</Text></View>
               <View style={styles.action}><Icon name="message-circle" size={15} color={palette.muted} /><Text style={styles.actionText}>{post.commentCount}</Text></View>
             </View>
           </Pressable>
@@ -70,4 +70,5 @@ const styles = StyleSheet.create({
   actions: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   action: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   actionText: { color: palette.muted, fontSize: 13 },
+  actionTextLiked: { color: palette.tomato, fontWeight: '600' },
 });

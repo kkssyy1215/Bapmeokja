@@ -300,6 +300,8 @@ export type CommunityPostSummary = {
   thumbnailUrl?: string;
   likeCount: number;
   commentCount: number;
+  /** 내가 좋아요를 누른 게시글인지 */
+  isLiked?: boolean;
 };
 
 export type CommunityPostDetail = {
